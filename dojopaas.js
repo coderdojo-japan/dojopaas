@@ -69,21 +69,24 @@ client.createRequest({
     Promise.all(promises).then(function() {
       client.createRequest({
         method: 'GET',
-        path  : 'server'
+        path  : 'server',
+        body  : {
+          Filter: {
+            "Tags": defaultTag
+          }
+        }
       }).send(function(err, result) {
         console.log(result.response.servers[0].interfaces)
         var servers = [];
         for (var i=0; i<result.response.servers.length; i++) {
-          servers.push({
-            name: result.response.servers[i].name,
-            description: result.response.servers[i].description,
-            createdAt: result.response.servers[i].createdAt,
-            modifiedAt: result.response.servers[i].modifiedAt,
-            ipAddress: result.response.servers[i].interfaces[0].ipAddress,
-            tags: result.response.servers[i].tags
-          })
+          servers.push([
+            result.response.servers[i].name,
+            result.response.servers[i].interfaces[0].ipAddress,
+            result.response.servers[i].description
+          ])
         }
-        fs.writeFile('servers.json', JSON.stringify(servers));
+        var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
+        fs.writeFile('instances.csv', list);
       });
     }).catch(function(error) {
       console.log(error)

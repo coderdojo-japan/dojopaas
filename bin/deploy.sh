@@ -20,8 +20,7 @@ git config user.name "Travis CI"
 git config user.email "miya0001@users.noreply.github.com"
 
 git add README.md
-git add index.html
-git add servers.json
+git add instances.csv
 
 git commit --quiet -m "Deploy from travis"
 git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages > /dev/null 2>&1
