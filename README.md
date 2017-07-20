@@ -27,7 +27,19 @@ https://github.com/miya0001.keys
 
 ### SSHの接続方法
 
-サーバーへの接続方法をご案内する方法は数日以内にご連絡します。
+以下のような感じで接続してください。
+
+```
+$ ssh ubuntu@<ip-address>
+```
+
+または
+
+```
+$ ssh -i <path-to-publickey> ubuntu@<ip-address>
+```
+
+サーバーへの接続に必要なIPアドレスをご案内する方法は数日以内にご連絡します。
 
 ### サーバーの仕様
 
