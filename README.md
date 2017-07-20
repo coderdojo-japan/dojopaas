@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/coderdojo-japan/dojopaas.svg?branch=master)](https://travis-ci.org/coderdojo-japan/dojopaas)
 
-このプロジェクトはさくらインターネット様からご提供いただいた「さくらのクラウド」のアカウントを管理するためのプロジェクトです。
+このプロジェクトはさくらインターネット様からご提供いただいた「さくらのクラウド」上の各インスタンス及び、それぞれのサーバーアカウントを管理するためのプロジェクトです。
+
+[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいてTravis CI経由で自動的にサーバーが起動します。
 
 ## サーバーがほしい方へ
 
