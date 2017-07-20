@@ -42,12 +42,13 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 * ユーザー名はすべて `ubuntu` です。
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
 
-プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーのIPアドレスを探してSSHコマンドで指定してください。
+プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
 
 https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
 ### サーバーの仕様
 
+* リージョン: 石狩第二
 * OS: Ubuntu 16.04
 * CPU: 1コア
 * メモリ: 1GB
