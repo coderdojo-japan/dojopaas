@@ -1,0 +1,12 @@
+language: node_js
+branches:
+  only:
+  - master
+before_script: npm install
+script:
+- npm run deploy
+after_success: bash ./bin/deploy.sh
+env:
+  global:
+  - GH_REF: github.com/coderdojo-japan/dojopaas
+  - secure: "CgE5K/v1h9l1anLSoBvTeRVZ24SKN4m5bsDSwXl+qnEr0eLgem7xWBo1j0ZAvDbazpo8sQfyfRC1Oav89ZxEJDDW+SkZpkAFgVaiTCwv5cRymZIUnJHw9Dy1w+uOZSq+ZPn7+HESVTwtDAFGQA5UXzQXCUNLrW9WI41oiE83n6WUdz8DSHB34U/CQV41wfxljDSeoWKRbfH52p7vBf0lsfSk1IinfwfIqGAAcsDVIjQ+j6G4FURZWXxkLUJz62RSe8V68cjvDppx1h6nz1pXggaCZ/UBmbRMtCTsFkRhNahyI+yzcsahwevqju4tKS5TtH5fhwIRn1E5P44YLrT1FnnCGQidbbTPSc+WuUOhcziOaJ7xQCV9kowcWtB03zsuJIUxvjvdPqF+YhxBD/WO1XNB2K1LP+Hi9VAa7Z8G4P3Wt9aJ8j8mL4EkF2xQtYesu9Zc/COq/Enj/vU6Q6+WCiPyuZVDlsAjJxbzZfDlrexaYEplHUS3Is4He06QT1ThB7Qt/+eUTHH4ARL7JAfoD6XkDkfyh2LQ7dJiTCTlwrM428kd5PmxGzQbmACnyB/WtnXBj+J64IFu9blMiXJybcpJCPjj4b7wFAX7Uy02kh95AB40Hbgx+TBSAPeh5IjC+IaHknLhEx1mTyou+Ftx1vGXLcGTrwfYvTHcYDUO6GE="

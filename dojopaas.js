@@ -1,4 +1,10 @@
 var sacloud = require('sacloud');
+var fs = require('fs');
+var csv = require('comma-separated-values');
+var Server = require('./lib/Server');
+
+var list = __dirname + '/servers.csv';
+var defaultTag = 'dojopaas'
 
 /// 石狩第一
 var zone = "31002";
@@ -6,6 +12,7 @@ var api = "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/"
 
 var plan = "1001" // 1コア、1GBメモリ
 var image = "112900757970" // Ubuntu 16.04
+var size = 20480;
 
 var packetfilterid = '112900922505' // www
 
@@ -13,54 +20,73 @@ sacloud.API_ROOT = api;
 var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
-  disableLocalizeKeys: false,// (optional;default:false) false: lower-camelize the property names in response Object
-  debug              : false// (optional;default:false) output debug requests to console.
+  disableLocalizeKeys: false, // (optional;default:false) false: lower-camelize the property names in response Object
+  debug              : false // (optional;default:false) output debug requests to console.
 });
 
-var request = client.createRequest({
-  method: 'POST',
+client.createRequest({
+  method: 'GET',
   path  : 'server',
   body  : {
-    Server: {
-      Zone       : { ID: zone },
-      ServerPlan : { ID: plan },
-      Name       : 'test-server.jp',
-      Tags       : ['dojopaas']
+    Filter: {
+      "Tags": defaultTag
     }
   }
-});
-
-request.send(function(err, result) {
-  if (err) console.log(result.response);
-  var request = client.createRequest({
-    method: 'POST',
-    path  : 'interface',
-    body  : {
-      Interface: {
-        Server: {
-          ID: result.response.server.id
+}).send(function(err, result) {
+  if (err) throw new Error(err);
+  var servers = [];
+  for (var i=0; i<result.response.servers.length; i++) {
+    servers.push(result.response.servers[i].name)
+  }
+  fs.readFile(list, 'utf8', function (err, text) {
+    var result = new csv(text, { header: true }).parse();
+    var data = [];
+    var promises = [];
+    for (var i=0; i<result.length; i++) {
+      promises.push(new Promise(function(resolve, reject) {
+        var line = result[i];
+        if (! servers.some(function(v){ return v === line.name }) ) {
+          var tags = [defaultTag];
+          tags.push(line.branch)
+          var server = new Server(client);
+          server.create({
+            zone: zone,
+            plan: plan,
+            packetfilterid: packetfilterid,
+            name: line.name,
+            description: line.description,
+            tags: tags,
+            pubkey: line.pubkey,
+            image: image,
+            size: size,
+            resolve: resolve
+          })
+        } else {
+          resolve();
         }
-      }
+      }));
     }
-  });
-
-  request.send(function(err, result) {
-    if (err) console.log(result.response);
-    var id = result.response.interface.id;
-    var request = client.createRequest({
-      method: 'PUT',
-      path  : 'interface/'+id+'/to/switch/shared'
-    });
-
-    request.send(function(err, result) {
-      if (err) console.log(result.response);
-      var request = client.createRequest({
-        method: 'PUT',
-        path  : 'interface/'+id+'/to/packetfilter/'+packetfilterid
+    Promise.all(promises).then(function() {
+      client.createRequest({
+        method: 'GET',
+        path  : 'server'
+      }).send(function(err, result) {
+        console.log(result.response.servers[0].interfaces)
+        var servers = [];
+        for (var i=0; i<result.response.servers.length; i++) {
+          servers.push({
+            name: result.response.servers[i].name,
+            description: result.response.servers[i].description,
+            createdAt: result.response.servers[i].createdAt,
+            modifiedAt: result.response.servers[i].modifiedAt,
+            ipAddress: result.response.servers[i].interfaces[0].ipAddress,
+            tags: result.response.servers[i].tags
+          })
+        }
+        fs.writeFile('servers.json', JSON.stringify(servers));
       });
-      request.send(function(err, result) {
-        if (err) console.log(result.response);
-      });
+    }).catch(function(error) {
+      console.log(error)
     });
   });
 });
