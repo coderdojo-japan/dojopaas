@@ -6,8 +6,10 @@ branches:
   - master
 before_script: npm install
 script:
-- npm run deploy
-after_success: bash ./bin/deploy.sh
+- ls -al
+after_success:
+  - npm run deploy
+  - bash ./bin/deploy.sh
 env:
   global:
   - GH_REF: github.com/coderdojo-japan/dojopaas
