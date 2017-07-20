@@ -25,7 +25,7 @@ https://github.com/miya0001.keys
 
 ### サーバーの仕様
 
-OS: Ubuntu 16.04
-CPU: 1コア
-メモリ: 1GB
-HDD: 20GB
+* OS: Ubuntu 16.04
+* CPU: 1コア
+* メモリ: 1GB
+* HDD: 20GB
