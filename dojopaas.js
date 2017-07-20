@@ -76,7 +76,6 @@ client.createRequest({
           }
         }
       }).send(function(err, result) {
-        console.log(result.response.servers[0].interfaces)
         var servers = [];
         for (var i=0; i<result.response.servers.length; i++) {
           servers.push([
@@ -86,7 +85,10 @@ client.createRequest({
           ])
         }
         var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
-        fs.writeFile('instances.csv', list);
+        fs.writeFile('instances.csv', list, function(error) {
+          if (err) throw err;
+          console.log('The CSV has been saved!');
+        });
       });
     }).catch(function(error) {
       console.log(error)
