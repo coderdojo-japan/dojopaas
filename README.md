@@ -17,9 +17,11 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 https://github.com/miya0001.keys
 
+秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
+
 ### SSHの接続方法
 
-サーバーへの接続方法をご案内する方法が数日以内にご連絡します。
+サーバーへの接続方法をご案内する方法は数日以内にご連絡します。
 
 ### サーバーの仕様
 
