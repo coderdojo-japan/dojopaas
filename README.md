@@ -21,7 +21,7 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 * description: サーバーの用途など、後からわかりやすいものをお願いします。
 * pubkey: SSHで接続するための公開鍵。秘密鍵とまちがえないようくれぐれもお願いします。
 
-https://github.com/miya0001.keys
+公開鍵のサンプル: https://github.com/miya0001.keys
 
 秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
 
