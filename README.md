@@ -6,6 +6,8 @@
 
 以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
 
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
+
 ### 各項目の説明
 
 * name: サーバーの名前。他のものと重複しないようにしてください。FQDNとかがいいかもですね。これはインスタンスの名前に使用されます。
