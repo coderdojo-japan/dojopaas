@@ -6,13 +6,13 @@ var Server = require('./lib/Server');
 var list = __dirname + '/servers.csv';
 var defaultTag = 'dojopaas'
 
-/// 石狩第一
+/// 石狩第二
 var zone = "31002";
 var api = "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/"
 
 var plan = "1001" // 1コア、1GBメモリ
 var image = "112900757970" // Ubuntu 16.04
-var size = 20480;
+var size = 20480; // 20GB
 
 var packetfilterid = '112900922505' // www
 
