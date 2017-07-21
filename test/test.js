@@ -16,7 +16,8 @@ var packetfilterid = '112900927419' // www
 const config = {
   disk: {
     Plan: { ID: 4 },
-    SizeMB: 20480
+    SizeMB: 20480,
+    SourceArchive: { ID: "112900758037" }
   }
 }
 
