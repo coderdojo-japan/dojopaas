@@ -7,14 +7,22 @@ var list = __dirname + '/servers.csv';
 var defaultTag = 'dojopaas'
 
 /// 石狩第二
-var zone = "31002";
+const zone = "31002";
 var api = "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/"
 
 var plan = "1001" // 1コア、1GBメモリ
-var image = "112900757970" // Ubuntu 16.04
-var size = 20480; // 20GB
+// var image = "112900758037" // Ubuntu 16.04
+// var size = 20480; // 20GB
 
 var packetfilterid = '112900922505' // www
+
+const config = {
+  disk: {
+    Plan: { ID: 4 },
+    SizeMB: 20480,
+    SourceArchive: { ID: "112900757970" }
+  }
+}
 
 sacloud.API_ROOT = api;
 var client = sacloud.createClient({
@@ -57,8 +65,7 @@ client.createRequest({
             description: line.description,
             tags: tags,
             pubkey: line.pubkey,
-            image: image,
-            size: size,
+            disk: config.disk,
             resolve: resolve
           })
         } else {
