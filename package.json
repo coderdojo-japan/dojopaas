@@ -5,7 +5,8 @@
   "main": "dojopaas.js",
   "scripts": {
     "deploy": "node dojopaas.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/test.js",
+    "test:csv": "node test/test-csv.js"
   },
   "author": "",
   "license": "MIT",

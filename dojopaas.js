@@ -4,19 +4,36 @@ var csv = require('comma-separated-values');
 var Server = require('./lib/Server');
 
 var list = __dirname + '/servers.csv';
-var defaultTag = 'dojopaas'
 
-/// 石狩第二
-var zone = "31002";
-var api = "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/"
+if ('--test' === process.argv[2]) {
+  var config = {
+    defaultTag: 'dojopaas',
+    zone: "29001", // サンドボックス
+    api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
+    plan: 1001,
+    packetfilterid: '112900927419',
+    disk: {
+      Plan: { ID: 4 },
+      SizeMB: 20480,
+      SourceArchive: { ID: "112900758037" }
+    }
+  }
+} else {
+  var config = {
+    defaultTag: 'dojopaas',
+    zone: "31002", // 石狩第二
+    api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", // 石狩第二
+    plan: "1001", // 1コア、1GBメモリ
+    packetfilterid: '112900922505', // www
+    disk: {
+      Plan: { ID: 4 }, // SSD
+      SizeMB: 20480, // 20GB
+      SourceArchive: { ID: "112900757970" } // Ubuntu 16.04
+    }
+  }
+}
 
-var plan = "1001" // 1コア、1GBメモリ
-var image = "112900757970" // Ubuntu 16.04
-var size = 20480; // 20GB
-
-var packetfilterid = '112900922505' // www
-
-sacloud.API_ROOT = api;
+sacloud.API_ROOT = config.api;
 var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
@@ -29,7 +46,7 @@ client.createRequest({
   path  : 'server',
   body  : {
     Filter: {
-      "Tags": defaultTag
+      "Tags": config.defaultTag
     }
   }
 }).send(function(err, result) {
@@ -46,19 +63,18 @@ client.createRequest({
       promises.push(new Promise(function(resolve, reject) {
         var line = result[i];
         if (! servers.some(function(v){ return v === line.name }) ) {
-          var tags = [defaultTag];
+          var tags = [config.defaultTag];
           tags.push(line.branch)
           var server = new Server(client);
           server.create({
-            zone: zone,
-            plan: plan,
-            packetfilterid: packetfilterid,
+            zone: config.zone,
+            plan: config.plan,
+            packetfilterid: config.packetfilterid,
             name: line.name,
             description: line.description,
             tags: tags,
             pubkey: line.pubkey,
-            image: image,
-            size: size,
+            disk: config.disk,
             resolve: resolve
           })
         } else {
@@ -72,7 +88,7 @@ client.createRequest({
         path  : 'server',
         body  : {
           Filter: {
-            "Tags": defaultTag
+            "Tags": config.defaultTag
           }
         }
       }).send(function(err, result) {
