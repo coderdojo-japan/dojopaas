@@ -8,7 +8,7 @@ script:
   - npm run test:csv
 deploy:
   provider: script
-  script: npm run deploy && bash ./bin/deploy.sh
+  script: npm install && npm run deploy && bash ./bin/deploy.sh
   on:
     branch: master
 env:
