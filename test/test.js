@@ -5,15 +5,12 @@ var Server = require('../lib/Server');
 
 var defaultTag = 'dojopaas'
 
-/// サンドボックス
-var zone = "29001";
-var api = "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/"
-
-var plan = "1001" // 1コア、1GBメモリ
-
-var packetfilterid = '112900927419' // www
-
-const config = {
+var config = {
+  defaultTag: 'dojopaas',
+  zone: "29001", // サンドボックス
+  api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
+  plan: 1001,
+  packetfilterid: '112900927419',
   disk: {
     Plan: { ID: 4 },
     SizeMB: 20480,
@@ -21,7 +18,7 @@ const config = {
   }
 }
 
-sacloud.API_ROOT = api;
+sacloud.API_ROOT = config.api;
 var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
@@ -37,7 +34,7 @@ Promise.resolve()
       path  : 'server',
       body  : {
         Filter: {
-          "Tags": defaultTag
+          "Tags": config.defaultTag
         }
       }
     }).send((err, result) => {
@@ -53,12 +50,12 @@ Promise.resolve()
   return new Promise((resolve, reject) => {
     var server = new Server(client);
     server.create({
-      zone: zone,
-      plan: plan,
-      packetfilterid: packetfilterid,
+      zone: config.zone,
+      plan: config.plan,
+      packetfilterid: config.packetfilterid,
       name: "test",
       description: "This is a instance for test",
-      tags: [defaultTag],
+      tags: [config.defaultTag],
       pubkey: "xxxx",
       disk: config.disk,
       resolve: resolve

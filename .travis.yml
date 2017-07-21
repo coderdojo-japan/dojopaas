@@ -7,6 +7,8 @@ branches:
 before_script: npm install
 script:
   - npm test
+  - npm run deploy -- --test
+  - npm run test:csv
 after_success:
   - npm run deploy
   - bash ./bin/deploy.sh
