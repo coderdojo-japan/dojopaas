@@ -7,10 +7,7 @@ script:
   - npm run deploy -- --test
   - npm run test:csv
 after_success:
-  - |
-    if [[ "master" == "$TRAVIS_BRANCH" ]]; then
-      npm run deploy && bash ./bin/deploy.sh
-    fi
+  - bash ./bin/deploy.sh
 env:
   global:
   - GH_REF: github.com/coderdojo-japan/dojopaas
