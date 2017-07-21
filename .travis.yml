@@ -4,7 +4,7 @@ node_js:
 before_script: npm install
 script:
   - npm test
-  - npm run deploy -- --test
+  # - npm run deploy -- --test
   - npm run test:csv
 after_success:
   - bash ./bin/deploy.sh
