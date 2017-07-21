@@ -46,10 +46,15 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
-### サーバーの仕様
+## サーバーの仕様
 
-* リージョン: 石狩第二
 * OS: Ubuntu 16.04
 * CPU: 1コア
 * メモリ: 1GB
 * HDD: 20GB
+
+## 管理者向けの情報
+
+* リージョンは、石狩第二ゾーンです。
+* 本システムで作成されたすべてのインスタンスには `dojopaas` というタグがついています。他の方法で起動したインスタンスにこのタグを付けないでください。
+* CSVのフォーマットに対してもテストを行っています。赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べる必要があります。
