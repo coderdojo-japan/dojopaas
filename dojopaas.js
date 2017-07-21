@@ -7,6 +7,7 @@ var list = __dirname + '/servers.csv';
 
 if ('--test' === process.argv[2]) {
   var config = {
+    debug: true,
     defaultTag: 'dojopaas',
     zone: "29001", // サンドボックス
     api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
@@ -20,6 +21,7 @@ if ('--test' === process.argv[2]) {
   }
 } else {
   var config = {
+    debug: false,
     defaultTag: 'dojopaas',
     zone: "31002", // 石狩第二
     api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", // 石狩第二
@@ -38,7 +40,7 @@ var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
   disableLocalizeKeys: false, // (optional;default:false) false: lower-camelize the property names in response Object
-  debug              : false // (optional;default:false) output debug requests to console.
+  debug              : config.debug // (optional;default:false) output debug requests to console.
 });
 
 client.createRequest({
