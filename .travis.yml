@@ -1,17 +1,16 @@
 language: node_js
 node_js:
   - "7"
-branches:
-  only:
-  - master
 before_script: npm install
 script:
   - npm test
   - npm run deploy -- --test
   - npm run test:csv
-after_success:
-  - npm run deploy
-  - bash ./bin/deploy.sh
+deploy:
+  provider: script
+  script: npm run deploy && bash ./bin/deploy.sh
+  on:
+    branch: master
 env:
   global:
   - GH_REF: github.com/coderdojo-japan/dojopaas
