@@ -6,7 +6,7 @@ branches:
   - master
 before_script: npm install
 script:
-- ls -al
+  - npm test
 after_success:
   - npm run deploy
   - bash ./bin/deploy.sh
