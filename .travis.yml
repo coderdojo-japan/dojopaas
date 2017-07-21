@@ -6,11 +6,11 @@ script:
   - npm test
   - npm run deploy -- --test
   - npm run test:csv
-deploy:
-  provider: script
-  script: npm install && npm run deploy && bash ./bin/deploy.sh
-  on:
-    branch: master
+after_success:
+  - |
+    if [[ "master" == "$TRAVIS_BRANCH" ]]; then
+      npm run deploy && bash ./bin/deploy.sh
+    fi
 env:
   global:
   - GH_REF: github.com/coderdojo-japan/dojopaas
