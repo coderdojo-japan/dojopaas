@@ -46,6 +46,22 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
+## サーバーが不要になったとき
+
+さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同でご利用いただいております。
+
+もしサーバーが不要になった場合は、以下の方法でなるべく早くその旨を申請してください。
+
+### 削除申請の方法
+
+Issueにてサーバーが不要になった旨をご連絡ください。
+
+https://github.com/coderdojo-japan/dojopaas/issues
+
+```
+xxxx という名前のサーバーの削除をお願いします。
+```
+
 ## サーバーの仕様
 
 * OS: Ubuntu 16.04
