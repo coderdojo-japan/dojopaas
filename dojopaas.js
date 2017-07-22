@@ -69,7 +69,7 @@ if (true === production) {
   }
 }
 
-console.log('Get a list of existing instances.')
+console.log('Get a list of existing servers.')
 client.createRequest({
   method: 'GET',
   path  : 'server',
@@ -95,7 +95,6 @@ client.createRequest({
         var line = result[i];
         // 同じ名前のものがすでにある場合はスキップ
         if (! servers.some(function(v){ return v === line.name }) ) {
-          console.log('Create a machine for '+line.name+'.')
           var tags = [config.defaultTag];
           tags.push(line.branch)
           var server = new Server(client);
