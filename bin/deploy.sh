@@ -12,7 +12,7 @@ if [[ "master" != "$TRAVIS_BRANCH" ]]; then
 	exit
 fi
 
-npm run deploy
+npm run deploy -- --production
 
 rm -fr .git
 rm -fr .gitignore

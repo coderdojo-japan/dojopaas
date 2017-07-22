@@ -5,22 +5,7 @@ var Server = require('./lib/Server');
 
 var list = __dirname + '/servers.csv';
 
-if ('--test' === process.argv[2]) {
-  var config = {
-    debug: false,
-    defaultTag: 'dojopaas',
-    zone: "29001", // サンドボックス
-    api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
-    plan: 1001,
-    packetfilterid: '112900927419',
-    disk: {
-      Plan: { ID: 4 },
-      SizeMB: 20480,
-      SourceArchive: { ID: "112900758037" }
-    },
-    notes: [{ID: "112900928939"}]
-  }
-} else {
+if (process.argv.some(function(v){ return v === '--production' })) {
   var config = {
     debug: false,
     defaultTag: 'dojopaas',
@@ -32,6 +17,21 @@ if ('--test' === process.argv[2]) {
       Plan: { ID: 4 }, // SSD
       SizeMB: 20480, // 20GB
       SourceArchive: { ID: "112900757970" } // Ubuntu 16.04
+    },
+    notes: [{ID: "112900928939"}]
+  }
+} else {
+  var config = {
+    debug: false,
+    defaultTag: 'dojopaas',
+    zone: "29001", // サンドボックス
+    api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
+    plan: 1001,
+    packetfilterid: '112900927419',
+    disk: {
+      Plan: { ID: 4 },
+      SizeMB: 20480,
+      SourceArchive: { ID: "112900758037" }
     },
     notes: [{ID: "112900928939"}]
   }
