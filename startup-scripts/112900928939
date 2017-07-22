@@ -1,15 +1,52 @@
 #!/usr/bin/env bash
 
 # @sacloud-once
-# This is for the dojopaas
+# This script will be executed once when startup.
 
 set -ex
 
-apt-get update -y
-apt-get upgrade -y
-apt-get install ansible -y
+apt update -y
+apt upgrade -y
+apt install ansible -y
+
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+apt install iptables-persistent -y
 
 sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin no/" /etc/ssh/sshd_config
 sed -i -e "s/#PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
 
 service ssh restart
+
+cat << EOL > /etc/iptables/rules.v4
+*filter
+:INPUT   DROP   [0:0]
+:FORWARD DROP   [0:0]
+:OUTPUT  ACCEPT [0:0]
+
+-A INPUT -i lo -j ACCEPT
+
+-A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+-A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+-A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+-A INPUT -p icmp --icmp-type echo-request -m hashlimit --hashlimit-name t_icmp --hashlimit 1/m --hashlimit-burst 10 --hashlimit-mode srcip --hashlimit-htable-expire 120000 -j ACCEPT
+-A INPUT -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p udp --sport 53 -j ACCEPT
+
+-A INPUT -p tcp -m state --syn --state NEW --dport 22 -m hashlimit --hashlimit-name t_sshd --hashlimit 1/m --hashlimit-burst 10 --hashlimit-mode srcip --hashlimit-htable-expire 120000 -j ACCEPT
+
+-A INPUT -p tcp --dport 80   -j ACCEPT
+-A INPUT -p tcp --dport 443  -j ACCEPT
+
+COMMIT
+EOL
+
+cat << EOL > /etc/iptables/rules.v6
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+COMMIT
+EOL
+
+netfilter-persistent reload
