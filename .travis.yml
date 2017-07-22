@@ -3,7 +3,7 @@ node_js:
   - "7"
 before_script: npm install
 script:
-  - npm test
+  # - npm test
   # - npm run deploy -- --test
   - npm run test:csv
 after_success:

@@ -23,7 +23,7 @@ var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
   disableLocalizeKeys: false, // (optional;default:false) false: lower-camelize the property names in response Object
-  debug              : false // (optional;default:false) output debug requests to console.
+  debug              : true // (optional;default:false) output debug requests to console.
 });
 
 Promise.resolve()
