@@ -11,7 +11,8 @@ CoderDojo `ooo` (代表: `ooo`) は、以下の各項目に同意した上で、
 1. さくらインターネットの[基本約款](https://www.sakura.ad.jp/agreement/[a]yakkan0_kihon.pdf)の内容に承諾します
 2. [さくらのクラウドサービス約款](https://www.sakura.ad.jp/agreement/[a]yakkan_cloud.pdf)の内容に承諾します
 3. 原則１道場につき１台、次のスペックのサーバーを利用します
-   - メモリー: 1GB
+   - CPU: 1コア
+   - メモリ: 1GB
    - ディスク: 20GB
 4. さくらインターネットのバナーまたは文言を、自身が関わるCoderDojoの公式Webサイトに掲載します
    - バナー・ロゴデータ及びその使用ガイドラインについては[さくらインターネットのブランドアセット](https://www.sakura.ad.jp/brand-assets/)をご確認ください
