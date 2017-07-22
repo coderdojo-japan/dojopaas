@@ -45,6 +45,26 @@ var client = sacloud.createClient({
   debug              : config.debug // (optional;default:false) output debug requests to console.
 });
 
+// スタートアップスクリプトを登録
+for (var i=0; i<config.notes.length; i++) {
+  var id = config.notes[i].ID;
+  fs.readFile('./startup-scripts/'+id, 'utf8', function (err, text) {
+    if (err) throw new Error(err);
+    client.createRequest({
+      method: 'PUT',
+      path  : 'note/'+id,
+      body  : {
+        Note: {
+          "Content": text
+        }
+      }
+    }).send(function(err, result) {
+      if (err) throw new Error(err);
+    });
+  });
+}
+
+// 既存のインスタンスのリストを取得
 client.createRequest({
   method: 'GET',
   path  : 'server',
@@ -59,6 +79,8 @@ client.createRequest({
   for (var i=0; i<result.response.servers.length; i++) {
     servers.push(result.response.servers[i].name)
   }
+
+  // CSVに記載された情報をもとにインスタンスを作成
   fs.readFile(list, 'utf8', function (err, text) {
     var result = new csv(text, { header: true }).parse();
     var data = [];
@@ -66,6 +88,7 @@ client.createRequest({
     for (var i=0; i<result.length; i++) {
       promises.push(new Promise(function(resolve, reject) {
         var line = result[i];
+        // 同じ名前のものがすでにある場合はスキップ
         if (! servers.some(function(v){ return v === line.name }) ) {
           var tags = [config.defaultTag];
           tags.push(line.branch)
@@ -107,7 +130,7 @@ client.createRequest({
         }
         var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
         fs.writeFile('instances.csv', list, function(error) {
-          if (err) throw err;
+          if (err) throw new Error(err);
           console.log('The CSV has been saved!');
         });
       });

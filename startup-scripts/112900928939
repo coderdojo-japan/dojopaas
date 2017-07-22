@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # @sacloud-once
+# This is for the dojopaas
 
 set -ex
 
