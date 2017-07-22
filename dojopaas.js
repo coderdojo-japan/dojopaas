@@ -5,7 +5,12 @@ var Server = require('./lib/Server');
 
 var list = __dirname + '/servers.csv';
 
+var production = false;
 if (process.argv.some(function(v){ return v === '--production' })) {
+  production = true;
+}
+
+if (true === production) {
   var config = {
     defaultTag: 'dojopaas',
     zone: "31002", // 石狩第二
@@ -43,23 +48,25 @@ var client = sacloud.createClient({
   debug              : false // trueにするとアクセストークンが漏れる！
 });
 
-// スタートアップスクリプトを登録
-for (var i=0; i<config.notes.length; i++) {
-  var id = config.notes[i].ID;
-  fs.readFile('./startup-scripts/'+id, 'utf8', function (err, text) {
-    if (err) throw new Error(err);
-    client.createRequest({
-      method: 'PUT',
-      path  : 'note/'+id,
-      body  : {
-        Note: {
-          "Content": text
-        }
-      }
-    }).send(function(err, result) {
+if (true === production) {
+  console.log('Update startup scripts.')
+  for (var i=0; i<config.notes.length; i++) {
+    var id = config.notes[i].ID;
+    fs.readFile('./startup-scripts/'+id, 'utf8', function (err, text) {
       if (err) throw new Error(err);
+      client.createRequest({
+        method: 'PUT',
+        path  : 'note/'+id,
+        body  : {
+          Note: {
+            "Content": text
+          }
+        }
+      }).send(function(err, result) {
+        if (err) throw new Error(err);
+      });
     });
-  });
+  }
 }
 
 // 既存のインスタンスのリストを取得
