@@ -75,6 +75,29 @@ xxxx という名前のサーバーの削除をお願いします。
 * 本システムで作成されたすべてのインスタンスには `dojopaas` というタグがついています。他の方法で起動したインスタンスにこのタグを付けないでください。
 * CSVのフォーマットに対してもテストを行っています。赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べる必要があります。
 
+## 貢献方法
+
+ローカルでテストするには以下の要領でお願いします。
+
+### 環境変数を設定
+
+さくらのクラウドのAPIへの接続に必要な情報を環境変数で設定してください。
+
+```
+export SACLOUD_ACCESS_TOKEN=xxxx
+export SACLOUD_ACCESS_TOKEN_SECRET=xxxx
+```
+
+### 実行
+
+```
+$ npm install
+$ npm test # 単体のテスト
+$ npm run test:csv # CSVに対するテスト
+$ npm run deploy # サンドボックスにインスタンスを作成
+$ npm run deploy -- --production # 本番環境でインスタンスを作成
+```
+
 ## 関連リンク
 
 - [子ども向けプログラミング道場を推進する一般社団法人 CoderDojo Japan をさくらインターネットが支援、「さくらのクラウド」を無料提供](https://www.sakura.ad.jp/press/2017/0720_cloud-coderjapan/)
@@ -84,8 +107,5 @@ xxxx という名前のサーバーの削除をお願いします。
 - [@miya0001](https://github.com/miya0001)
 - [@yasulab](https://github.com/yasulab)
 
-一般社団法人 CoderDojo Japan   
+一般社団法人 CoderDojo Japan
 https://coderdojo.jp/
-
-
-
