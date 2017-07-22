@@ -7,7 +7,6 @@ var list = __dirname + '/servers.csv';
 
 if (process.argv.some(function(v){ return v === '--production' })) {
   var config = {
-    debug: false,
     defaultTag: 'dojopaas',
     zone: "31002", // 石狩第二
     api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", // 石狩第二
@@ -22,7 +21,6 @@ if (process.argv.some(function(v){ return v === '--production' })) {
   }
 } else {
   var config = {
-    debug: false,
     defaultTag: 'dojopaas',
     zone: "29001", // サンドボックス
     api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
@@ -42,7 +40,7 @@ var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
   disableLocalizeKeys: false, // (optional;default:false) false: lower-camelize the property names in response Object
-  debug              : config.debug // (optional;default:false) output debug requests to console.
+  debug              : false // trueにするとアクセストークンが漏れる！
 });
 
 // スタートアップスクリプトを登録
