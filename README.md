@@ -78,8 +78,8 @@ xxxx という名前のサーバーの削除をお願いします。
 
 # 開発・運営
 
-- @miya0001
-- @yasulab
+- [@miya0001](https://github.com/miya0001)
+- [@yasulab](https://github.com/yasulab)
 
 一般社団法人 CoderDojo Japan   
 https://coderdojo.jp/
