@@ -5,33 +5,38 @@ var Server = require('./lib/Server');
 
 var list = __dirname + '/servers.csv';
 
+var production = false;
 if (process.argv.some(function(v){ return v === '--production' })) {
+  production = true; // 本番環境
+}
+
+if (true === production) {
   var config = {
     defaultTag: 'dojopaas',
     zone: "31002", // 石狩第二
     api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", // 石狩第二
     plan: "1001", // 1コア、1GBメモリ
-    packetfilterid: '112900922505', // www
+    packetfilterid: '112900922505', // See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
     disk: {
       Plan: { ID: 4 }, // SSD
       SizeMB: 20480, // 20GB
       SourceArchive: { ID: "112900757970" } // Ubuntu 16.04
     },
-    notes: [{ID: "112900928939"}]
+    notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
 } else {
   var config = {
     defaultTag: 'dojopaas',
     zone: "29001", // サンドボックス
     api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
-    plan: 1001,
-    packetfilterid: '112900927419',
+    plan: 1001, // 1コア、1GBメモリ
+    packetfilterid: '112900927419', // See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
     disk: {
-      Plan: { ID: 4 },
-      SizeMB: 20480,
-      SourceArchive: { ID: "112900758037" }
+      Plan: { ID: 4 }, // SSD
+      SizeMB: 20480, // 20GB
+      SourceArchive: { ID: "112900758037" } // Ubuntu 16.04
     },
-    notes: [{ID: "112900928939"}]
+    notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
 }
 
@@ -39,30 +44,32 @@ sacloud.API_ROOT = config.api;
 var client = sacloud.createClient({
   accessToken        : process.env.SACLOUD_ACCESS_TOKEN,
   accessTokenSecret  : process.env.SACLOUD_ACCESS_TOKEN_SECRET,
-  disableLocalizeKeys: false, // (optional;default:false) false: lower-camelize the property names in response Object
+  disableLocalizeKeys: false,
   debug              : false // trueにするとアクセストークンが漏れる！
 });
 
-// スタートアップスクリプトを登録
-for (var i=0; i<config.notes.length; i++) {
-  var id = config.notes[i].ID;
-  fs.readFile('./startup-scripts/'+id, 'utf8', function (err, text) {
-    if (err) throw new Error(err);
-    client.createRequest({
-      method: 'PUT',
-      path  : 'note/'+id,
-      body  : {
-        Note: {
-          "Content": text
-        }
-      }
-    }).send(function(err, result) {
+if (true === production) {
+  console.log('Update startup scripts.')
+  for (var i=0; i<config.notes.length; i++) {
+    var id = config.notes[i].ID;
+    fs.readFile('./startup-scripts/'+id, 'utf8', function (err, text) {
       if (err) throw new Error(err);
+      client.createRequest({
+        method: 'PUT',
+        path  : 'note/'+id,
+        body  : {
+          Note: {
+            "Content": text
+          }
+        }
+      }).send(function(err, result) {
+        if (err) throw new Error(err);
+      });
     });
-  });
+  }
 }
 
-// 既存のインスタンスのリストを取得
+console.log('Get a list of existing servers.')
 client.createRequest({
   method: 'GET',
   path  : 'server',
@@ -129,7 +136,7 @@ client.createRequest({
         var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
         fs.writeFile('instances.csv', list, function(error) {
           if (err) throw new Error(err);
-          console.log('The CSV has been saved!');
+          console.log('The `instances.csv` was saved!');
         });
       });
     }).catch(function(error) {
