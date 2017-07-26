@@ -6,7 +6,7 @@
 
 [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいてTravis CI経由で自動的にサーバーが起動します。
 
-## サーバーがほしい方へ
+## 1. サーバーがほしい方へ
 
 以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
 
@@ -25,7 +25,11 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
 
-### SSHの接続方法
+### 2. SSHの接続方法
+
+プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
+
+https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
 以下のような感じで接続してください。
 
@@ -42,11 +46,8 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 * ユーザー名はすべて `ubuntu` です。
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
 
-プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
 
-https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
-
-## サーバーが不要になったとき
+## 3. サーバーが不要になったとき
 
 さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同でご利用いただいております。
 
@@ -54,9 +55,9 @@ https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
 ### 削除申請の方法
 
-Issueにてサーバーが不要になった旨をご連絡ください。
+Pull Requestにて、当該サーバーが記載されている行を削除し、不要になった旨を記述してください。
 
-https://github.com/coderdojo-japan/dojopaas/issues
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 ```
 xxxx という名前のサーバーの削除をお願いします。
@@ -107,5 +108,5 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 - [@miya0001](https://github.com/miya0001)
 - [@yasulab](https://github.com/yasulab)
 
-一般社団法人 CoderDojo Japan
+一般社団法人 CoderDojo Japan   
 https://coderdojo.jp/
