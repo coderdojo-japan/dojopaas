@@ -31,7 +31,7 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
-以下のような感じで接続してください。
+上記ファイル内に当該サーバーの行が追加されたら、次のような形式で接続できるようになります
 
 ```
 $ ssh ubuntu@<ip-address>
@@ -62,6 +62,8 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 ```
 xxxx という名前のサーバーの削除をお願いします。
 ```
+
+# 他、参考情報など
 
 ## サーバーの仕様
 
