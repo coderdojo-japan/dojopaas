@@ -25,7 +25,7 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
 
-### 2. SSHの接続方法
+## 2. SSHの接続方法
 
 プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
 
