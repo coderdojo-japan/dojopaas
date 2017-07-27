@@ -6,6 +6,14 @@
 
 [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいてTravis CI経由で自動的にサーバーが起動します。
 
+## 📹 解説動画
+
+サーバーを申請する準備から利用申請・削除までの手順を解説する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
+
+[![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
+
+下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、下記の手順を読みながら直接進めていっても問題ありません 🆗
+
 ## 1. サーバーがほしい方へ
 
 以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
