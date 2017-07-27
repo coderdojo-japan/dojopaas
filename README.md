@@ -1,4 +1,4 @@
-# dojopaas
+# DojoPaaS ~ CoderDojo のためのサーバー利用申請手続き
 
 [![Build Status](https://travis-ci.org/coderdojo-japan/dojopaas.svg?branch=master)](https://travis-ci.org/coderdojo-japan/dojopaas)
 
