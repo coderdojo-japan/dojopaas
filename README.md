@@ -66,8 +66,7 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 Pull Requestにて、当該サーバーが記載されている行を削除し、不要になった旨を記述してください。
 
-https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
-
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
 プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/38
 
 ```
