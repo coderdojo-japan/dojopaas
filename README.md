@@ -16,11 +16,12 @@
 
 ## 1. サーバーがほしい方へ
 
-以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。なお、代理での申請も受け付けております。その場合は代表から代理人に移譲された旨をプルリクエストにコメントしていただけると幸いです (参考: [代理申請の例](https://github.com/coderdojo-japan/dojopaas/pull/45))。
+以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
 
-https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
-
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
 プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/1
+
+なお、代理での申請も受け付けております。その場合は代表から代理人に移譲された旨をプルリクエストにコメントしていただけると幸いです (参考: [代理申請の例](https://github.com/coderdojo-japan/dojopaas/pull/45))。
 
 ### 各項目の説明
 
