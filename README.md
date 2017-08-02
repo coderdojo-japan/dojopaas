@@ -8,7 +8,7 @@
 
 ## 📹 解説動画
 
-サーバーを申請する準備から利用申請・削除までの手順を解説する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;) 
+サーバーを申請する準備から利用申請・削除までの手順を解説する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
 
 [![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
 
@@ -16,7 +16,7 @@
 
 ## 1. サーバーがほしい方へ
 
-以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。なお、代理での申請も受け付けております。その場合は代表から代理に移譲された旨をコメントしていただけると幸いです。
+以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。なお、代理での申請も受け付けております。その場合は代表から代理人に移譲された旨をコメントしていただけると幸いです。
 
 https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
