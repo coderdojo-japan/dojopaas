@@ -6,7 +6,6 @@
 set -ex
 
 apt update -y
-apt upgrade -y
 apt install ansible -y
 
 echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
