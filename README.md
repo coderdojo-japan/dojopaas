@@ -36,7 +36,7 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 ## 2. SSHの接続方法
 
-プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
+プルリクエストがマージされてから１時間ほど経つと、以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
 
 https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
