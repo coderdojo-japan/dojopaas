@@ -1,4 +1,4 @@
-# dojopaas
+# DojoPaaS ~ CoderDojo のためのサーバー利用申請手続き
 
 [![Build Status](https://travis-ci.org/coderdojo-japan/dojopaas.svg?branch=master)](https://travis-ci.org/coderdojo-japan/dojopaas)
 
@@ -6,13 +6,22 @@
 
 [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいてTravis CI経由で自動的にサーバーが起動します。
 
-## サーバーがほしい方へ
+## 📹 解説動画
+
+サーバーを申請する準備から利用申請・削除までの手順を解説する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
+
+[![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
+
+下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、下記の手順を読みながら直接進めていっても問題ありません 🆗
+
+## 1. サーバーがほしい方へ
 
 以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
 
-https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
-
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
 プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/1
+
+なお、代理での申請も受け付けております。その場合は代表から代理人に移譲された旨をプルリクエストにコメントしていただけると幸いです (参考: [代理申請の例](https://github.com/coderdojo-japan/dojopaas/pull/45))。
 
 ### 各項目の説明
 
@@ -25,9 +34,13 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
 
-### SSHの接続方法
+## 2. SSHの接続方法
 
-以下のような感じで接続してください。
+プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
+
+https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
+
+上記ファイル内に当該サーバーの行が追加されたら、次のような形式で接続できるようになります
 
 ```
 $ ssh ubuntu@<ip-address>
@@ -41,12 +54,9 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 * ユーザー名はすべて `ubuntu` です。
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
+* **ポート番号は22 (SSH), 80 (HTTP), 443 (HTTPS) のみが空いている状態になります。** 詳細は、サーバー生成時に実行される[スタートアップスクリプト](https://github.com/coderdojo-japan/dojopaas/blob/master/startup-scripts/112900928939)をご参照ください。
 
-プルリクエストがマージされて数分後に以下のURLにIPアドレスのリストがコミットされます。その中からご自身が申請したサーバーを探して、そのIPアドレスをSSHコマンドで指定してください。
-
-https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
-
-## サーバーが不要になったとき
+## 3. サーバーが不要になったとき
 
 さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同でご利用いただいております。
 
@@ -54,13 +64,16 @@ https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv
 
 ### 削除申請の方法
 
-Issueにてサーバーが不要になった旨をご連絡ください。
+Pull Requestにて、当該サーバーが記載されている行を削除し、不要になった旨を記述してください。
 
-https://github.com/coderdojo-japan/dojopaas/issues
+https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
+プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/38
 
 ```
 xxxx という名前のサーバーの削除をお願いします。
 ```
+
+# 他、参考情報など
 
 ## サーバーの仕様
 
@@ -101,11 +114,13 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 ## 関連リンク
 
 - [子ども向けプログラミング道場を推進する一般社団法人 CoderDojo Japan をさくらインターネットが支援、「さくらのクラウド」を無料提供](https://www.sakura.ad.jp/press/2017/0720_cloud-coderjapan/)
+- [さくらインターネット株式会社様より、全国の #CoderDojo を対象としたサーバー環境 (計100台分) のご支援をしていただくことになりました!](https://www.facebook.com/coderdojo.jp/posts/673793186165170)
+- [さくらのクラウドとGitHub+Travis CIを使ってCoderDojo向けのプルリクドリブンのPaaSサービスを3日で作った！](https://tarosky.co.jp/tarog/2086)
 
 # 開発・運営
 
 - [@miya0001](https://github.com/miya0001)
 - [@yasulab](https://github.com/yasulab)
 
-一般社団法人 CoderDojo Japan
+一般社団法人 CoderDojo Japan   
 https://coderdojo.jp/
