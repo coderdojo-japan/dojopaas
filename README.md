@@ -12,7 +12,7 @@
 
 [![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
 
-下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、下記の手順を読みながら直接進めていっても問題ありません 🆗
+下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、下記の手順を読みながら直接進めていっても問題ありません 🆗 公開鍵認証がよくわからない場合は[「よく分かる公開鍵認証」～初心者でもよくわかる！VPSによるWebサーバー運用講座](https://knowledge.sakura.ad.jp/3543/)を読んでみてください 📑👀
 
 ## 1. サーバーがほしい方へ
 
