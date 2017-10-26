@@ -84,7 +84,7 @@ Q. SSH で接続できなくなりました。どうすればよいですか?
 A. CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
 
 Q. サーバーの知識があまりないです。どうすればよいですか?   
-A. [簡易的なハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/docs/ssh.md#参考資料)です。基本的なポイントだけを押さえておりますので、他の細かなテクニックについては参考文献をご参照ください。
+A. @manzyun さんが描いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/docs/ssh.md)。基本的なポイントだけを押さえておりますので、他の細かなテクニックについては当該ドキュメントの[参考文献](https://github.com/coderdojo-japan/dojopaas/docs/ssh.md#参考資料)をご参照ください。
 
 ## サーバーの仕様 {#spec}
 
