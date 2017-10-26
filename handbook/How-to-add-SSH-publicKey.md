@@ -60,5 +60,5 @@ $ ssh -i <path/to/directory/key> ubuntu@<ip-address> # このコマンドでサ�
 
 ## 参考資料
 
-* [お前らのSSH Keysの作り方は間違っている - Qiita](https://qiita.com/suthio/items/2760e4cff0e185fe2db9)
-* [ssh公開鍵認証設定まとめ - Qiita](https://qiita.com/ir-yk/items/af8550fea92b5c5f7fca)
+* [「よく分かる公開鍵認証」～初心者でもよくわかる！VPSによるWebサーバー運用講座 - さくらのナレッジ](http://knowledge.sakura.ad.jp/beginner/3543/)
+* [Ubuntuサーバーガイド](https://help.ubuntu.com/lts/serverguide/index.html)
