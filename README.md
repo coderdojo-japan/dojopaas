@@ -73,9 +73,9 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 xxxx という名前のサーバーの削除をお願いします。
 ```
 
-# 他、参考情報など {#refs}
+# 他、参考情報など
 
-## よくある質問と回答 {#faq}
+## よくある質問と回答
 
 Q. サーバーを初期化したい場合はどうすればよいですか?   
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバーの初期化をお願いします。&labels=サーバーの初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名や申請者名を入力してください。
