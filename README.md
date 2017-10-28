@@ -86,7 +86,7 @@ A. CoderDojo Japan では各サーバーの管理までは対応しておりま�
 Q. サーバーの知識があまりないです。どうすればよいですか?   
 A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、他の細かなテクニックについては当該ドキュメントの[参考文献](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md#参考資料)をご参照ください。
 
-## サーバーの仕様 {#spec}
+## サーバーの仕様
 
 * OS: Ubuntu 16.04
 * CPU: 1コア
