@@ -14,7 +14,7 @@ var config = {
   disk: {
     Plan: { ID: 4 },
     SizeMB: 20480,
-    SourceArchive: { ID: "112900758037" }
+    SourceArchive: { ID: "112901206732" }
   }
 }
 
@@ -43,6 +43,7 @@ Promise.resolve()
     })
   })
 }).then((data) => {
+  console.log('created');
   client.createRequest({
     method: 'GET',
     path  : 'server/'+data,
