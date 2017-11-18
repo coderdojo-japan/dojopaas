@@ -33,7 +33,6 @@ if (true === production) {
     disk: {
       Plan: { ID: 4 }, // SSD
       SizeMB: 20480 // 20GB
-      //SourceArchive: { ID: "112901206732" } // Ubuntu 16.04
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
