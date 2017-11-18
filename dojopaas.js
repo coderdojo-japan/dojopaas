@@ -20,7 +20,7 @@ if (true === production) {
     disk: {
       Plan: { ID: 4 }, // SSD
       SizeMB: 20480, // 20GB
-      SourceArchive: { ID: "112900757970" } // Ubuntu 16.04
+      SourceArchive: { ID: "112901206585" } // Ubuntu 16.04
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
@@ -34,7 +34,7 @@ if (true === production) {
     disk: {
       Plan: { ID: 4 }, // SSD
       SizeMB: 20480, // 20GB
-      SourceArchive: { ID: "112900758037" } // Ubuntu 16.04
+      SourceArchive: { ID: "112901206732" } // Ubuntu 16.04
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
