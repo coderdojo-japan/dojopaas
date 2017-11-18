@@ -19,7 +19,7 @@ if (true === production) {
     packetfilterid: '112900922505', // See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
     disk: {
       Plan: { ID: 4 }, // SSD
-      SizeMB: 20480
+      SizeMB: 20480    // 20GB
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
