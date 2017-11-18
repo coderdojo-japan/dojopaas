@@ -19,8 +19,7 @@ if (true === production) {
     packetfilterid: '112900922505', // See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
     disk: {
       Plan: { ID: 4 }, // SSD
-      SizeMB: 20480, // 20GB
-      SourceArchive: { ID: "112901206585" } // Ubuntu 16.04
+      SizeMB: 20480
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
@@ -33,8 +32,8 @@ if (true === production) {
     packetfilterid: '112900927419', // See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
     disk: {
       Plan: { ID: 4 }, // SSD
-      SizeMB: 20480, // 20GB
-      SourceArchive: { ID: "112901206732" } // Ubuntu 16.04
+      SizeMB: 20480 // 20GB
+      //SourceArchive: { ID: "112901206732" } // Ubuntu 16.04
     },
     notes: [{ID: "112900928939"}] // See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
   }
@@ -69,78 +68,100 @@ if (true === production) {
   }
 }
 
-console.log('Get a list of existing servers.')
 client.createRequest({
   method: 'GET',
-  path  : 'server',
-  body  : {
-    Filter: {
-      "Tags": config.defaultTag
-    }
-  }
+  path  : 'archive'
 }).send(function(err, result) {
   if (err) throw new Error(err);
-  var servers = [];
-  for (var i=0; i<result.response.servers.length; i++) {
-    servers.push(result.response.servers[i].name)
+
+  var archives = result.response.archives;
+  var archiveid = 0;
+  for ( var i = 0; i < archives.length; i++ ) {
+    if ( archives[i].name.match(/ubuntu/i) && archives[i].name.match(/16\.04/i) ) {
+      archiveid = archives[i].id;
+    }
   }
 
-  // CSVに記載された情報をもとにインスタンスを作成
-  fs.readFile(list, 'utf8', function (err, text) {
-    var result = new csv(text, { header: true }).parse();
-    var data = [];
-    var promises = [];
-    for (var i=0; i<result.length; i++) {
-      promises.push(new Promise(function(resolve, reject) {
-        var line = result[i];
-        // 同じ名前のものがすでにある場合はスキップ
-        if (! servers.some(function(v){ return v === line.name }) ) {
-          var tags = [config.defaultTag];
-          tags.push(line.branch)
-          var server = new Server(client);
-          server.create({
-            zone: config.zone,
-            plan: config.plan,
-            packetfilterid: config.packetfilterid,
-            name: line.name,
-            description: line.description,
-            tags: tags,
-            pubkey: line.pubkey,
-            disk: config.disk,
-            resolve: resolve,
-            notes: config.notes
-          })
-        } else {
-          resolve();
-        }
-      }));
+  if (archiveid) {
+    console.log( 'Archive ID:' + archiveid );
+    config.disk.SourceArchive = { ID: archiveid };
+  } else {
+    if (err) throw new Error("Can't get archive id.");
+  }
+
+  console.log('Get a list of existing servers.')
+  client.createRequest({
+    method: 'GET',
+    path  : 'server',
+    body  : {
+      Filter: {
+        "Tags": config.defaultTag
+      }
     }
-    Promise.all(promises).then(function() {
-      client.createRequest({
-        method: 'GET',
-        path  : 'server',
-        body  : {
-          Filter: {
-            "Tags": config.defaultTag
+  }).send(function(err, result) {
+    if (err) throw new Error(err);
+    var servers = [];
+    for (var i=0; i<result.response.servers.length; i++) {
+      servers.push(result.response.servers[i].name)
+    }
+
+    // CSVに記載された情報をもとにインスタンスを作成
+    fs.readFile(list, 'utf8', function (err, text) {
+      var result = new csv(text, { header: true }).parse();
+      var data = [];
+      var promises = [];
+      for (var i=0; i<result.length; i++) {
+        promises.push(new Promise(function(resolve, reject) {
+          var line = result[i];
+          // 同じ名前のものがすでにある場合はスキップ
+          if (! servers.some(function(v){ return v === line.name }) ) {
+            var tags = [config.defaultTag];
+            tags.push(line.branch)
+            var server = new Server(client);
+            server.create({
+              zone: config.zone,
+              plan: config.plan,
+              packetfilterid: config.packetfilterid,
+              name: line.name,
+              description: line.description,
+              tags: tags,
+              pubkey: line.pubkey,
+              disk: config.disk,
+              resolve: resolve,
+              notes: config.notes
+            })
+          } else {
+            resolve();
           }
-        }
-      }).send(function(err, result) {
-        var servers = [];
-        for (var i=0; i<result.response.servers.length; i++) {
-          servers.push([
-            result.response.servers[i].name,
-            result.response.servers[i].interfaces[0].ipAddress,
-            result.response.servers[i].description
-          ])
-        }
-        var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
-        fs.writeFile('instances.csv', list, function(error) {
-          if (err) throw new Error(err);
-          console.log('The `instances.csv` was saved!');
+        }));
+      }
+      Promise.all(promises).then(function() {
+        client.createRequest({
+          method: 'GET',
+          path  : 'server',
+          body  : {
+            Filter: {
+              "Tags": config.defaultTag
+            }
+          }
+        }).send(function(err, result) {
+          var servers = [];
+          for (var i=0; i<result.response.servers.length; i++) {
+            servers.push([
+              result.response.servers[i].name,
+              result.response.servers[i].interfaces[0].ipAddress,
+              result.response.servers[i].description
+            ])
+          }
+          var list = new csv(servers, {header: ["Name", "IP Address", "Description"]}).encode();
+          fs.writeFile('instances.csv', list, function(error) {
+            if (err) throw new Error(err);
+            console.log('The `instances.csv` was saved!');
+          });
         });
+      }).catch(function(error) {
+        console.log(error)
       });
-    }).catch(function(error) {
-      console.log(error)
     });
   });
 });
