@@ -78,7 +78,7 @@ xxxx という名前のサーバーの削除をお願いします。
 ## よくある質問と回答
 
 Q. サーバーを初期化したい場合はどうすればよいですか?   
-A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス: 【xxx.xxx.xxx.xxx】）の初期化をお願いします。&labels=サーバーの初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名や申請者名を入力してください。
+A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。&labels=サーバーの初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名や申請者名を入力してください。
 
 Q. SSH で接続できなくなりました。どうすればよいですか?   
 A. CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
