@@ -1,8 +1,8 @@
-# SSH鍵の追加の仕方
+# SSH 鍵の追加の仕方
 
-このドキュメントは  
-「CoderDojo Japanのさくらインターネットの提供しているサーバーを借りたものの、
-他のメンターやニンジャに使わせたい」  
+このドキュメントは
+「CoderDojo Japan のさくらインターネットの提供しているサーバーを借りたものの、
+他のメンターやニンジャに使わせたい」
 といった申請者さんのためのドキュメントです。
 
 シェルコマンドを叩くこと、黒い画面に白い文字だけの画面の操作に抵抗のない人を想定しています。
@@ -22,9 +22,9 @@ Mac, Linux, Windows Subsystem for Linux を想定しています。
 ### 繋げたい人
 
 ```shell
-$ ssh-keygen -t rsa -b 4096 -C "dojopaas" # RSA暗号で4096バイト長の鍵をdojopaasというコメントをつけて生成。
+$ ssh-keygen -t rsa -b 4096 -C "dojopaas" # RSA 暗号で 4096 バイト長の鍵を dojopaas というコメントをつけて生成。
 Enter file in which to save the key (/Users/you/.ssh/id_rsa): # 「どこに鍵ファイルを保存します？」　と聞かれるので、鍵を保存するファイル名含むパスを記入
-Enter passphrase (empty for no passphrase): # 「パスワードを入力して」と聞かれるので、鍵にさらにパスワードをつけたい場合は入力してEnter。なお、入力された内容は表示されないので注意。
+Enter passphrase (empty for no passphrase): # 「パスワードを入力して」と聞かれるので、鍵にさらにパスワードをつけたい場合は入力して Enter。なお、入力された内容は表示されないので注意。
 Enter same passphrase again: # 「もう一度さっきのパスワード入力して」と聞かれるので入力。なお、入力された内容は表示されないので注意。
 
 # 鍵ファイルが該当のパスに作成される。アスキーアートとかが出てくるが、念のため書き留めておいてもよい。
@@ -37,28 +37,33 @@ Enter same passphrase again: # 「もう一度さっきのパスワード入力�
 すでにサーバーにログインしているものとします。
 
 ```shell
+$ useradd <新たにログインする人のユーザー名>
+$ passwd <新たにログインする人のユーザー名>
+-- # ログインする人のパスワード入力を求められる。特に設定しない場合は Enter 連打で。
+$ su <新たにログインする人のユーザー名> # ユーザーの切り替え
 $ cd ~ # ホームディレクトリへ移動する
-$ mkdir -p .ssh # ssh関係のディレクトリを作る。
+$ mkdir -p .ssh # ssh 関係のディレクトリを作る。
 $ touch .ssh/authorized_keys # 認証した人たちの情報（鍵の照合情報）を残すための空ファイルを作る。
-$ chmod 700 .ssh # .sshディレクトリを、制作者だけが編集・実行でき、それ以外の者はできないようにする
-$ chmod 600 .ssh/authorized_keys # .ssh_authorized_keysファイルを、制作者だけが編集のみできるようにする。
+$ chmod 700 .ssh # .ssh ディレクトリを、制作者だけが編集・実行でき、それ以外の者はできないようにする
+$ chmod 600 .ssh/authorized_keys # .ssh_authorized_keys ファイルを、制作者だけが編集のみできるようにする。
 ```
 
-SSHの接続を一度切断し、以下を実行
+SSH の接続を一度切断し、以下を実行
 
 ```shell
-$ cat <path/to/directory/pub_key.pub> | ssh ubuntu@<ip-address> 'cat >> .ssh/authorized_keys'
--- # 手元の<path/to/directory/key.pub>ファイルの中身をsshでつないだセッションに渡し、sshでつないだ先のサーバーの.ssh/authorized_keysに追記する。
+$ cat <path/to/directory/pub_key.pub> | ssh <新たにログインする人のユーザー名>@<ip-address> 'cat >> .ssh/authorized_keys'
+-- # 手元の<path/to/directory/key.pub>ファイルの中身を ssh でつないだセッションに渡し、ssh でつないだ先のサーバーのユーザー名の.ssh/authorized_keys に追記する。
 ```
 
 ### 接続確認（繋げたい人）
 
 ```shell
-$ ssh -i <path/to/directory/key> ubuntu@<ip-address> # このコマンドでサーバーに接続する。
--- # 場合によってはここでパスワードを聞かれる。入力してEnter。打った文字列は表示されない。
+$ ssh -i <path/to/directory/key> <伝えられたユーザー名>@<ip-address> # このコマンドでサーバーに接続する。
+-- # 場合によってはここでパスワードを聞かれる。入力して Enter。打った文字列は表示されない。
 ```
 
 ## 参考資料
 
-* [「よく分かる公開鍵認証」～初心者でもよくわかる！VPSによるWebサーバー運用講座 - さくらのナレッジ](http://knowledge.sakura.ad.jp/beginner/3543/)
-* [Ubuntuサーバーガイド](https://help.ubuntu.com/lts/serverguide/index.html)
+* [「よく分かる公開鍵認証」～初心者でもよくわかる！VPS による Web サーバー運用講座 - さくらのナレッジ](http://knowledge.sakura.ad.jp/beginner/3543/)
+* [Ubuntu サーバーガイド](https://help.ubuntu.com/lts/serverguide/index.html)
+* [Linux ユーザーの追加〜 SSH 公開鍵登録まで - Qiita](https://qiita.com/soushiy/items/fabe64ec382a007a753c)
