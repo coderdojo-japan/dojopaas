@@ -37,9 +37,9 @@ Enter same passphrase again: # 「もう一度さっきのパスワード入力�
 すでにサーバーにログインしているものとします。
 
 ```shell
-$ useradd <新たにログインする人のユーザー名>
-$ passwd <新たにログインする人のユーザー名>
--- # ログインする人のパスワード入力を求められる。特に設定しない場合は Enter 連打で。
+$ sudo su #管理者権限に切り替え
+$ adduser <新たにログインする人のユーザー名>
+-- # ログインする人のパスワード入力やフルネームを求められる。特に設定しない場合は Enter 連打で。
 $ su <新たにログインする人のユーザー名> # ユーザーの切り替え
 $ cd ~ # ホームディレクトリへ移動する
 $ mkdir -p .ssh # ssh 関係のディレクトリを作る。
@@ -48,11 +48,15 @@ $ chmod 700 .ssh # .ssh ディレクトリを、制作者だけが編集・実�
 $ chmod 600 .ssh/authorized_keys # .ssh_authorized_keys ファイルを、制作者だけが編集のみできるようにする。
 ```
 
-SSH の接続を一度切断し、以下を実行
+サーバーにつなげたままで、
+事前に受け取っている公開鍵の内容を、他のテキストエディタなどでコピー。
 
 ```shell
-$ cat <path/to/directory/pub_key.pub> | ssh <新たにログインする人のユーザー名>@<ip-address> 'cat >> .ssh/authorized_keys'
--- # 手元の<path/to/directory/key.pub>ファイルの中身を ssh でつないだセッションに渡し、ssh でつないだ先のサーバーのユーザー名の.ssh/authorized_keys に追記する。
+$ echo '<コピーした公開鍵の内容>' > .ssh/authorized_keys
+-- # コピーした公開鍵の内容を .ssh/authorized_keys に上書きする。
+$ exit # 接続したい人のユーザーからログアウト
+$ exit # 管理者権限からログアウト
+$ exit # 一番最初にSSH接続したアカウントからログアウト → SSH切断
 ```
 
 ### 接続確認（繋げたい人）
