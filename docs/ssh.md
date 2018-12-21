@@ -49,7 +49,7 @@ $ chmod 600 .ssh/authorized_keys # .ssh_authorized_keys ファイルを、制作
 ```
 
 サーバーにつなげたままで、
-事前に受け取っている公開鍵の内容を、他のテキストエディタなどでコピー。
+事前に受け取っている公開鍵の内容を、他のテキストエディタなどで開いてコピー。
 
 ```shell
 $ echo '<コピーした公開鍵の内容>' > .ssh/authorized_keys
