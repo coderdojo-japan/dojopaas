@@ -16,6 +16,7 @@
 
 class CoderDojoSakuraCLI 
   require './ruby_scripts/sakura_server_user_agent.rb'
+  require 'csv'
   #jsではproductionの方を特別にしていたが、たぶんprodocutionの方を頻繁に叩くので...
   def initialize(argv)
     if /sandbox/ =~ argv[0]
@@ -23,22 +24,36 @@ class CoderDojoSakuraCLI
     end
   end
 
+
+  def update_startup_scripts
+    startup_file_name = "./startup-scripts/112900928939"
+    text = File.open(startup_file_name,'r').read
+    @ssua.update_startup_scripts(text)
+  end
+
   def run()
     request_params = perform_init_params()
-    p request_params
+    @ssua = SakuraServerUserAgent.new(request_params)
+
+    unless @isSandbox
+      update_startup_scripts
+    end
   end
+
+
+  private
 
   def perform_init_params
     if @isSandbox
       {
        zone: "31002", # 石狩第二
-       api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", # 石狩第二
+       zone_id: "is1b", # 石狩第二
        packetfilterid: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
     else 
       {
        zone: "29001", # サンドボックス
-       api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
+       zone_id: "tk1v",
        packetfilterid: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
     end
