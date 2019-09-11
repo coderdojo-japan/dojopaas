@@ -4,7 +4,6 @@ class SakuraServerUserAgent
   require 'jsonclient'
 
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
-  SAKURA_ZONE_ID      = 'is1b'
   SAKURA_CLOUD_SUFFIX = 'api/cloud'
   SAKURA_API_VERSION  = '1.1'
 
@@ -12,7 +11,7 @@ class SakuraServerUserAgent
   SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, packetfilterid:nil, name:nil, description:nil, 
+  def initialize(zone:0, packetfilterid:nil, name:nil, description:nil, zone_id:"is1b",
                  tags:nil, pubkey:nil, disk:{}, resolve:nil)
     @zone           = zone
     @packetfilterid = packetfilterid
@@ -24,6 +23,7 @@ class SakuraServerUserAgent
     @disk           = disk || { Plan:{ID:4}, SizeMB:20480 } #plan is SSD, sizeMB is 20GB
     @plan           = 1001 # 1core 1Gb memory
     @notes          = [ ID:"112900928939" ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
+    @sakura_zone_id = zone_id
 
     @client = JSONClient.new
     @client.set_proxy_auth(SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
@@ -124,6 +124,11 @@ class SakuraServerUserAgent
 
     rescue => exception
       puts exception
+  end
+
+  def update_startup_scripts(text)
+    body = {Note:{Content:text}}
+    send_request('put',"note/#{@notes[:ID]}",body)
   end
 
   def setup_ssh_key(params = nil)
