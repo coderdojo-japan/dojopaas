@@ -158,7 +158,7 @@ class SakuraServerUserAgent
 
   # URI(エンドポイント)を作成する
   def create_endpoint(path)
-    "#{SAKURA_BASE_URL}/#{SAKURA_ZONE_ID}/#{SAKURA_CLOUD_SUFFIX}/#{SAKURA_API_VERSION}/#{path}"
+    "#{SAKURA_BASE_URL}/#{@sakura_zone_id}/#{SAKURA_CLOUD_SUFFIX}/#{SAKURA_API_VERSION}/#{path}"
   end
 
   # 実際に送信する
