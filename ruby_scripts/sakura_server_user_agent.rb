@@ -36,7 +36,6 @@ class SakuraServerUserAgent
     create_network_interface()
   end
 
-  private
 
   # createとdestroyで独自に引数を取れるようにしておく
 
@@ -135,6 +134,8 @@ class SakuraServerUserAgent
     put_ssh_key()
     _copying_image()
   end
+
+  private
 
   def _put_ssh_key
     body = { 
