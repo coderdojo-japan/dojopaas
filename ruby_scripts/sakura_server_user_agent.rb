@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-
 class SakuraServerUserAgent
   require 'jsonclient'
 
@@ -135,6 +134,11 @@ class SakuraServerUserAgent
     _copying_image()
   end
 
+  def get_servers()
+    body = { Filter: {Tags: @tags.first} }
+    send_request('get','server',body) 
+  end 
+
   private
 
   def _put_ssh_key
@@ -164,7 +168,7 @@ class SakuraServerUserAgent
   # 実際に送信する
   def send_request(http_method,path,query)
     endpoint = create_endpoint(path)
-    response = @client.send(http_method,endpoint,:query => query)
+    response = @client.send(http_method,endpoint,:query => query, :follow_redirect => true)
     if response.body.empty?
       raise "Can not send #{http_method} request."
     else
