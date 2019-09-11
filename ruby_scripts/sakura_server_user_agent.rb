@@ -25,7 +25,7 @@ class SakuraServerUserAgent
     @sakura_zone_id = zone_id
 
     @client = JSONClient.new
-    @client.set_proxy_auth(SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
+    @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
   end
 
   # server.createに対応
