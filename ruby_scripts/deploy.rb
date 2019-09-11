@@ -35,9 +35,7 @@ class CoderDojoSakuraCLI
     request_params = perform_init_params()
     @ssua = SakuraServerUserAgent.new(request_params)
 
-    unless @isSandbox
-      update_startup_scripts
-    end
+    update_startup_scripts() unless @isSandbox
   end
 
 
