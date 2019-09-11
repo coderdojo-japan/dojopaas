@@ -12,17 +12,17 @@ class SakuraServerUserAgent
   SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, plan:nil, packetfilterid:nil, name:nil, description:nil, 
+  def initialize(zone:0, packetfilterid:nil, name:nil, description:nil, 
                  tags:nil, pubkey:nil, disk:{}, resolve:nil)
     @zone           = zone
-    @plan           = plan
     @packetfilterid = packetfilterid
     @name           = name
     @description    = description
-    @tags           = tags
+    @tags           = tags || ['dojopaas']
     @pubkey         = pubkey
-    @disk           = disk
     @resolve        = resolve
+    @disk           = disk || { Plan:{ID:4}, SizeMB:20480 } #plan is SSD, sizeMB is 20GB
+    @plan           = 1001 # 1core 1Gb memory
     @notes          = [ ID:"112900928939" ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
 
     @client = JSONClient.new
