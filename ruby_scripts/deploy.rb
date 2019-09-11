@@ -30,27 +30,19 @@ class CoderDojoSakuraCLI
 
   def perform_init_params
     if @isSandbox
-      init_production_params()
-    else
-      init_sandbox_params()
+      {
+       zone: "31002", # 石狩第二
+       api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", # 石狩第二
+       packetfilterid: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+      }
+    else 
+      {
+       zone: "29001", # サンドボックス
+       api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
+       packetfilterid: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+      }
     end
   end
-
-  def init_production_params
-    {
-     zone: "31002", # 石狩第二
-     api: "https://secure.sakura.ad.jp/cloud/zone/is1b/api/cloud/1.1/", # 石狩第二
-     packetfilterid: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
-    }
-  end
-  def init_sandbox_params
-    {
-     zone: "29001", # サンドボックス
-     api: "https://secure.sakura.ad.jp/cloud/zone/tk1v/api/cloud/1.1/",
-     packetfilterid: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
-    }
-  end
- 
 end
 
 CoderDojoSakuraCLI.new(ARGV).run()
