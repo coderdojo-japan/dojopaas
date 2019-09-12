@@ -35,12 +35,20 @@ class SakuraServerUserAgent
     @description = params[:description] || @description
     @pubkey      = params[:pubkey] || @pubkey
 
+    puts 'create_server_instance'
     create_server_instance()
+    puts 'create_network_interface'
     create_network_interface()
+    puts 'apply_packet_filter'
     apply_packet_filter()
+    puts 'create_a_disk'
     create_a_disk()
+    puts 'disk_connection'
     disk_connection()
+    puts 'setup_ssh_key'
     setup_ssh_key()
+    server_shutdown()
+    server_start()
   end
 
 
@@ -138,7 +146,7 @@ class SakuraServerUserAgent
   end
 
   def setup_ssh_key(params = nil)
-    put_ssh_key()
+    _put_ssh_key()
     _copying_image()
   end
 
@@ -149,6 +157,14 @@ class SakuraServerUserAgent
 
   def get_archives()
     send_request('get','archive',nil) 
+  end
+
+  def server_start()
+    send_request('put',"server/#{@server_id}/power",nil)
+  end
+
+  def server_shutdown()
+    send_request('delete',"server/#{@server_id}/power",nil)
   end
 
   private
@@ -162,7 +178,7 @@ class SakuraServerUserAgent
     if !@notes.empty?
       body[:SSHKey][:Notes] = @notes
     end
-    send_request('put',"disk/#{@disk['id']}/config",body)
+    send_request('put',"disk/#{@disk[:Plan][:ID]}/config",body)
   end
 
   def _copying_image
