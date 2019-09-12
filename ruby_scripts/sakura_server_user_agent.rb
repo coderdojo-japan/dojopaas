@@ -34,6 +34,7 @@ class SakuraServerUserAgent
     @name        = params[:name] || @name
     @description = params[:description] || @description
     @pubkey      = params[:pubkey] || @pubkey
+    @tags        = ['dojopaas',params[:tag]]
 
     puts 'create_server_instance'
     create_server_instance()
@@ -55,19 +56,20 @@ class SakuraServerUserAgent
   # createとdestroyで独自に引数を取れるようにしておく
 
   #インスタンス作成
-  def create_server_instance(params = nil)
+  def create_server_instance()
+    binding.pry
     puts "Create a server for #{@name}."
     query = {
-      :Server => {
-        :Zone        => @zone,
-        :ServerPlan  => params[:plan] || @plan,
-        :Name        => params[:name] || @name,
-        :Description => params[:Description] || @description,
-        :Tags        => params[:tags] || @tags
+      Server:  {
+        Zone:         @zone,
+        ServerPlan:   {ID:@plan},
+        Name:         @name,
+        Description:  @description,
+        Tags:         @tags
       }
     }
-    response   = send_request('post','server', params)
-    @server_id = response['server']['id']
+    response   = send_request('post','server', query)
+    @server_id = response['Server']['ID']
 
     rescue => exception
       puts exception
@@ -76,14 +78,14 @@ class SakuraServerUserAgent
   #ネットワークインターフェイスの作成
   def create_network_interface(server_id = nil)
     query = {
-      :interface => {
+      :Interface => {
         :Server => {
           :ID => server_id || @server_id
         }
       }
     }
     response      = send_request('post', 'interface', query)
-    @interface_id = response['interface']['id']
+    @interface_id = response['Interface']['ID']
 
     rescue => exception
       puts exception
@@ -93,8 +95,8 @@ class SakuraServerUserAgent
   def connect_network_interface(interfce_id = nil)
     @interface_id ||= interface_id
     response      = send_request('put', "interface/#{interface_id}/to/switch/shared",nil)
-    @server_id    = response['serverId']
-    @interface_id = response['interfaceId']
+    @server_id    = response['ServerID']
+    @interface_id = response['InterfaceID']
 
     rescue => exception
       puts exception
@@ -117,13 +119,13 @@ class SakuraServerUserAgent
       @disk = disk_param
     else
       @disk = {
-        :Zone => { :ID => @zone}, 
-        :Name => @name,
-        :Description => @description
+        Zone: { ID:  @zone}, 
+        Name: @name,
+        Description: @description
       }
     end
-    response    = send_request('post','disk',{:Disk => @disk})
-    @disk[:id]  = response['disk']['id']
+    response    = send_request('post','disk',{Disk: @disk})
+    @disk[:id]  = response['Disk']['ID']
 
     rescue => exception
       puts exception
@@ -171,8 +173,8 @@ class SakuraServerUserAgent
 
   def _put_ssh_key
     body = { 
-      :SSHKey => {
-        :PublicKey => @pubkey
+      SSHKey:  {
+        PublicKey: @pubkey
       }
     }
     if !@notes.empty?
