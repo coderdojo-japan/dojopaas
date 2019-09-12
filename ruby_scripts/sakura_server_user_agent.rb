@@ -30,7 +30,11 @@ class SakuraServerUserAgent
 
   # server.createに対応
   # 引数があると、オブジェクトの状態を変えつつそちらを使う
-  def create(server_params = nil)
+  def create(params)
+    @name        = params[:name] || @name
+    @description = params[:description] || @description
+    @pubkey      = params[:pubkey] || @pubkey
+
     create_server_instance()
     create_network_interface()
   end
@@ -43,7 +47,7 @@ class SakuraServerUserAgent
     puts "Create a server for #{@name}."
     query = {
       :Server => {
-        :Zone        => params[:zone] || @zone,
+        :Zone        => @zone,
         :ServerPlan  => params[:plan] || @plan,
         :Name        => params[:name] || @name,
         :Description => params[:Description] || @description,
@@ -138,6 +142,10 @@ class SakuraServerUserAgent
     body = { Filter: {Tags: @tags.first} }
     send_request('get','server',body) 
   end 
+
+  def get_archives()
+    send_request('get','archive',nil) 
+  end
 
   private
 
