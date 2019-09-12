@@ -37,6 +37,10 @@ class SakuraServerUserAgent
 
     create_server_instance()
     create_network_interface()
+    apply_packet_filter()
+    create_a_disk()
+    disk_connection()
+    setup_ssh_key()
   end
 
 
