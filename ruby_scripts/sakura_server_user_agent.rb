@@ -11,7 +11,7 @@ class SakuraServerUserAgent
   SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
+  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b", archive_id: nil,
                  tags:nil, pubkey:nil, resolve:nil)
     @zone             = zone
     @packet_filter_id = packet_filter_id
@@ -23,6 +23,7 @@ class SakuraServerUserAgent
     @plan             = 1001 # 1core 1Gb memory
     @notes            = [ ID:112900928939 ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
     @sakura_zone_id   = zone_id
+    @archive_id       = archive_id
 
     @isDebug = true
     @client = JSONClient.new
@@ -127,7 +128,7 @@ class SakuraServerUserAgent
 
   # ディスク作成
   def create_a_disk()
-    disk        = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description} #plan is SSD, sizeMB is 20GB
+    disk        = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description, SourceArchive: { ID: @archive_id }} #plan is SSD, sizeMB is 20GB
     response    = send_request('post','disk',{Disk: disk})
     response['Disk']['ID']
 

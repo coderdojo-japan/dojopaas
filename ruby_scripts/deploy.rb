@@ -54,7 +54,7 @@ class CoderDojoSakuraCLI
     CSV.read(INSTANCE_CSV,headers: true).each do |line|
       next if sakura_server_names.include?(line['name']) #すでに登録されているものは飛ばす
       p line['branch']
-      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'], tag:line['branch'])
+      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'], tag:line['branch'], archive_id: archiveid)
       break
     end
 
