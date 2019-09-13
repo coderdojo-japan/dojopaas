@@ -78,15 +78,15 @@ class CoderDojoSakuraCLI
   def perform_init_params
     if @isSandbox
       {
-       zone: "31002", # 石狩第二
-       zone_id: "is1b", # 石狩第二
-       packet_filter_id: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
-      }
-    else 
-      {
        zone: "29001", # サンドボックス
        zone_id: "tk1v",
        packet_filter_id: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+      }
+    else 
+      {
+       zone: "31002", # 石狩第二
+       zone_id: "is1b", # 石狩第二
+       packet_filter_id: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
     end
   end
