@@ -58,6 +58,7 @@ class SakuraServerUserAgent
     puts 'server_shutdown'
     server_shutdown()
 
+    sleep(5)
     puts 'server_start'
     server_start()
   end
@@ -181,7 +182,7 @@ class SakuraServerUserAgent
   end
 
   def _copying_image
-    send_request('put',"server/#{@server_id}/power")
+    send_request('put',"server/#{@server_id}/power",nil)
 
     rescue => exception
       puts exception
