@@ -73,15 +73,30 @@ class SakuraServerUserAgent
     setup_ssh_key(disk_id)
 
     puts 'server_shutdown'
-    server_shutdown()
-
     status = false
     while !status
+     sleep(5)
+     api_status = get_server_power_status()
+     if /down/ !~ api_status['Instance']['Status']
+       status = true
+     end
+     p api_status['Instance']['Status']
+    end
+
+    p '---------------------'
+    puts 'wait_shutdown'
+    status = false
+    counter = 0
+    while !status
+     counter += 1
      sleep(5)
      api_status = get_server_power_status()
      if /down/ =~ api_status['Instance']['Status']
        status = true
      end
+     if counter %5 == 0
+     end
+     p api_status['Instance']['Status']
     end
     puts 'server_start'
     server_start()
