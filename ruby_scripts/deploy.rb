@@ -53,7 +53,9 @@ class CoderDojoSakuraCLI
 
     CSV.read(INSTANCE_CSV,headers: true).each do |line|
       next if sakura_server_names.include?(line['name']) #すでに登録されているものは飛ばす
-      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'])
+      p line['branch']
+      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'], tag:line['branch'])
+      break
     end
 
     result_csv_elements = []
@@ -78,13 +80,13 @@ class CoderDojoSakuraCLI
       {
        zone: "31002", # 石狩第二
        zone_id: "is1b", # 石狩第二
-       packetfilterid: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       packet_filter_id: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
     else 
       {
        zone: "29001", # サンドボックス
        zone_id: "tk1v",
-       packetfilterid: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       packet_filter_id: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
     end
   end
