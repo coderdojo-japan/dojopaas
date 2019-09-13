@@ -20,11 +20,9 @@ class SakuraServerUserAgent
     @tags             = tags || ['dojopaas']
     @pubkey           = pubkey
     @resolve          = resolve
-    @disk             = { Plan:{ID:4}, SizeMB:20480 } #plan is SSD, sizeMB is 20GB
     @plan             = 1001 # 1core 1Gb memory
     @notes            = [ ID:112900928939 ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
     @sakura_zone_id   = zone_id
-    @disk_id          = nil
 
     @isDebug = true
     @client = JSONClient.new
@@ -41,17 +39,26 @@ class SakuraServerUserAgent
 
     puts 'create_server_instance'
     create_server_instance()
+
     puts 'create_network_interface'
     create_network_interface()
+
     puts 'apply_packet_filter'
     apply_packet_filter()
+
     puts 'create_a_disk'
-    create_a_disk()
+    disk_id = create_a_disk()
+
     puts 'disk_connection'
-    disk_connection()
+    disk_connection(disk_id)
+
     puts 'setup_ssh_key'
-    setup_ssh_key()
+    setup_ssh_key(disk_id)
+
+    puts 'server_shutdown'
     server_shutdown()
+
+    puts 'server_start'
     server_start()
   end
 
@@ -85,7 +92,6 @@ class SakuraServerUserAgent
         }
       }
     }
-    binding.pry
     response      = send_request('post', 'interface', query)
     @interface_id = response['Interface']['ID']
 
@@ -97,7 +103,6 @@ class SakuraServerUserAgent
   def connect_network_interface(interfce_id = nil)
     @interface_id ||= interface_id
     response      = send_request('put', "interface/#{interface_id}/to/switch/shared",nil)
-    binding.pry
     @server_id    = response['ServerID']
     @interface_id = response['InterfaceID']
 
@@ -117,20 +122,18 @@ class SakuraServerUserAgent
   end
 
   # ディスク作成
-  def create_a_disk(disk_param = nil)
-    disk_param = {Name: @name, Description: @description}
-    disk_param.merge!(@disk)
-    binding.pry
-    response    = send_request('post','disk',{Disk: disk_param})
-    @disk_id    = response['Disk']['ID']
+  def create_a_disk()
+    disk        = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description} #plan is SSD, sizeMB is 20GB
+    response    = send_request('post','disk',{Disk: disk})
+    response['Disk']['ID']
 
     rescue => exception
       puts exception
       puts 'Can not create a disk.'
   end
 
-  def disk_connection(disk_param = nil)
-    response = send_request('put',"disk/#{@disk_id}/to/server/#{@server_id}",nil)
+  def disk_connection(disk_id)
+    response = send_request('put',"disk/#{disk_id}/to/server/#{@server_id}",nil)
 
     rescue => exception
       puts exception
@@ -141,8 +144,8 @@ class SakuraServerUserAgent
     send_request('put',"note/#{@notes[:ID]}",body)
   end
 
-  def setup_ssh_key(params = nil)
-    _put_ssh_key()
+  def setup_ssh_key(disk_id)
+    _put_ssh_key(disk_id)
     _copying_image()
   end
 
@@ -165,16 +168,16 @@ class SakuraServerUserAgent
 
   private
 
-  def _put_ssh_key
+  def _put_ssh_key(disk_id)
     body = { 
       SSHKey:  {
-        PublicKey: @pubkey
+        PublicKey: [@pubkey]
       }
     }
     if !@notes.empty?
-      body[:SSHKey][:Notes] = @notes
+      body[:Notes] = @notes
     end
-    send_request('put',"disk/#{@disk[:Plan][:ID]}/config",body)
+    send_request('put',"disk/#{disk_id}/config",body)
   end
 
   def _copying_image
