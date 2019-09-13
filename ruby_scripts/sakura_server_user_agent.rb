@@ -95,6 +95,7 @@ class SakuraServerUserAgent
        status = true
      end
      if counter %5 == 0
+       server_shutdown()
      end
      p api_status['Instance']['Status']
     end
@@ -220,11 +221,9 @@ class SakuraServerUserAgent
     body = { 
       SSHKey:  {
         PublicKey: [@pubkey]
-      }
+      },
+      Notes: @notes
     }
-    if !@notes.empty?
-      body[:Notes] = @notes
-    end
     send_request('put',"disk/#{disk_id}/config",body)
   end
 
