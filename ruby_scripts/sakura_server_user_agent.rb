@@ -10,7 +10,7 @@ class SakuraServerUserAgent
   SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b", archive_id: nil,
+  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
                  tags:nil, pubkey:nil, resolve:nil)
     @zone             = zone
     @packet_filter_id = packet_filter_id
@@ -22,10 +22,14 @@ class SakuraServerUserAgent
     @plan             = 1001 # 1core 1Gb memory
     @notes            = [ ID:112900928939 ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
     @sakura_zone_id   = zone_id
-    @archive_id       = archive_id
+    @archive_id       = nil
 
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
+  end
+
+  def archive_id=(aid)
+    @archive_id = aid
   end
 
   # server.createに対応
@@ -50,6 +54,17 @@ class SakuraServerUserAgent
 
     puts 'create_a_disk'
     disk_id = create_a_disk()
+
+    puts 'migrating_disk'
+     
+    disk_availability_flag = false
+    while !disk_availability_flag 
+      disk_satus =  get_disk_status(disk_id)
+      if /migrating/ !~  disk_satus['Disk']['Availability']
+        disk_availability_flag = true
+      end
+      sleep(5)
+    end
 
     puts 'disk_connection'
     disk_connection(disk_id)
@@ -180,6 +195,10 @@ class SakuraServerUserAgent
     send_request('delete',"server/#{@server_id}/power",nil)
   end
 
+  def get_disk_status(disk_id)
+    send_request('get',"disk/#{disk_id}",nil) 
+  end
+
   private
 
   def _put_ssh_key(disk_id)
@@ -219,6 +238,7 @@ class SakuraServerUserAgent
       raise "Can not success"
     end
 
+    #pp response.body
     response.body
   end
 end

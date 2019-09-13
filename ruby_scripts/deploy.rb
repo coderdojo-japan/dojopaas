@@ -40,7 +40,7 @@ class CoderDojoSakuraCLI
 
     #update_startup_scripts() unless @isSandbox
 
-    archiveid = initial_archive_id()
+    @ssua.archive_id = initial_archive_id()
 
     #serverのリストを取得
     puts 'Get a list of existing servers.'
@@ -54,7 +54,7 @@ class CoderDojoSakuraCLI
     CSV.read(INSTANCE_CSV,headers: true).each do |line|
       next if sakura_server_names.include?(line['name']) #すでに登録されているものは飛ばす
       p line['branch']
-      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'], tag:line['branch'], archive_id: archiveid)
+      @ssua.create(name:line['name'], description:line['description'],pubkey:line['pubkey'], tag:line['branch'])
       break
     end
 
