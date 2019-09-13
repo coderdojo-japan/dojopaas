@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 class SakuraServerUserAgent
+  require 'pry'
   require 'jsonclient'
 
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
@@ -10,20 +11,22 @@ class SakuraServerUserAgent
   SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, packetfilterid:nil, name:nil, description:nil, zone_id:"is1b",
-                 tags:nil, pubkey:nil, disk:{}, resolve:nil)
-    @zone           = zone
-    @packetfilterid = packetfilterid
-    @name           = name
-    @description    = description
-    @tags           = tags || ['dojopaas']
-    @pubkey         = pubkey
-    @resolve        = resolve
-    @disk           = disk || { Plan:{ID:4}, SizeMB:20480 } #plan is SSD, sizeMB is 20GB
-    @plan           = 1001 # 1core 1Gb memory
-    @notes          = [ ID:"112900928939" ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
-    @sakura_zone_id = zone_id
+  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
+                 tags:nil, pubkey:nil, resolve:nil)
+    @zone             = zone
+    @packet_filter_id = packet_filter_id
+    @name             = name
+    @description      = description
+    @tags             = tags || ['dojopaas']
+    @pubkey           = pubkey
+    @resolve          = resolve
+    @disk             = { Plan:{ID:4}, SizeMB:20480 } #plan is SSD, sizeMB is 20GB
+    @plan             = 1001 # 1core 1Gb memory
+    @notes            = [ ID:112900928939 ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
+    @sakura_zone_id   = zone_id
+    @disk_id          = nil
 
+    @isDebug = true
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
   end
@@ -57,12 +60,10 @@ class SakuraServerUserAgent
 
   #インスタンス作成
   def create_server_instance()
-    binding.pry
     puts "Create a server for #{@name}."
     query = {
       Server:  {
-        Zone:         @zone,
-        ServerPlan:   {ID:@plan},
+        ServerPlan:   {ID:@plan.to_i},
         Name:         @name,
         Description:  @description,
         Tags:         @tags
@@ -84,6 +85,7 @@ class SakuraServerUserAgent
         }
       }
     }
+    binding.pry
     response      = send_request('post', 'interface', query)
     @interface_id = response['Interface']['ID']
 
@@ -95,6 +97,7 @@ class SakuraServerUserAgent
   def connect_network_interface(interfce_id = nil)
     @interface_id ||= interface_id
     response      = send_request('put', "interface/#{interface_id}/to/switch/shared",nil)
+    binding.pry
     @server_id    = response['ServerID']
     @interface_id = response['InterfaceID']
 
@@ -106,8 +109,8 @@ class SakuraServerUserAgent
   def apply_packet_filter(params = nil)
     @interface_id     ||= params[:interface_id]
     @packet_filter_id ||= params[:packet_filter_id]
-    response      = send_request('put', "interface/#{interface_id}/to/packetfilter/#{@packet_filter_id}",nil)
-    @server_id    = response['serverId']
+    response      = send_request('put', "interface/#{@interface_id}/to/packetfilter/#{@packet_filter_id}",nil)
+    @server_id    = response['Interface']['Server']['ID']
 
     rescue => exception
       puts exception
@@ -115,17 +118,11 @@ class SakuraServerUserAgent
 
   # ディスク作成
   def create_a_disk(disk_param = nil)
-    if @disk.empty?
-      @disk = disk_param
-    else
-      @disk = {
-        Zone: { ID:  @zone}, 
-        Name: @name,
-        Description: @description
-      }
-    end
-    response    = send_request('post','disk',{Disk: @disk})
-    @disk[:id]  = response['Disk']['ID']
+    disk_param = {Name: @name, Description: @description}
+    disk_param.merge!(@disk)
+    binding.pry
+    response    = send_request('post','disk',{Disk: disk_param})
+    @disk_id    = response['Disk']['ID']
 
     rescue => exception
       puts exception
@@ -133,10 +130,7 @@ class SakuraServerUserAgent
   end
 
   def disk_connection(disk_param = nil)
-    if @disk.empty?
-      @disk = disk_param
-    end
-    response = send_request('put',"disk/#{@disk['id']}/to/server/#{@server_id}",nil)
+    response = send_request('put',"disk/#{@disk_id}/to/server/#{@server_id}",nil)
 
     rescue => exception
       puts exception
@@ -198,11 +192,19 @@ class SakuraServerUserAgent
   # 実際に送信する
   def send_request(http_method,path,query)
     endpoint = create_endpoint(path)
-    response = @client.send(http_method,endpoint,:query => query, :follow_redirect => true)
+    response = @client.send(http_method, endpoint, query)
     if response.body.empty?
       raise "Can not send #{http_method} request."
-    else
-      response.body
     end
+    
+    if response.body['is_fatal']
+      pp response.body
+      raise "Can not success"
+    end
+
+    if @isDebug 
+      pp response.body
+    end
+    response.body
   end
 end
