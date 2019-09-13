@@ -43,6 +43,9 @@ class SakuraServerUserAgent
     puts 'create_network_interface'
     create_network_interface()
 
+    puts 'connect_network_interface'
+    connect_network_interface()
+
     puts 'apply_packet_filter'
     apply_packet_filter()
 
@@ -103,9 +106,9 @@ class SakuraServerUserAgent
   #ネットワークインターフェイスの接続
   def connect_network_interface(interfce_id = nil)
     @interface_id ||= interface_id
-    response      = send_request('put', "interface/#{interface_id}/to/switch/shared",nil)
-    @server_id    = response['ServerID']
-    @interface_id = response['InterfaceID']
+    response      = send_request('put', "interface/#{@interface_id}/to/switch/shared",nil)
+    @server_id    = response['Interface']['Server']['ID']
+    @interface_id = response['Interface']['ID']
 
     rescue => exception
       puts exception
