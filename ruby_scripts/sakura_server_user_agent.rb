@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 class SakuraServerUserAgent
-  require 'pry'
   require 'jsonclient'
 
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
@@ -25,7 +24,6 @@ class SakuraServerUserAgent
     @sakura_zone_id   = zone_id
     @archive_id       = archive_id
 
-    @isDebug = true
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
   end
@@ -62,7 +60,14 @@ class SakuraServerUserAgent
     puts 'server_shutdown'
     server_shutdown()
 
-    sleep(5)
+    status = false
+    while !status
+     sleep(5)
+     api_status = get_server_power_status()
+     if /down/ =~ api_status['Instance']['Status']
+       status = true
+     end
+    end
     puts 'server_start'
     server_start()
   end
@@ -159,6 +164,10 @@ class SakuraServerUserAgent
     send_request('get','server',body) 
   end 
 
+  def get_server_power_status
+    send_request('get',"server/#{@server_id}/power",nil)
+  end
+
   def get_archives()
     send_request('get','archive',nil) 
   end
@@ -210,9 +219,6 @@ class SakuraServerUserAgent
       raise "Can not success"
     end
 
-    if @isDebug 
-      pp response.body
-    end
     response.body
   end
 end
