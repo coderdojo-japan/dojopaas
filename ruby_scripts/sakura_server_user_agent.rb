@@ -25,9 +25,9 @@ class SakuraServerUserAgent
 
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
-    @client.connect_timeout = 150
-    @client.send_timeout    = 150
-    @client.receive_timeout = 150
+    @client.connect_timeout = 300
+    @client.send_timeout    = 300
+    @client.receive_timeout = 300
   end
 
   def archive_id=(aid)
@@ -188,7 +188,18 @@ class SakuraServerUserAgent
   end
 
   def setup_ssh_key(disk_id)
+    disk_availability_flag = false
+    while !disk_availability_flag 
+      disk_satus =  get_disk_status(disk_id)
+      if /migrating/ !~  disk_satus['Disk']['Availability']
+        disk_availability_flag = true
+      end
+      sleep(5)
+    end
+
+    sleep(5)
     _put_ssh_key(disk_id)
+
     disk_availability_flag = false
     while !disk_availability_flag 
       disk_satus =  get_disk_status(disk_id)
