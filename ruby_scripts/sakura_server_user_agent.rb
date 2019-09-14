@@ -25,6 +25,9 @@ class SakuraServerUserAgent
 
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
+    @client.connect_timeout = 150
+    @client.send_timeout    = 150
+    @client.receive_timeout = 150
   end
 
   def archive_id=(aid)
