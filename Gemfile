@@ -8,6 +8,7 @@ ruby '~> 2.6'
 
 gem 'httpclient'
 gem 'rake'
+gem 'rspec'
 
 group :development do 
   gem 'pry-byebug'
