@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 class SakuraServerUserAgent
   require 'jsonclient'
-
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
   SAKURA_CLOUD_SUFFIX = 'api/cloud'
   SAKURA_API_VERSION  = '1.1'
@@ -187,6 +186,14 @@ class SakuraServerUserAgent
 
   def setup_ssh_key(disk_id)
     _put_ssh_key(disk_id)
+    disk_availability_flag = false
+    while !disk_availability_flag 
+      disk_satus =  get_disk_status(disk_id)
+      if /migrating/ !~  disk_satus['Disk']['Availability']
+        disk_availability_flag = true
+      end
+      sleep(5)
+    end
     _copying_image()
   end
 
@@ -220,7 +227,7 @@ class SakuraServerUserAgent
   def _put_ssh_key(disk_id)
     body = { 
       SSHKey:  {
-        PublicKey: [@pubkey]
+        PublicKey: @pubkey
       },
       Notes: @notes
     }
@@ -232,6 +239,12 @@ class SakuraServerUserAgent
 
     rescue => exception
       puts exception
+  end
+
+  def remove_instance
+    send_request('delete',"server/#{@server_id}/power", {Force: true}) 
+    sleep(10)
+    send_request('delete',"server/#{@server_id}", {WithDisk: true}) 
   end
 
   # URI(エンドポイント)を作成する
@@ -249,10 +262,10 @@ class SakuraServerUserAgent
     
     if response.body['is_fatal']
       pp response.body
+      remove_instance()
       raise "Can not success"
     end
 
-    #pp response.body
     response.body
   end
 end
