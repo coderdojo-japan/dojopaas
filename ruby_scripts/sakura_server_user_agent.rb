@@ -5,8 +5,8 @@ class SakuraServerUserAgent
   SAKURA_CLOUD_SUFFIX = 'api/cloud'
   SAKURA_API_VERSION  = '1.1'
 
-  SAKURA_TOKEN        = ENV.fetch('SAKURA_TOKEN')
-  SAKURA_TOKEN_SECRET = ENV.fetch('SAKURA_TOKEN_SECRET')
+  SAKURA_TOKEN        = ENV.fetch('SACLOUD_ACCESS_TOKEN')
+  SAKURA_TOKEN_SECRET = ENV.fetch('SACLOUD_ACCESS_TOKEN_SECRET')
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
