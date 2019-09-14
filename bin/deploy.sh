@@ -12,7 +12,7 @@ if [[ "master" != "$TRAVIS_BRANCH" ]]; then
 	exit
 fi
 
-npm run deploy -- --production
+bundle exec ruby ruby_scripts/deploy.rb 
 
 rm -fr .git
 rm -fr .gitignore

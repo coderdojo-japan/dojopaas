@@ -1,11 +1,8 @@
-language: node_js
-node_js:
-  - "7"
-before_script: npm install
-script:
-  # - npm test
-  # - npm run deploy
-  - npm run test:csv
+language: ruby
+before_script: 
+    - gem update --system
+install:
+    - bundle install --jobs=3 --retry=3 --no-deployment
 after_success:
   - bash ./bin/deploy.sh
 env:
