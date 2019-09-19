@@ -18,7 +18,7 @@ class CoderDojoSakuraCLI
   require './ruby_scripts/sakura_server_user_agent.rb'
   require 'csv'
   INSTANCE_CSV = "servers.csv".freeze
-  RESULT_INSTANCE_CSV = "instance.csv".freeze
+  RESULT_INSTANCE_CSV = "instances.csv".freeze
 
   #jsではproductionの方を特別にしていたが、たぶんprodocutionの方を頻繁に叩くので...
   def initialize(argv)
