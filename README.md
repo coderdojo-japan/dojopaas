@@ -77,17 +77,17 @@ xxxx という名前のサーバーの削除をお願いします。
 
 ## よくある質問と回答
 
-Q. サーバーに接続できなくなった場合はどうすればよいですか?   
-A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの再起動依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。cc/%20@yasulab&labels=サーバー再起動依頼&assignee=yasulab)から依頼していただけると管理コンソールから当該サーバーを再起動します。 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
+### Q. サーバーに接続できなくなった場合はどうすればよいですか?
+A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの再起動依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の再起動をお願いします。cc/%20@yasulab&labels=サーバー再起動依頼&assignee=yasulab)から依頼していただけると管理コンソールから当該サーバーを再起動します。 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
-Q. サーバーを初期化したい場合はどうすればよいですか?   
+### Q. サーバーを初期化したい場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。cc/%20@yasulab&labels=サーバー初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
-Q. SSH で接続できなくなりました。どうすればよいですか?   
+### Q. SSH で接続できなくなりました。どうすればよいですか?
 A. CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
 
-Q. サーバーの知識があまりないです。どうすればよいですか?   
-A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、他の細かなテクニックについては当該ドキュメントの[参考文献](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md#参考資料)をご参照ください。
+### Q. サーバーの知識があまりないです。どうすればよいですか?   
+A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
 
 ## サーバーの仕様
 
