@@ -118,12 +118,20 @@ export SACLOUD_ACCESS_TOKEN_SECRET=xxxx
 ### 実行
 
 ```
+$ gem install
+$ bundle exec rake test # 単体のテスト
+$ bundle exec ruby ruby_scripts/deploy.rb # 本番環境でインスタンスを作成
+```
+
+<!--
+```
 $ npm install
 $ npm test # 単体のテスト
 $ npm run test:csv # CSVに対するテスト
 $ npm run deploy # サンドボックスにインスタンスを作成
 $ npm run deploy -- --production # 本番環境でインスタンスを作成
 ```
+-->
 
 ## 関連リンク
 
