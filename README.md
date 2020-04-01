@@ -135,6 +135,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 ## 関連リンク
 
+- [さくらインターネット、子ども向けプログラミング道場「CoderDojo」にサーバー100台を追加支援 〜さくらのクラウド計200台を無料提供〜](https://www.sakura.ad.jp/information/pressreleases/2020/03/25/1968203191/)
 - [子ども向けプログラミング道場を推進する一般社団法人 CoderDojo Japan をさくらインターネットが支援、「さくらのクラウド」を無料提供](https://www.sakura.ad.jp/press/2017/0720_cloud-coderjapan/)
 - [さくらインターネット株式会社様より、全国の #CoderDojo を対象としたサーバー環境 (計100台分) のご支援をしていただくことになりました!](https://www.facebook.com/coderdojo.jp/posts/673793186165170)
 - [さくらのクラウドとGitHub+Travis CIを使ってCoderDojo向けのプルリクドリブンのPaaSサービスを3日で作った！](https://tarosky.co.jp/tarog/2086)
