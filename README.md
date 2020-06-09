@@ -60,49 +60,31 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同でご利用いただいております。
 
-もしサーバーが不要になった場合は、以下の方法でなるべく早くその旨を申請してください。
+もしサーバーが不要になった場合は、[こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの削除依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の削除をお願いします。cc/%20@yasulab&labels=サーバー削除依頼&assignee=yasulab)よりその旨を申請していただけると嬉しいです :relieved: :sparkling_heart:
 
-### 削除申請の方法
+# よくある質問と回答
 
-Pull Requestにて、当該サーバーが記載されている行を削除し、不要になった旨を記述してください。
-
-https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
-プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/38
-
-```
-xxxx という名前のサーバーの削除をお願いします。
-```
-
-# 他、参考情報など
-
-## よくある質問と回答
-
-### Q. サーバーに接続できなくなった場合はどうすればよいですか?
+## Q. サーバーに接続できなくなった場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの再起動依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の再起動をお願いします。cc/%20@yasulab&labels=サーバー再起動依頼&assignee=yasulab)から依頼していただけると管理コンソールから当該サーバーを再起動します。 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
-### Q. サーバーを初期化したい場合はどうすればよいですか?
+## Q. サーバーを初期化したい場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。cc/%20@yasulab&labels=サーバー初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。 **( :warning: 初期化すると IP アドレスが変わるのでご注意ください)**
 
-### Q. SSH で接続できなくなりました。どうすればよいですか?
+## Q. SSH で接続できなくなりました。どうすればよいですか?
 A. CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
 
-### Q. サーバーの知識があまりないです。どうすればよいですか?   
+## Q. サーバーの知識があまりないです。どうすればよいですか?   
 A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
 
-## サーバーの仕様
+## Q. 作成されるサーバーの仕様を教えてください
 
 * OS: Ubuntu 16.04
 * CPU: 1コア
 * メモリ: 1GB
 * HDD: 20GB
-
-## 管理者向けの情報
-
-* リージョンは、石狩第二ゾーンです。
-* 本システムで作成されたすべてのインスタンスには `dojopaas` というタグがついています。他の方法で起動したインスタンスにこのタグを付けないでください。
-* CSVのフォーマットに対してもテストを行っています。赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べる必要があります。
-
-## 貢献方法
+* リージョン: 石狩第二ゾーン
+  
+## Q. 開発に貢献する方法を教えてください
 
 ローカルでテストするには以下の要領でお願いします。
 
@@ -133,7 +115,13 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 ```
 -->
 
-## 関連リンク
+### 開発時の注意事項
+
+* 本システムで作成されたすべてのインスタンスには `dojopaas` というタグをつけ、そのタグを利用しています。他の方法で起動したインスタンスにこのタグを付けないでください
+* CSVのフォーマットに対してもテストを行っています。CI の結果に赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べていただけると幸いです
+
+
+## DojoPaaS 関連記事
 
 - [さくらインターネット、子ども向けプログラミング道場「CoderDojo」にサーバー100台を追加支援 〜さくらのクラウド計200台を無料提供〜](https://www.sakura.ad.jp/information/pressreleases/2020/03/25/1968203191/)
 - [子ども向けプログラミング道場を推進する一般社団法人 CoderDojo Japan をさくらインターネットが支援、「さくらのクラウド」を無料提供](https://www.sakura.ad.jp/press/2017/0720_cloud-coderjapan/)
@@ -142,8 +130,9 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 # 開発・運営
 
-- [@miya0001](https://github.com/miya0001)
-- [@yasulab](https://github.com/yasulab)
+- 共同発起人: [@miya0001](https://github.com/miya0001)
+- 共同発起人: [@yasulab](https://github.com/yasulab)
+- 開発・運営: [YassLab 株式会社](https://yasslab.jp/ja/)
 
-一般社団法人 CoderDojo Japan   
+Copyright &copy; 一般社団法人 CoderDojo Japan   
 https://coderdojo.jp/
