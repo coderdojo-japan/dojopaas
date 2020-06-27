@@ -64,6 +64,12 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 # よくある質問と回答
 
+## Q. サーバーでどんなことができるの?
+A. 例えばマインクラフト用のサーバーを立てることができます！CoderDojo 三島・沼津が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
+
+:octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/coderdojo-mishima-numazu/minecraft)
+  
+
 ## Q. サーバーに接続できなくなった場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの再起動依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の再起動をお願いします。cc/%20@yasulab&labels=サーバー再起動依頼&assignee=yasulab)から依頼していただけると管理コンソールから当該サーバーを再起動します。 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
