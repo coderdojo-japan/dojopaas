@@ -1,0 +1,17 @@
+{
+  "name": "dojopaas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dojopaas.js",
+  "scripts": {
+    "deploy": "node dojopaas.js",
+    "test": "node test/test.js",
+    "test:csv": "node test/test-csv.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "comma-separated-values": "^3.6.4",
+    "sacloud": "0.0.16"
+  }
+}
