@@ -95,7 +95,7 @@ class CoderDojoSakuraCLI
     puts "List of Archive IDs:"
     archives['Archives'].each do |arch|
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
-      puts "- Archive ID: #{arch['ID']}"
+      puts "- Archive ID: #{arch['Name']}"
       if /ubuntu/i =~ arch['Name'] && /16\.04/i =~ arch['Name'] then
         archiveid = arch['ID']
       end
