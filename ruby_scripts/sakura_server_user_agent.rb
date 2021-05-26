@@ -58,9 +58,9 @@ class SakuraServerUserAgent
     disk_id = create_a_disk()
 
     puts 'migrating_disk'
-     
+
     disk_availability_flag = false
-    while !disk_availability_flag 
+    while !disk_availability_flag
       disk_satus =  get_disk_status(disk_id)
       if /migrating/ !~  disk_satus['Disk']['Availability']
         disk_availability_flag = true
@@ -189,7 +189,7 @@ class SakuraServerUserAgent
 
   def setup_ssh_key(disk_id)
     disk_availability_flag = false
-    while !disk_availability_flag 
+    while !disk_availability_flag
       disk_satus =  get_disk_status(disk_id)
       if /migrating/ !~  disk_satus['Disk']['Availability']
         disk_availability_flag = true
@@ -201,7 +201,7 @@ class SakuraServerUserAgent
     _put_ssh_key(disk_id)
 
     disk_availability_flag = false
-    while !disk_availability_flag 
+    while !disk_availability_flag
       disk_satus =  get_disk_status(disk_id)
       if /migrating/ !~  disk_satus['Disk']['Availability']
         disk_availability_flag = true
@@ -213,15 +213,15 @@ class SakuraServerUserAgent
 
   def get_servers()
     body = { Filter: {Tags: @tags.first} }
-    send_request('get','server',body) 
-  end 
+    send_request('get','server',body)
+  end
 
   def get_server_power_status
     send_request('get',"server/#{@server_id}/power",nil)
   end
 
   def get_archives()
-    send_request('get','archive',nil) 
+    send_request('get','archive',nil)
   end
 
   def server_start()
@@ -233,13 +233,13 @@ class SakuraServerUserAgent
   end
 
   def get_disk_status(disk_id)
-    send_request('get',"disk/#{disk_id}",nil) 
+    send_request('get',"disk/#{disk_id}",nil)
   end
 
   private
 
   def _put_ssh_key(disk_id)
-    body = { 
+    body = {
       SSHKey:  {
         PublicKey: @pubkey
       },
@@ -256,9 +256,9 @@ class SakuraServerUserAgent
   end
 
   def remove_instance
-    send_request('delete',"server/#{@server_id}/power", {Force: true}) 
+    send_request('delete',"server/#{@server_id}/power", {Force: true})
     sleep(10)
-    send_request('delete',"server/#{@server_id}", {WithDisk: true}) 
+    send_request('delete',"server/#{@server_id}", {WithDisk: true})
   end
 
   # URI(エンドポイント)を作成する
@@ -273,7 +273,7 @@ class SakuraServerUserAgent
     if response.body.empty?
       raise "Can not send #{http_method} request."
     end
-    
+
     if response.body['is_fatal']
       pp response.body
       remove_instance()

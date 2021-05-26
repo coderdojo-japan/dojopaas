@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 #  # jsのserver.createで使っているフィールドを参考
-#  def initialize(zone:0, plan:nil, packetfilterid:nil, name:nil, description:nil, 
+#  def initialize(zone:0, plan:nil, packetfilterid:nil, name:nil, description:nil,
 #                 tags:nil, pubkey:nil, disk:{}, resolve:nil, notes:nil)
 #    @zone           = zone
 #    @plan           = plan
@@ -14,7 +14,7 @@
 #    @resolve        = resolve
 #    @notes          = notes
 
-class CoderDojoSakuraCLI 
+class CoderDojoSakuraCLI
   require './ruby_scripts/sakura_server_user_agent.rb'
   require 'csv'
   INSTANCE_CSV = "servers.csv".freeze
@@ -80,7 +80,7 @@ class CoderDojoSakuraCLI
        zone_id: "tk1v",
        packet_filter_id: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
       }
-    else 
+    else
       {
        zone: "31002", # 石狩第二
        zone_id: "is1b", # 石狩第二
@@ -109,4 +109,3 @@ class CoderDojoSakuraCLI
 end
 
 CoderDojoSakuraCLI.new(ARGV).run()
-

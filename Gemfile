@@ -10,6 +10,6 @@ gem 'httpclient'
 gem 'rake'
 gem 'rspec'
 
-group :development do 
+group :development do
   gem 'pry-byebug'
 end
