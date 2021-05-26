@@ -93,6 +93,7 @@ class CoderDojoSakuraCLI
     archiveid = nil
     archives = @ssua.get_archives()
     archives['Archives'].each do |arch|
+      # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
       if /ubuntu/i =~ arch['Name'] && /16\.04/i =~ arch['Name'] then
         archiveid = arch['ID']
       end

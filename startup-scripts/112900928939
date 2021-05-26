@@ -2,6 +2,8 @@
 
 # @sacloud-once
 # This script will be executed once when startup.
+# スタートアップスクリプトの仕様が変更する場合もあるので注意。
+# VPSの例: https://vps.sakura.ad.jp/news/startupscripts-end-ubuntu16/
 
 set -ex
 
