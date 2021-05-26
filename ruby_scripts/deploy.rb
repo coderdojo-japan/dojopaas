@@ -96,7 +96,7 @@ class CoderDojoSakuraCLI
     archives['Archives'].each do |arch|
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
       puts "- Name: #{arch['Name']}"
-      if /ubuntu/i =~ arch['Name'] && /16\.04/i =~ arch['Name'] then
+      if /ubuntu/i =~ arch['Name'] && /20\.04/i =~ arch['Name'] then
         archiveid = arch['ID']
       end
     end
