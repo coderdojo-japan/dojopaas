@@ -92,8 +92,10 @@ class CoderDojoSakuraCLI
   def initial_archive_id
     archiveid = nil
     archives = @ssua.get_archives()
+    puts "List of Archive IDs:"
     archives['Archives'].each do |arch|
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
+      puts "- Archive ID: #{arch['ID']}"
       if /ubuntu/i =~ arch['Name'] && /16\.04/i =~ arch['Name'] then
         archiveid = arch['ID']
       end
