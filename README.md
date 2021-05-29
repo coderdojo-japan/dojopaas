@@ -84,7 +84,7 @@ A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハ�
 
 ## Q. 作成されるサーバーの仕様を教えてください
 
-* OS: Ubuntu 16.04
+* OS: Ubuntu 20.04
 * CPU: 1コア
 * メモリ: 1GB
 * HDD: 20GB
