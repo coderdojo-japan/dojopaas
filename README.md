@@ -1,10 +1,10 @@
 # DojoPaaS ~ CoderDojo のためのサーバー利用申請手続き
 
-[![Build Status](https://travis-ci.org/coderdojo-japan/dojopaas.svg?branch=master)](https://travis-ci.org/coderdojo-japan/dojopaas)
+[![Build Status](https://github.com/coderdojo-japan/dojopaas/actions/workflows/test.yml/badge.svg)](https://github.com/coderdojo-japan/dojopaas/actions/workflows/test.yml)
 
 このプロジェクトはさくらインターネット様からご提供いただいた「さくらのクラウド」上の各インスタンス及び、それぞれのサーバーアカウントを管理するためのプロジェクトです。
 
-[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいてTravis CI経由で自動的にサーバーが起動します。
+[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいて[GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions)経由で自動的にサーバーが起動します。
 
 ## 📹 解説動画
 
@@ -134,6 +134,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 - [CoderDojo を楽しむ 〜 DojoPaaS (さくらのオフライン通信)](https://github.com/coderdojo-japan/dojopaas/issues/51#issuecomment-326204848)
 - [さくらインターネット株式会社様より、全国の #CoderDojo を対象としたサーバー環境 (計100台分) のご支援をしていただくことになりました!](https://www.facebook.com/coderdojo.jp/posts/673793186165170)
 - [さくらのクラウドとGitHub+Travis CIを使ってCoderDojo向けのプルリクドリブンのPaaSサービスを3日で作った！](https://tarosky.co.jp/tarog/2086)
+  - :warning: 2021年6月より、Travis CI から GitHub Actions に移行されました 🚜💨
 
 # 開発・運営
 
