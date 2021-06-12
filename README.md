@@ -134,7 +134,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 - [CoderDojo を楽しむ 〜 DojoPaaS (さくらのオフライン通信)](https://github.com/coderdojo-japan/dojopaas/issues/51#issuecomment-326204848)
 - [さくらインターネット株式会社様より、全国の #CoderDojo を対象としたサーバー環境 (計100台分) のご支援をしていただくことになりました!](https://www.facebook.com/coderdojo.jp/posts/673793186165170)
 - [さくらのクラウドとGitHub+Travis CIを使ってCoderDojo向けのプルリクドリブンのPaaSサービスを3日で作った！](https://tarosky.co.jp/tarog/2086)
-  - :warning: 2021年6月より、Travis CI から GitHub Actions に移行されました 🚜💨
+  - :memo: 2021年6月より、Travis CI から GitHub Actions に移行されました 🚜💨
 
 # 開発・運営
 
