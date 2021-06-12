@@ -1,0 +1,21 @@
+name: actions
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - "*"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+      - name: run spec
+        run: bundle exec rake test
