@@ -1,4 +1,4 @@
-name: test
+name: actions
 on:
   push:
     branches:
@@ -19,3 +19,17 @@ jobs:
           bundler-cache: true
       - name: run spec
         run: bundle exec rake test
+  deploy:
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+      - name: deploy
+        run: bash ./bin/deploy.sh
