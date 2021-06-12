@@ -28,7 +28,7 @@ READMEにあるフォームからサーバー初期化の依頼が来たとき�
 3. Statusが `up` なので `/sacloud halt 112900984832` でサーバーを停止させる
 4. `/sacloud destroy 112900984832` で当該サーバーを削除する
 5. coderdojo-japan/dojopaas リポジトリに[空コミット](https://github.com/coderdojo-japan/dojopaas/commit/854418bb09e7d30ef5e62418f7f07da4855c3674)をする
-6. [CIが無事に動作](https://travis-ci.org/coderdojo-japan/dojopaas/builds/315086462)すれば、削除したサーバーが再生成 (初期化) されます
+6. CI ([GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions))が無事に動作すると、削除したサーバーが再生成 (初期化) されます
 
 > ...   
 > Update startup scripts.   
