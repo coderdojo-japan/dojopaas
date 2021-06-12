@@ -1,13 +1,13 @@
-name: actions
+name: deploy
 on:
   push:
     branches:
       - master
 jobs:
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      needs: test
       - uses: actions/checkout@v2
         with:
           fetch-depth: 1
