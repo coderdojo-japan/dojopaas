@@ -19,6 +19,7 @@ jobs:
           bundler-cache: true
       - name: run spec
         run: bundle exec rake test
+
   deploy:
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
     needs: test
