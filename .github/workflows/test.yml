@@ -15,8 +15,8 @@ jobs:
           fetch-depth: 1
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
           bundler-cache: true
+          #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
       - name: run spec
         run: bundle exec rake test
 
