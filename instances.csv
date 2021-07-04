@@ -1,0 +1,67 @@
+Name,IP Address,Description
+coderdojo-hommachi,133.242.237.100,CoderDojo本町用のサーバーです。
+coderdojo-akita,133.242.229.124,CoderDojo秋田用のサーバーです。
+coderdojo-kadena,133.242.237.68,CoderDojo嘉手納用のサーバーです。
+coderdojo-japan,153.127.216.63,CoderDojo Japan用のサーバーです。主にcoderdojo.jpやDojoCastのウェブサーバーとして使います。
+coderdojo-funabashi,153.127.216.16,CoderDojo船橋＠凛堂舎用のサーバーです。公式Webページを運営します。
+coderdojo-nagatsuta,133.242.231.67,CoderDojo長津田用のサーバーです。ニンジャの開発用Webサーバとして利用します。
+coderdojo-chofu,133.242.228.45,CoderDojo調布用のサーバーです。
+coderdojo-takatsuki,153.127.193.216,CoderDojo高槻用のサーバーです。忍者の開発環境として利用します。
+coderdojo-tempaku,133.242.237.226,CoderDojo天白のサーバーです。
+dojocon2017,133.242.238.55,DojoCon Japan 2017
+coderdojo-kodaira,133.242.231.121,CoderDojo小平用のサーバーです。参加申込・備品データの管理システム、Dojo内開発環境等の運用に使います。
+coderdojo-wakayama,153.127.200.216,CoderDojo和歌山用のサーバーです。
+coderdojo-fujisawa,153.120.171.128,CoderDojo藤沢用のサーバーです。
+coderdojo-ginowan,133.242.236.236,CoderDojo宜野湾用のサーバーです。DojoのWebサイト環境及びニンジャの開発環境として活用します。
+coderdojo-okinawa,153.127.196.43,CoderDojo沖縄用のサーバです。WordpressをインストールしてWebサイトとして活用します。
+coderdojo-fukuoka,153.120.171.70,CoderDojo福岡用のサーバーです。DojoのWebサイト及びNinjaの開発環境として活用します。
+coderdojo-minoh,133.242.237.179,CoderDojo箕面用のサーバーです。
+coderdojo-umeda-nishinomiya,153.125.129.106,CoderDojo梅田/CoderDojo西宮用のサーバーです。
+coderdojo-hirakata,133.242.238.190,CoderDojo枚方のサーバです。
+coderdojo-nada,153.125.129.223,CoderDojo Nadaのサーバです。
+coderdojo-sennan,153.127.196.10,CoderDojo泉南のサーバーです。WordpressをインストールしてWebサイトとして使います。
+coderdojo-nagaokakyo,153.127.193.169,CoderDojo長岡京のサーバーです。
+coderdojo-kashii,133.242.237.34,CoderDojo香椎のサーバーです。
+coderdojo-kashiwa,153.127.196.243,CoderDojo柏のサーバーです。Ninja向けのWebサービス「OnlineDojo」の運用に使用します。
+coderdojo-aizu,153.127.198.12,CoderDojo会津用のサーバーです。マイクラ用のサーバーとして活用します。
+coderdojo-inagawa,133.242.227.201,CoderDojo猪名川用のサーバーです。
+coderdojo-shinagawa-gotenyama,153.120.168.82,CoderDojo品川御殿山のサーバーです。
+coderdojo-urasoe,153.120.167.142,CoderDojo浦添用のサーバーです。DojoのWebサイト環境及びニンジャの開発環境として活用します。
+coderdojo-nago,153.127.219.132,CoderDojo名護用のサーバーです。DojoのWebサイトとして活用します。
+coderdojo-toyonaka,153.125.128.121,CoderDojo豊中用のサーバーです。
+coderdojo-koza,153.120.170.91,CoderDojoコザ用のサーバーです。
+coderdojo-matsumoto,153.125.131.12,CoderDojo松本用のサーバーです。
+coderdojo-ofuna,153.120.166.9,CoderDojo大船用のサーバーです。
+coderdojo-nishihara,153.127.194.18,CoderDojo西原用のサーバーです。
+coderdojo-suita,133.242.230.53,CoderDojo吹田用のサーバーです。マイクラ用のサーバーとして使います。
+coderdojo-todakoen,153.120.170.166,CoderDojo戸田公園用のサーバーです。
+coderdojo-itabashi,133.242.237.195,CoderDojo板橋用のサーバーです。
+coderdojo-kamoi,133.242.236.188,CoderDojo鴨居用のサーバーです。
+coderdojo-sannomaru,153.127.194.186,coderdojo三の丸用のサーバです。ホームページに使います。
+coderdojo-ikebukuro,133.242.232.24,CoderDojo池袋用のサーバーです。
+coderdojo-kuji,153.120.166.237,CoderDojo久地用のサーバーです。
+coderdojo-nara-ikoma,133.242.233.135,CoderDojo奈良/CoderDojo生駒用の共有サーバーです。
+coderdojo-ueda,133.242.230.46,CoderDojo上田用のサーバーです。
+coderdojo-tachikawa,133.242.225.106,CoderDojo立川用のサーバーです。
+coderdojo-naha,133.242.230.237,CoderDojo那覇用のサーバーです。
+coderdojo-nisshin,153.125.128.130,CoderDojo日進用のサーバーです。
+coderdojo-kofu,153.127.196.196,CoderDojo甲府用のサーバーです。WordpressをインストールしてWebサイトとして活用します。
+coderdojo-inazawa-shomeiji,133.242.229.174,CoderDojo稲沢正明寺のサーバーです。
+coderdojo-mishima-numazu,153.127.193.129,CoderDojo三島沼津用のサーバーです。
+coderdojo-shizuoka,153.127.202.217,CoderDojo静岡用のサーバーです。Ninjaの開発環境として活用します。
+coderdojo-kurashiki,153.127.199.142,CoderDojo倉敷のサーバーです。マインクラフトのサーバーに使います。
+coderdojo-sapporo-east,153.127.197.155,CoderDojo札幌東のサーバーです。マインクラフト用サーバーとして活用します。
+coderdojo-seto,153.127.195.11,CoderDojo瀬戸のサーバーです
+coderdojo-mizuho,153.120.170.128,CoderDojo瑞穂のサーバーです
+dojocon2020,153.120.166.77, DojoConJapan2020用のサーバーです。
+coderdojo-gifu,133.242.226.55,CoderDojo岐阜のサーバーです。マインクラフトサーバーに使わせていただく予定です。
+coderdojo-konan-okayama,133.242.236.148,CoderDojo 岡南 用のサーバーです。ニンジャの作品などのテスト実行環境、運営上のシステムなどに使用します。
+coderdojo-ishigaki,153.125.131.106,CoderDojo石垣用のサーバーです。
+coderdojo-inuyama,153.125.130.19,CoderDojo犬山のサーバーです。
+coderdojo-eniwa,153.120.171.50,CoderDojo恵庭のサーバーです。DojoのWebサイトとして利用します
+coderdojo-matsuyama,153.125.131.53,CoderDojo松山のサーバです。
+coderdojo-higashi-sumiyoshi,153.120.168.231,CoderDojo東住吉用サーバーです。
+coderdojo-kurume,153.120.171.76,CoderDojo久留米用のサーバです。
+coderdojo-kichijoji,133.242.227.190,CoderDojo吉祥寺のサーバーです。
+shishi-test,153.125.148.163,test by shsihi
+coderdojo-iyo,133.242.233.181,CoderDojo伊予のサーバーです。
