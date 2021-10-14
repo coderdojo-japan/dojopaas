@@ -90,6 +90,9 @@ A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハ�
 * HDD: 20GB
 * リージョン: 石狩第二ゾーン
   
+## Q. `ooo.coderdojo.jp` のようなサブドメインは使えますか?
+A. 以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNSの更新・管理のコストが肥大化し他の業務に支障が出てしまったため、現在は [DecaDojo](https://decadojo.coderdojo.jp/) や [DojoCon Japan](https://dojocon2020.coderdojo.jp/) などのケースを除いて、サブドメインの提供には対応しておりません。なお、更新・管理コストの肥大化が原因であるため、DojoPaaS のような自動化が DNS でも実現できれば、受付を再開できる可能性があります。
+
 ## Q. 開発に貢献する方法を教えてください
 
 ローカルでテストするには以下の要領でお願いします。
