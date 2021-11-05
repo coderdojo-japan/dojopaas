@@ -32,7 +32,7 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 公開鍵のサンプル: https://github.com/miya0001.keys
 
-秘密鍵と公開鍵を絶対に間違えないようにお願いします。`git push`する前によーく確認してください。
+**秘密鍵と公開鍵を間違えない** ようお願いします！ `git push`する前によーくご確認ください。
 
 ## 2. SSHの接続方法
 
@@ -58,9 +58,13 @@ $ ssh -i <path-to-publickey> ubuntu@<ip-address>
 
 ## 3. サーバーが不要になったとき
 
-さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同でご利用いただいております。
+さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から削除することでサーバーの使用を停止できます。
 
-もしサーバーが不要になった場合は、[こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの削除依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の削除をお願いします。cc/%20@yasulab&labels=サーバー削除依頼&assignee=yasulab)よりその旨を申請していただけると嬉しいです :relieved: :sparkling_heart:
+- :octocat: [サーバー削除依頼の申請例 (#195)](https://github.com/coderdojo-japan/dojopaas/pull/195)
+
+もし削除の手続きが分からない場合は、下記フォームから削除依頼を申請することもできます。もし削除の手続きが分からない場合はお気軽に下記フォームをご利用ください :relieved: :sparkling_heart:
+
+- :postbox: [サーバー削除依頼の申請フォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの削除依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の削除をお願いします。cc/%20@yasulab&labels=サーバー削除依頼&assignee=yasulab)
 
 # よくある質問と回答
 
