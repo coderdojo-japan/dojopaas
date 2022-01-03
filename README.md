@@ -49,7 +49,7 @@ $ ssh ubuntu@<ip-address>
 または
 
 ```
-$ ssh -i <path-to-publickey> ubuntu@<ip-address>
+$ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 ```
 
 * ユーザー名はすべて `ubuntu` です。
