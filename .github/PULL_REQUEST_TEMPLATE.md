@@ -22,4 +22,5 @@ CoderDojo `ooo` (代表: `ooo`) は、以下の各項目に同意した上で、
 4. さくらインターネットのバナー画像または文言を、当該 CoderDojo の公式Webサイトに掲載します
    - バナー画像を使用する際は、[さくらインターネットのブランドアセット](https://www.sakura.ad.jp/brand-assets/)のガイドラインに従います
 5. さくらインターネットから活動実績報告のお願いが来た際、可能な範囲で協力します
-6. CoderDojo のために使い、他の用途で使う場合は一般社団法人 CoderDojo Japan からの書面による許諾を事前に得ます
+6. 利用する CoderDojo は、[coderdojo.jp](https://coderdojo.jp/#dojos) に掲載されていることを確認しました
+7. 提供されたサーバーは CoderDojo のために使い、他の用途で使う場合は、一般社団法人 CoderDojo Japan からの書面による許諾を事前に得ます
