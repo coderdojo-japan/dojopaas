@@ -71,7 +71,7 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 ## Q. サーバーでどんなことができるの?
 A. 例えばマインクラフト用のサーバーを立てることができます！[CoderDojo 三島・沼津](https://coderdojo-mn.com/)が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
 
-:octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/coderdojo-mishima-numazu/minecraft)
+:octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/urushibata/minecraft)
   
 
 ## Q. サーバーに接続できなくなった場合はどうすればよいですか?
