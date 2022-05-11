@@ -58,9 +58,8 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 ## 3. サーバーが不要になったとき
 
-さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から削除することでサーバーの使用を停止できます。
+さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、 **申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から削除** することでサーバーの使用を停止できます。
 
-- :octocat: [サーバー削除の申請例 (#195)](https://github.com/coderdojo-japan/dojopaas/pull/195)
 - :octocat: [サーバー削除の申請例 (#213)](https://github.com/coderdojo-japan/dojopaas/pull/213)  
 
 <!--
