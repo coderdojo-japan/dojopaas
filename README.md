@@ -77,8 +77,10 @@ A. 例えばマインクラフト用のサーバーを立てることができ�
 :octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/urushibata/minecraft)
   
 
+<!--
 ## Q. サーバーに接続できなくなった場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの再起動依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の再起動をお願いします。cc/%20@yasulab&labels=サーバー再起動依頼&assignee=yasulab)から依頼していただけると管理コンソールから当該サーバーを再起動します。 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
+-->
 
 ## Q. サーバーを初期化したい場合はどうすればよいですか?
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。cc/%20@yasulab&labels=サーバー初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。 **( :warning: 初期化すると IP アドレスが変わるのでご注意ください)**
