@@ -2,7 +2,7 @@
 
 set -e
 
-bundle exec ruby ruby_scripts/deploy.rb 
+bundle exec ruby scripts/deploy.rb 
 
 git config user.name "Github Actions"
 git config user.email "noreply@yasslab.jp"

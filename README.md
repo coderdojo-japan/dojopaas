@@ -115,7 +115,7 @@ export SACLOUD_ACCESS_TOKEN_SECRET=xxxx
 ```
 $ gem install
 $ bundle exec rake test # 単体のテスト
-$ bundle exec ruby ruby_scripts/deploy.rb # 本番環境でインスタンスを作成
+$ bundle exec ruby scripts/deploy.rb # 本番環境でインスタンスを作成
 ```
 
 <!--
