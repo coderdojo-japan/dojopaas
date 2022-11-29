@@ -15,7 +15,7 @@
 #    @notes          = notes
 
 class CoderDojoSakuraCLI
-  require './ruby_scripts/sakura_server_user_agent.rb'
+  require './scripts/sakura_server_user_agent.rb'
   require 'csv'
   INSTANCE_CSV = "servers.csv".freeze
   RESULT_INSTANCE_CSV = "instances.csv".freeze
