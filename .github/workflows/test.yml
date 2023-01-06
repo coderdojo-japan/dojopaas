@@ -14,9 +14,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 2
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
@@ -29,15 +29,15 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 2
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
           bundler-cache: true
+          #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
       - name: deploy
         run: bash ./bin/deploy.sh
         env:
-          SACLOUD_ACCESS_TOKEN: ${{ secrets.SACLOUD_ACCESS_TOKEN }}
+          SACLOUD_ACCESS_TOKEN:        ${{ secrets.SACLOUD_ACCESS_TOKEN }}
           SACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SACLOUD_ACCESS_TOKEN_SECRET }}
