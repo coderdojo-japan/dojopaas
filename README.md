@@ -147,7 +147,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 - 共同発起人: [@miya0001](https://github.com/miya0001)
 - 共同発起人: [@yasulab](https://github.com/yasulab)
-- 開発・運営: [YassLab 株式会社](https://yasslab.jp/ja/)
+- 開発・運営: [@YassLab](https://github.com/YassLab)
 
 Copyright &copy; 一般社団法人 CoderDojo Japan   
 https://coderdojo.jp/
