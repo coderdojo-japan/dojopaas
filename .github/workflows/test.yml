@@ -21,7 +21,7 @@ jobs:
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
-      - name: run spec
+      - name: Run bundle exec rake test
         run: bundle exec rake test
 
   deploy:
