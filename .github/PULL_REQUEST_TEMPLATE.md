@@ -7,7 +7,7 @@
 
 ## 「さくらのクラウド」および「DojoPaaS」の利用同意書
 
-CoderDojo `ooo` (担当者: `ooo`) は、以下の各項目に同意した上で、さくらインターネットから提供されるサーバーを利用します。
+CoderDojo `ooo` (代表: `ooo`) は、以下の各項目に同意した上で、さくらインターネットから提供されるサーバーを利用します。
 
 1. さくらインターネットの[基本約款](https://www.sakura.ad.jp/agreement/[a]yakkan0_kihon.pdf)の内容を承諾します
 2. [さくらのクラウドサービス約款](https://www.sakura.ad.jp/agreement/[a]yakkan_cloud.pdf)の内容を承諾します
