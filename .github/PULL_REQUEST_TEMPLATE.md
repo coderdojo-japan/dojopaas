@@ -17,7 +17,7 @@ CoderDojo `ooo` (代表: `ooo`) は、以下の各項目に同意した上で、
    - ディスク: 20GB
 4. さくらインターネットのバナー画像または文言を、当該 CoderDojo の公式Webサイトに掲載します
    - バナー画像を使用する際は、[さくらインターネットのブランドアセット](https://www.sakura.ad.jp/brand-assets/)のガイドラインに従います
-5. さくらインターネットから活動実績報告のお願いが来た際、可能な範囲で協力します
+5. [さくらインターネット × CoderDojo](https://www.facebook.com/groups/sakura.coderdojo/) の合同グループに参加し、活動実績報告などのお願いが来た際、可能な範囲で協力します
 6. 利用する CoderDojo は、[coderdojo.jp](https://coderdojo.jp/#dojos) に掲載されていることを確認しました
 7. さくらインターネットまたは CoderDojo Japan の都合により、事前の通達を持って、サーバーの提供が中止になる可能性があることを承諾します
 8. 提供されたサーバーは CoderDojo のために使い、他の用途で使う場合は、一般社団法人 CoderDojo Japan からの書面による許諾を事前に得ます
