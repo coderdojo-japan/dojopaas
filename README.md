@@ -6,9 +6,16 @@
 
 [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいて[GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions)経由で自動的にサーバーが起動します。
 
-## 📹 解説動画
+**本システムの背景と概要、および活用例などについては以下の SAKURA internet のレポート記事・動画からご確認いただけます。**
 
-サーバーを申請する準備から利用申請・削除までの手順を解説する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
+- [📜 さくらのナレッジ - 子どものためのプログラミング道場を支えるさくらのクラウド 〜「さくらの夕べ CoderDojoナイト」レポート〜](https://knowledge.sakura.ad.jp/42930/)
+- [:tv: さくらの夕べ CoderDojo ナイト - YouTube 再生リスト](https://www.youtube.com/playlist?list=PL94GDfaSQTmLwp4aaWmu4dosjzIOcdcds)
+
+<br>
+
+## 📹 DojoPaaS の使い方
+
+サーバーを申請する準備から利用申請・削除までの手順を説明する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
 
 [![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
 
