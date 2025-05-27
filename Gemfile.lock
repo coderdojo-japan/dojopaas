@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    csv (3.3.4)
     diff-lcs (1.6.2)
     httpclient (2.9.0)
       mutex_m
@@ -24,6 +25,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  csv
   httpclient
   rake
   rspec
