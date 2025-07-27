@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 class SakuraServerUserAgent
   require 'jsonclient'
+  require 'base64'
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
   SAKURA_CLOUD_SUFFIX = 'api/cloud'
   SAKURA_API_VERSION  = '1.1'
@@ -19,7 +20,10 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
-    @notes            = [ { ID: 112900928939 } ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
+    # スタートアップスクリプトID: 112900928939 が404エラーになるため一時的に無効化
+    # 本番環境の正しいIDを確認する必要あり
+    # スクリプト内容: iptables設定、SSH強化、Ansible導入
+    @notes            = []
     @sakura_zone_id   = zone_id
     @archive_id       = nil
 
@@ -166,8 +170,25 @@ class SakuraServerUserAgent
 
   # ディスク作成
   def create_a_disk()
-    disk        = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description, SourceArchive: { ID: @archive_id }} #plan is SSD, sizeMB is 20GB
-    response    = send_request('post','disk',{Disk: disk})
+    disk = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description, SourceArchive: { ID: @archive_id }} #plan is SSD, sizeMB is 20GB
+    
+    # cloud-init用のスタートアップスクリプトを読み込む
+    startup_script_path = './startup-scripts/112900928939'
+    if File.exist?(startup_script_path)
+      startup_script_content = File.read(startup_script_path)
+      
+      # cloud-init設定
+      config = {
+        UserData: Base64.strict_encode64(startup_script_content),
+        SSHKeys: [ @pubkey ]
+      }
+      
+      response = send_request('post','disk',{Disk: disk, Config: config})
+    else
+      puts "Warning: Startup script not found at #{startup_script_path}"
+      response = send_request('post','disk',{Disk: disk})
+    end
+    
     response['Disk']['ID']
 
     rescue => exception
@@ -188,6 +209,8 @@ class SakuraServerUserAgent
   end
 
   def setup_ssh_key(disk_id)
+    # cloud-init版では、SSH鍵はディスク作成時に設定済みなので
+    # ディスクのマイグレーションが完了するのを待つだけ
     disk_availability_flag = false
     while !disk_availability_flag
       disk_satus =  get_disk_status(disk_id)
@@ -196,18 +219,8 @@ class SakuraServerUserAgent
       end
       sleep(5)
     end
-
-    sleep(5)
-    _put_ssh_key(disk_id)
-
-    disk_availability_flag = false
-    while !disk_availability_flag
-      disk_satus =  get_disk_status(disk_id)
-      if /migrating/ !~  disk_satus['Disk']['Availability']
-        disk_availability_flag = true
-      end
-      sleep(5)
-    end
+    
+    # サーバーを起動
     _copying_image()
   end
 
