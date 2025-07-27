@@ -97,7 +97,7 @@ class CoderDojoSakuraCLI
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
       # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
       puts "- Name: #{arch['Name']}"
-      if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !/cloudimg/i =~ arch['Name'] then
+      if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name']) then
         archiveid = arch['ID']
       end
     end
