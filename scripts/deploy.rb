@@ -36,7 +36,7 @@ class CoderDojoSakuraCLI
 
   def run()
     request_params = perform_init_params()
-    @ssua = SakuraServerUserAgent.new(request_params)
+    @ssua = SakuraServerUserAgent.new(**request_params)
 
     #update_startup_scripts() unless @isSandbox
 
