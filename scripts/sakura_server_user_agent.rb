@@ -19,7 +19,7 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
-    @notes            = { ID: 112900928939 }  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
+    @notes            = [ { ID: 112900928939 } ]  # See https://secure.sakura.ad.jp/cloud/iaas/#!/pref/script/.
     @sakura_zone_id   = zone_id
     @archive_id       = nil
 
@@ -184,7 +184,7 @@ class SakuraServerUserAgent
 
   def update_startup_scripts(text)
     body = {Note:{Content:text}}
-    send_request('put',"note/#{@notes[:ID]}",body)
+    send_request('put',"note/#{@notes.first[:ID]}",body)
   end
 
   def setup_ssh_key(disk_id)
