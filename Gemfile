@@ -7,3 +7,4 @@ gem 'rspec'
 
 # Add bundled gems to fix errors/warnings
 gem 'csv'
+gem 'base64'

@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    base64 (0.3.0)
     csv (3.3.4)
     diff-lcs (1.6.2)
     httpclient (2.9.0)
@@ -25,6 +26,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  base64
   csv
   httpclient
   rake
