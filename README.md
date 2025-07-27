@@ -100,7 +100,7 @@ A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハ�
 
 ## Q. 作成されるサーバーの仕様を教えてください
 
-* OS: [Ubuntu 20.04 (LTS)](https://wiki.ubuntu.com/FocalFossa/ReleaseNotes/Ja#:~:text=2025年4月%20まで5年間サポート)
+* OS: [Ubuntu 24.04.2 (LTS)](https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html)
 * CPU: 1コア
 * メモリ: 1GB
 * HDD: 20GB
