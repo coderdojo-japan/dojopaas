@@ -8,6 +8,10 @@ class SakuraServerUserAgent
 
   SAKURA_TOKEN        = ENV.fetch('SACLOUD_ACCESS_TOKEN')
   SAKURA_TOKEN_SECRET = ENV.fetch('SACLOUD_ACCESS_TOKEN_SECRET')
+  
+  # ディスク状態確認用の定数
+  DISK_CHECK_INTERVAL = 10  # 秒
+  MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
@@ -156,7 +160,7 @@ class SakuraServerUserAgent
   end
 
   #ネットワークインターフェイスの接続
-  def connect_network_interface(interfce_id = nil)
+  def connect_network_interface(interface_id = nil)
     @interface_id ||= interface_id
     response      = send_request('put', "interface/#{@interface_id}/to/switch/shared",nil)
     @server_id    = response['Interface']['Server']['ID']
@@ -220,8 +224,6 @@ class SakuraServerUserAgent
   def setup_ssh_key(disk_id)
     # cloud-init版では、SSH鍵はディスク作成時に設定済みなので
     # ディスクが完全に利用可能になるまで待機
-    DISK_CHECK_INTERVAL = 10  # 秒
-    MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
     attempts = 0
     
     puts "DEBUG: Waiting for disk to become available..."
