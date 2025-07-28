@@ -46,6 +46,10 @@ class SakuraServerUserAgent
     @pubkey      = params[:pubkey] || @pubkey
     @tags        = ['dojopaas',params[:tag]]
 
+    puts "DEBUG: Creating server with name: #{@name}, description: #{@description}"
+    puts "DEBUG: Tags: #{@tags.inspect}"
+    puts "DEBUG: Public key: #{@pubkey[0..50]}..." if @pubkey
+
     puts 'create_server_instance'
     create_server_instance()
 
@@ -117,12 +121,17 @@ class SakuraServerUserAgent
     puts "Create a server for #{@name}."
     query = {
       Server:  {
-        ServerPlan:   {ID:@plan.to_i},
+        ServerPlan:   {
+          CPU: 1,
+          MemoryMB: 1024,
+          Generation: 100
+        },
         Name:         @name,
         Description:  @description,
         Tags:         @tags
       }
     }
+    puts "DEBUG: Server creation request: #{query.inspect}"
     response   = send_request('post','server', query)
     @server_id = response['Server']['ID']
 
@@ -269,9 +278,21 @@ class SakuraServerUserAgent
   end
 
   def remove_instance
-    send_request('delete',"server/#{@server_id}/power", {Force: true})
-    sleep(10)
-    send_request('delete',"server/#{@server_id}", {WithDisk: true})
+    # 自動削除は行わず、手動削除を促す
+    puts "\n" + "="*60
+    puts "ERROR: サーバー作成中にエラーが発生しました"
+    if @server_id
+      puts "部分的に作成されたサーバーがある可能性があります:"
+      puts "  Server ID: #{@server_id}"
+      puts "  Server Name: #{@name}"
+      puts ""
+      puts "手動で確認・削除してください:"
+      puts "  1. さくらのクラウドコントロールパネルで確認"
+      puts "  2. 必要に応じて手動で削除"
+    else
+      puts "サーバーは作成されていません（IDが設定されていません）"
+    end
+    puts "="*60 + "\n"
   end
 
   # URI(エンドポイント)を作成する
@@ -282,14 +303,17 @@ class SakuraServerUserAgent
   # 実際に送信する
   def send_request(http_method,path,query)
     endpoint = create_endpoint(path)
+    puts "DEBUG: #{http_method.upcase} #{endpoint}"
+    puts "DEBUG: Request body: #{query.inspect}" if query
     response = @client.send(http_method, endpoint, query)
     if response.body.empty?
       raise "Can not send #{http_method} request."
     end
 
     if response.body['is_fatal']
+      puts "DEBUG: Error at endpoint: #{endpoint}"
       pp response.body
-      remove_instance()
+      remove_instance()  # 削除はせず、手動削除の案内のみ表示
       raise "Can not success"
     end
 
