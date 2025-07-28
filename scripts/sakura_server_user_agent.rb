@@ -219,14 +219,37 @@ class SakuraServerUserAgent
 
   def setup_ssh_key(disk_id)
     # cloud-init版では、SSH鍵はディスク作成時に設定済みなので
-    # ディスクのマイグレーションが完了するのを待つだけ
-    disk_availability_flag = false
-    while !disk_availability_flag
-      disk_satus =  get_disk_status(disk_id)
-      if /migrating/ !~  disk_satus['Disk']['Availability']
-        disk_availability_flag = true
+    # ディスクが完全に利用可能になるまで待機
+    DISK_CHECK_INTERVAL = 10  # 秒
+    MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
+    attempts = 0
+    
+    puts "DEBUG: Waiting for disk to become available..."
+    
+    while attempts < MAX_ATTEMPTS
+      disk_status = get_disk_status(disk_id)
+      availability = disk_status['Disk']['Availability']
+      
+      puts "DEBUG: Disk availability: #{availability} (attempt #{attempts + 1}/#{MAX_ATTEMPTS})"
+      
+      case availability
+      when 'available'
+        puts "Disk is ready!"
+        break
+      when 'failed'
+        raise "Disk creation failed with status: #{availability}"
+      when 'migrating', 'creating', 'copying'
+        # まだ処理中なので待機
+      else
+        puts "DEBUG: Unknown disk availability status: #{availability}"
       end
-      sleep(5)
+      
+      attempts += 1
+      sleep(DISK_CHECK_INTERVAL)
+    end
+    
+    if attempts >= MAX_ATTEMPTS
+      raise "Timeout waiting for disk to become available (waited #{MAX_ATTEMPTS * DISK_CHECK_INTERVAL} seconds)"
     end
     
     # サーバーを起動
