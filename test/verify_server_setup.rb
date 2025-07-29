@@ -6,6 +6,9 @@
 require 'dotenv/load'
 require 'open3'
 require 'json'
+require_relative 'smart_wait_helper'
+
+include SmartWaitHelper
 
 if ARGV.empty?
   puts "使い方: ruby #{$0} <IPアドレス>"
@@ -22,16 +25,28 @@ puts "対象サーバー: #{username}@#{ip_address}"
 puts "========================================"
 puts ""
 
-# SSH接続テスト
-print "1. SSH接続テスト... "
-stdout, stderr, status = Open3.capture3("ssh", "-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no", 
-                                       "#{username}@#{ip_address}", "echo 'OK'")
-if status.success? && stdout.strip == 'OK'
-  puts "✅ 成功"
-else
-  puts "❌ 失敗"
-  puts "エラー: #{stderr}"
-  puts "サーバーがまだ起動中の可能性があります。数分待ってから再度お試しください。"
+# SSH接続テスト（スマートウェイト付き）
+puts "1. SSH接続テスト..."
+
+begin
+  result = wait_for_resource("SSH connection", -> {
+    stdout, stderr, status = Open3.capture3(
+      "ssh", "-o", "ConnectTimeout=5", "-o", "StrictHostKeyChecking=no",
+      "-o", "BatchMode=yes", "#{username}@#{ip_address}", "echo 'OK'"
+    )
+    
+    {
+      state: status.success? ? "connected" : "waiting",
+      ready: status.success? && stdout.strip == 'OK',
+      error: nil,
+      data: { stdout: stdout, stderr: stderr }
+    }
+  }, max_wait_time: 120, initial_interval: 2, max_interval: 10)
+  
+  puts "✅ SSH接続成功"
+rescue => e
+  puts "❌ SSH接続失敗: #{e.message}"
+  puts "サーバーの起動が完了していない可能性があります。"
   exit 1
 end
 
