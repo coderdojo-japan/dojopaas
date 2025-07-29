@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
+require_relative 'smart_wait_helper'
+
 class SakuraServerUserAgent
+  include SmartWaitHelper
+  
   require 'jsonclient'
   require 'base64'
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
@@ -102,20 +106,17 @@ class SakuraServerUserAgent
 
     p '---------------------'
     puts 'wait_shutdown'
-    status = false
-    counter = 0
-    while !status
-     counter += 1
-     sleep(5)
-     api_status = get_server_power_status()
-     if /down/ =~ api_status['Instance']['Status']
-       status = true
-     end
-     if counter %5 == 0
-       server_shutdown()
-     end
-     p api_status['Instance']['Status']
+    
+    # スマートウェイトでシャットダウンを待つ
+    begin
+      wait_for_server_power('down', phase: 'shutdown', max_wait_time: 120, initial_interval: 2, max_interval: 10)
+    rescue => e
+      # タイムアウトした場合は再度シャットダウンを試みる
+      puts "Shutdown timeout, trying again..."
+      server_shutdown()
+      wait_for_server_power('down', phase: 'shutdown-retry', max_wait_time: 60)
     end
+    
     puts 'server_start'
     server_start()
   end
@@ -224,31 +225,15 @@ class SakuraServerUserAgent
   end
 
   def setup_ssh_key(disk_id)
-    # 従来の方法：ディスクが完全にavailableになるまで待機
-    disk_availability_flag = false
-    while !disk_availability_flag
-      disk_satus = get_disk_status(disk_id)
-      if /migrating/ !~ disk_satus['Disk']['Availability']
-        disk_availability_flag = true
-      end
-      sleep(5)
-    end
+    # スマートウェイト実装：ディスクが完全にavailableになるまで待機
+    wait_for_disk_available(disk_id, phase: "creation", max_wait_time: 300)
     
-    sleep(5)
     # SSH鍵を設定
     _put_ssh_key(disk_id)
     
-    # SSH鍵設定後、再度ディスクがavailableになるまで待機
-    disk_availability_flag = false
-    while !disk_availability_flag
-      disk_satus = get_disk_status(disk_id)
-      if /migrating/ !~ disk_satus['Disk']['Availability']
-        disk_availability_flag = true
-      end
-      sleep(5)
-    end
+    # SSH鍵設定後、再度ディスクがavailableになるまで待機（通常より短い時間）
+    wait_for_disk_available(disk_id, phase: "ssh-key-setup", max_wait_time: 60, initial_interval: 1, max_interval: 8)
     
-    # サーバーを起動
     _copying_image()
   end
 
