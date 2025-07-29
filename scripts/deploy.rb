@@ -98,8 +98,8 @@ class CoderDojoSakuraCLI
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
       # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
       puts "- Name: #{arch['Name']}"
-      # cloud-init対応のためcloudimg版を使用
-      if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && /cloudimg/i =~ arch['Name'] then
+      # 通常版Ubuntu 24.04を使用（disk/config APIでSSH鍵設定、@notesでスタートアップスクリプト実行）
+      if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name']) then
         archiveid = arch['ID']
         selected_name = arch['Name']
       end
