@@ -185,22 +185,9 @@ class SakuraServerUserAgent
   def create_a_disk()
     disk = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description, SourceArchive: { ID: @archive_id }} #plan is SSD, sizeMB is 20GB
     
-    # cloud-init用のスタートアップスクリプトを読み込む
-    startup_script_path = './startup-scripts/112900928939'
-    if File.exist?(startup_script_path)
-      startup_script_content = File.read(startup_script_path)
-      
-      # cloud-init設定
-      config = {
-        UserData: Base64.strict_encode64(startup_script_content),
-        SSHKeys: [ @pubkey ]
-      }
-      
-      response = send_request('post','disk',{Disk: disk, Config: config})
-    else
-      puts "Warning: Startup script not found at #{startup_script_path}"
-      response = send_request('post','disk',{Disk: disk})
-    end
+    # cloud-init版アーカイブの場合、ディスク作成時にはSSH鍵の設定は不要
+    # （サーバー起動時にcloud-init設定を渡す）
+    response = send_request('post','disk',{Disk: disk})
     
     response['Disk']['ID']
 
@@ -286,17 +273,46 @@ class SakuraServerUserAgent
   private
 
   def _put_ssh_key(disk_id)
-    body = {
-      SSHKey:  {
-        PublicKey: @pubkey
-      },
-      Notes: @notes
-    }
-    send_request('put',"disk/#{disk_id}/config",body)
+    # cloud-init版では使用しない（サーバー起動時に設定）
+    puts "DEBUG: _put_ssh_key called but skipped for cloud-init"
   end
 
   def _copying_image
-    send_request('put',"server/#{@server_id}/power",nil)
+    # cloud-init用のスタートアップスクリプトを読み込む
+    startup_script_path = './startup-scripts/112900928939'
+    if File.exist?(startup_script_path)
+      startup_script_content = File.read(startup_script_path)
+      
+      # cloud-config形式で設定を作成
+      # runcmdはbashスクリプト全体を一つのコマンドとして実行
+      cloud_config = <<-EOF
+#cloud-config
+hostname: #{@name}
+ssh_authorized_keys:
+  - #{@pubkey}
+timezone: Asia/Tokyo
+locale: ja_JP.utf8
+runcmd:
+  - |
+    #{startup_script_content.split("\n").map { |line| line.strip.empty? ? "" : "    #{line}" }.join("\n")}
+EOF
+      
+      puts "DEBUG: Starting server with cloud-init configuration"
+      puts "DEBUG: cloud-config (first 200 chars): #{cloud_config[0..200]}..."
+      
+      # cloud-init設定付きでサーバーを起動
+      body = {
+        UserBootVariables: {
+          CloudInit: {
+            UserData: cloud_config
+          }
+        }
+      }
+      send_request('put',"server/#{@server_id}/power", body)
+    else
+      puts "Warning: Startup script not found at #{startup_script_path}"
+      send_request('put',"server/#{@server_id}/power",nil)
+    end
 
     rescue => exception
       puts exception

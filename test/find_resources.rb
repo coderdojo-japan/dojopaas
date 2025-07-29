@@ -6,7 +6,7 @@
 #     bundle exec ruby find_resources.rb coderdojo
 #     bundle exec ruby find_resources.rb （全て表示）
 
-require '../scripts/sakura_server_user_agent.rb'
+require_relative '../scripts/sakura_server_user_agent.rb'
 require 'time'
 
 # 環境変数のチェック

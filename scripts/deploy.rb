@@ -91,18 +91,22 @@ class CoderDojoSakuraCLI
 
   def initial_archive_id
     archiveid = nil
+    selected_name = nil
     archives = @ssua.get_archives()
     puts "List of Archives:"
     archives['Archives'].each do |arch|
       # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
       # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
       puts "- Name: #{arch['Name']}"
+      # cloud-init対応のためcloudimg版を使用
       if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && /cloudimg/i =~ arch['Name'] then
         archiveid = arch['ID']
+        selected_name = arch['Name']
       end
     end
 
     if archiveid then
+      puts "Selected Archive: #{selected_name}"
       puts "Archive ID: #{archiveid}"
     else
       puts "Can't get archive id"
