@@ -12,6 +12,11 @@ class SakuraServerUserAgent
   # ディスク状態確認用の定数
   DISK_CHECK_INTERVAL = 10  # 秒
   MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
+  
+  # 標準スタートアップスクリプトID
+  # dojopaas-default (2017年から使用)
+  # 内容: iptables設定、SSH強化、Ansible導入
+  STARTUP_SCRIPT_ID = 112900928939
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
@@ -24,10 +29,8 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
-    # スタートアップスクリプトID: 112900928939 が404エラーになるため一時的に無効化
-    # 本番環境の正しいIDを確認する必要あり
-    # スクリプト内容: iptables設定、SSH強化、Ansible導入
-    @notes            = []
+    # 標準スタートアップスクリプトを使用
+    @notes            = [{ID: STARTUP_SCRIPT_ID}]
     @sakura_zone_id   = zone_id
     @archive_id       = nil
 
@@ -132,7 +135,8 @@ class SakuraServerUserAgent
         },
         Name:         @name,
         Description:  @description,
-        Tags:         @tags
+        Tags:         @tags,
+        # Icon:         { ID: 112900928939 }  # スタートアップスクリプトIDは一時的に無効化（cloud-initで実行）
       }
     }
     puts "DEBUG: Server creation request: #{query.inspect}"
@@ -174,6 +178,13 @@ class SakuraServerUserAgent
   def apply_packet_filter(params = nil)
     @interface_id     ||= params[:interface_id]
     @packet_filter_id ||= params[:packet_filter_id]
+    
+    # パケットフィルターIDが指定されていない場合はスキップ
+    if @packet_filter_id.nil?
+      puts "パケットフィルターは適用されません（packet_filter_id is nil）"
+      return
+    end
+    
     response      = send_request('put', "interface/#{@interface_id}/to/packetfilter/#{@packet_filter_id}",nil)
     @server_id    = response['Interface']['Server']['ID']
 
@@ -183,10 +194,14 @@ class SakuraServerUserAgent
 
   # ディスク作成
   def create_a_disk()
-    disk = { Plan: {ID:4}, SizeMB: 20480, Name: @name, Description: @description, SourceArchive: { ID: @archive_id }} #plan is SSD, sizeMB is 20GB
+    disk = {
+      Plan: {ID:4},
+      SizeMB: 20480,
+      Name: @name,
+      Description: @description,
+      SourceArchive: { ID: @archive_id }
+    } #plan is SSD, sizeMB is 20GB
     
-    # cloud-init版アーカイブの場合、ディスク作成時にはSSH鍵の設定は不要
-    # （サーバー起動時にcloud-init設定を渡す）
     response = send_request('post','disk',{Disk: disk})
     
     response['Disk']['ID']
@@ -209,36 +224,28 @@ class SakuraServerUserAgent
   end
 
   def setup_ssh_key(disk_id)
-    # cloud-init版では、SSH鍵はディスク作成時に設定済みなので
-    # ディスクが完全に利用可能になるまで待機
-    attempts = 0
-    
-    puts "DEBUG: Waiting for disk to become available..."
-    
-    while attempts < MAX_ATTEMPTS
-      disk_status = get_disk_status(disk_id)
-      availability = disk_status['Disk']['Availability']
-      
-      puts "DEBUG: Disk availability: #{availability} (attempt #{attempts + 1}/#{MAX_ATTEMPTS})"
-      
-      case availability
-      when 'available'
-        puts "Disk is ready!"
-        break
-      when 'failed'
-        raise "Disk creation failed with status: #{availability}"
-      when 'migrating', 'creating', 'copying'
-        # まだ処理中なので待機
-      else
-        puts "DEBUG: Unknown disk availability status: #{availability}"
+    # 従来の方法：ディスクが完全にavailableになるまで待機
+    disk_availability_flag = false
+    while !disk_availability_flag
+      disk_satus = get_disk_status(disk_id)
+      if /migrating/ !~ disk_satus['Disk']['Availability']
+        disk_availability_flag = true
       end
-      
-      attempts += 1
-      sleep(DISK_CHECK_INTERVAL)
+      sleep(5)
     end
     
-    if attempts >= MAX_ATTEMPTS
-      raise "Timeout waiting for disk to become available (waited #{MAX_ATTEMPTS * DISK_CHECK_INTERVAL} seconds)"
+    sleep(5)
+    # SSH鍵を設定
+    _put_ssh_key(disk_id)
+    
+    # SSH鍵設定後、再度ディスクがavailableになるまで待機
+    disk_availability_flag = false
+    while !disk_availability_flag
+      disk_satus = get_disk_status(disk_id)
+      if /migrating/ !~ disk_satus['Disk']['Availability']
+        disk_availability_flag = true
+      end
+      sleep(5)
     end
     
     # サーバーを起動
@@ -273,34 +280,38 @@ class SakuraServerUserAgent
   private
 
   def _put_ssh_key(disk_id)
-    # cloud-init版では使用しない（サーバー起動時に設定）
-    puts "DEBUG: _put_ssh_key called but skipped for cloud-init"
+    # disk/config APIを使用してSSH鍵を設定
+    body = {
+      SSHKey: {
+        PublicKey: @pubkey
+      },
+      Notes: @notes
+    }
+    puts "DEBUG: Setting SSH key via disk/config API"
+    send_request('put',"disk/#{disk_id}/config",body)
   end
 
   def _copying_image
-    # cloud-init用のスタートアップスクリプトを読み込む
+    # SSH鍵はdisk/configで設定済み
+    # スタートアップスクリプトはcloud-initで実行
     startup_script_path = './startup-scripts/112900928939'
+    
     if File.exist?(startup_script_path)
       startup_script_content = File.read(startup_script_path)
       
-      # cloud-config形式で設定を作成
-      # runcmdはbashスクリプト全体を一つのコマンドとして実行
+      # cloud-config（SSH鍵とスクリプト実行）
       cloud_config = <<-EOF
 #cloud-config
-hostname: #{@name}
 ssh_authorized_keys:
   - #{@pubkey}
-timezone: Asia/Tokyo
-locale: ja_JP.utf8
 runcmd:
   - |
     #{startup_script_content.split("\n").map { |line| line.strip.empty? ? "" : "    #{line}" }.join("\n")}
 EOF
       
-      puts "DEBUG: Starting server with cloud-init configuration"
+      puts "DEBUG: Starting server with cloud-init for startup script"
       puts "DEBUG: cloud-config (first 200 chars): #{cloud_config[0..200]}..."
       
-      # cloud-init設定付きでサーバーを起動
       body = {
         UserBootVariables: {
           CloudInit: {
@@ -311,7 +322,7 @@ EOF
       send_request('put',"server/#{@server_id}/power", body)
     else
       puts "Warning: Startup script not found at #{startup_script_path}"
-      send_request('put',"server/#{@server_id}/power",nil)
+      send_request('put',"server/#{@server_id}/power", nil)
     end
 
     rescue => exception
