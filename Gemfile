@@ -8,3 +8,9 @@ gem 'rspec'
 # Add bundled gems to fix errors/warnings
 gem 'csv'
 gem 'base64'
+gem 'net-ssh'
+
+# Development dependencies
+group :development, :test do
+  gem 'dotenv'
+end
