@@ -151,6 +151,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 ## DojoPaaS 関連記事
 
+- [さくらのナレッジ - 子どものためのプログラミング道場を支えるさくらのクラウド 〜「さくらの夕べ CoderDojoナイト」レポート〜](https://knowledge.sakura.ad.jp/42930/)
 - [さくらインターネット、子ども向けプログラミング道場「CoderDojo」にサーバー100台を追加支援 〜さくらのクラウド計200台を無料提供〜](https://www.sakura.ad.jp/information/pressreleases/2020/03/25/1968203191/)
 - [子ども向けプログラミング道場を推進する一般社団法人 CoderDojo Japan をさくらインターネットが支援、「さくらのクラウド」を無料提供](https://www.sakura.ad.jp/press/2017/0720_cloud-coderjapan/)
 - [CoderDojo を楽しむ 〜 DojoPaaS (さくらのオフライン通信)](https://github.com/coderdojo-japan/dojopaas/issues/51#issuecomment-326204848)
