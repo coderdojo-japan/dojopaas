@@ -4,7 +4,7 @@
 
 このプロジェクトはさくらインターネット様からご提供いただいた「さくらのクラウド」上の各インスタンス及び、それぞれのサーバーアカウントを管理するためのプロジェクトです。
 
-[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいて[GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions)経由で自動的にサーバーが起動します。
+[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいて [GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions) 経由で自動的にサーバーが起動します。
 
 **本システムの背景と概要、および活用例などについては以下の SAKURA internet のレポート記事・動画からご確認いただけます。**
 
