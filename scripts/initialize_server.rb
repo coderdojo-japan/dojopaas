@@ -31,11 +31,12 @@ class ServerInitializer
   VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
 
   def initialize(input, options = {})
-    @input = input  # Issue URLまたはIPアドレス
-    @verbose = options[:verbose] || false
-    @delete_mode = options[:delete] || false
-    @find_mode = options[:find] || false
-    @dry_run = options[:dry_run] || false
+    @input       = input  # Issue URLまたはIPアドレス
+    @verbose     = options[:verbose] || false
+    @delete_mode = options[:delete]  || false
+    @find_mode   = options[:find]    || false
+    @dry_run     = options[:dry_run] || false
+    @force       = options[:force]   || false
     
     # さくらのクラウドAPIクライアント初期化（石狩第二ゾーン）
     @ssua = SakuraServerUserAgent.new(
@@ -65,6 +66,7 @@ class ServerInitializer
     puts "オプション:"
     puts "        --find <URL|IP|NAME>         サーバー情報を検索（URL/IP/名前）"
     puts "        --delete IP_ADDRESS          指定したIPアドレスのサーバーを削除（危険）"
+    puts "        --force                      削除時の確認をスキップ（危険）"
     puts "        --dry-run                    削除を実行せず、何が起こるかを表示（開発者向け）"
     puts "        --verbose                    詳細ログを出力"
     puts "    -h, --help                       ヘルプを表示"
@@ -86,10 +88,14 @@ class ServerInitializer
     puts "  # IPアドレスを指定して削除（危険）"
     puts "  #{$0} --delete 192.168.1.1"
     puts ""
+    puts "  # 確認なしで削除（非常に危険）"
+    puts "  #{$0} --delete 192.168.1.1 --force"
+    puts ""
     puts "  # 削除のシミュレーション（開発・テスト用）"
     puts "  #{$0} --delete 192.168.1.1 --dry-run"
     puts ""
     puts "⚠️  警告: --delete オプションはサーバーとディスクを完全に削除します！"
+    puts "         --force を使用すると確認なしで削除されます（非常に危険）！"
     puts "         --dry-run を使用すると、実際には削除せずに動作を確認できます。"
     puts ""  # 下部に空行
     exit 0
@@ -356,7 +362,7 @@ class ServerInitializer
     puts "💾 接続されているディスク:"
     disk_ids.each do |disk_id|
       begin
-        disk_info = @ssua.send_request('get', "disk/#{disk_id}", nil)
+        disk_info = @ssua.get_disk_details(disk_id)
         if disk_info && disk_info['Disk']
           disk = disk_info['Disk']
           puts "  - ディスクID: #{disk['ID']}"
@@ -381,6 +387,16 @@ class ServerInitializer
       return true
     end
     
+    # --forceオプションが指定されている場合は確認をスキップ
+    if @force
+      puts "=" * 60
+      puts "🔍 --force オプションにより確認をスキップ"
+      puts "=" * 60
+      puts ""
+      puts "削除を実行します..."
+      return true
+    end
+    
     puts "=" * 60
     puts "⚠️  ⚠️  ⚠️  削除確認 ⚠️  ⚠️  ⚠️"
     puts "=" * 60
@@ -395,7 +411,24 @@ class ServerInitializer
     puts ""
     print "本当に削除しますか？ (yes/no): "
     
-    answer = STDIN.gets.chomp.downcase
+    # Claude Code環境では入力が取得できないため、エラーハンドリングを追加
+    begin
+      input = STDIN.gets
+      if input.nil?
+        puts ""
+        puts "❌ エラー: 対話式入力が利用できません"
+        puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
+        puts ""
+        puts "例: FORCE_DELETE=yes ruby scripts/initialize_server.rb --delete #{@input}"
+        return false
+      end
+      answer = input.chomp.downcase
+    rescue => e
+      puts ""
+      puts "❌ 入力エラー: #{e.message}"
+      puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
+      return false
+    end
     
     # yes/y/no/n以外の入力は全て拒否
     unless ['yes', 'y', 'no', 'n'].include?(answer)
@@ -410,12 +443,33 @@ class ServerInitializer
       return false
     end
     
-    # yesまたはyの場合、さらに確認
+    # yesまたはyの場合、さらに確認（FORCE_DELETE環境変数の場合はスキップ）
+    if ENV['FORCE_DELETE'] == 'yes'
+      puts ""
+      puts "🔍 FORCE_DELETE環境変数により最終確認もスキップ"
+      puts "削除を実行します..."
+      return true
+    end
+    
     puts ""
     puts "⚠️  最終確認：サーバー #{server['Name']} を本当に削除しますか？"
     print "削除を実行する場合は 'DELETE' と入力してください: "
     
-    final_answer = STDIN.gets.chomp
+    begin
+      input = STDIN.gets
+      if input.nil?
+        puts ""
+        puts "❌ エラー: 対話式入力が利用できません"
+        puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
+        return false
+      end
+      final_answer = input.chomp
+    rescue => e
+      puts ""
+      puts "❌ 入力エラー: #{e.message}"
+      puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
+      return false
+    end
     
     if final_answer == 'DELETE'
       puts ""
@@ -448,7 +502,7 @@ class ServerInitializer
         puts "🔍 [DRY-RUN] Would check power status: GET /server/#{server_id}/power"
         puts "🔍 [DRY-RUN] Current status: #{server['Instance']['Status']}"
       else
-        power_status = @ssua.send_request('get', "server/#{server_id}/power", nil)
+        power_status = @ssua.get_server_power_status_by_id(server_id)
       end
       
       # 2. サーバーが起動中なら停止
@@ -462,13 +516,13 @@ class ServerInitializer
       else
         if power_status && power_status['Instance'] && power_status['Instance']['Status'] == 'up'
           puts "⏸️  サーバーを停止中..."
-          @ssua.send_request('delete', "server/#{server_id}/power", nil)
+          @ssua.stop_server(server_id)
           
           # 停止を待つ
           wait_count = 0
           while wait_count < 30  # 最大60秒待機
             sleep(2)
-            power_status = @ssua.send_request('get', "server/#{server_id}/power", nil)
+            power_status = @ssua.get_server_power_status_by_id(server_id)
             break if power_status['Instance']['Status'] == 'down'
             wait_count += 1
             print "."
@@ -488,8 +542,7 @@ class ServerInitializer
         puts "    - Disk IDs: #{disk_ids.join(', ')}"
       else
         puts "🗑️  サーバーとディスクを削除中..."
-        delete_params = { WithDisk: disk_ids }
-        @ssua.send_request('delete', "server/#{server_id}", delete_params)
+        @ssua.delete_server(server_id, disk_ids)
       end
       
       puts ""
@@ -691,6 +744,10 @@ if __FILE__ == $0
     opts.on("--delete IP_ADDRESS", "指定したIPアドレスのサーバーを削除（危険）") do |ip|
       options[:delete] = true
       input = ip
+    end
+    
+    opts.on("--force", "削除時の確認をスキップ（危険）") do
+      options[:force] = true
     end
     
     opts.on("--dry-run", "削除を実行せず、何が起こるかを表示（開発者向け）") do

@@ -266,6 +266,27 @@ class SakuraServerUserAgent
   def get_server_details(server_id)
     send_request('get',"server/#{server_id}",nil)
   end
+  
+  # ディスク詳細情報を取得
+  def get_disk_details(disk_id)
+    send_request('get',"disk/#{disk_id}",nil)
+  end
+  
+  # サーバーを削除（ディスクも同時削除可能）
+  def delete_server(server_id, disk_ids = [])
+    delete_params = disk_ids.any? ? { WithDisk: disk_ids } : {}
+    send_request('delete',"server/#{server_id}", delete_params)
+  end
+  
+  # 特定サーバーの電源状態を取得
+  def get_server_power_status_by_id(server_id)
+    send_request('get',"server/#{server_id}/power",nil)
+  end
+  
+  # 特定サーバーを停止
+  def stop_server(server_id)
+    send_request('delete',"server/#{server_id}/power",nil)
+  end
 
   private
 
