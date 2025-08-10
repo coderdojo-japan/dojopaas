@@ -80,12 +80,14 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 # よくある質問と回答
 
 ## Q. サーバーでどんなことができるの?
+
 A. 例えばマインクラフト用のサーバーを立てることができます！[CoderDojo 三島・沼津](https://coderdojo-mn.com/)が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
 
 :octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/urushibata/minecraft)
   
 
 ## Q. サーバーを初期化したい場合はどうすればよいですか?
+
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの初期化依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の初期化をお願いします。cc/%20@yasulab%20&labels=サーバー初期化依頼&assignee=yasulab)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
 初期化処理が開始したらステータスが `Closed` になるので、[2. SSHの接続方法](#2-sshの接続方法)を参考に当該サーバーに接続してみてください。
@@ -95,11 +97,14 @@ A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues
 
 
 ## Q. SSH で接続できなくなりました。どうすればよいですか?
-A. CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
+
+CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
 
 
-## Q. サーバーの知識があまりないです。どうすればよいですか?   
-A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
+## Q. サーバーの知識があまりないです。どうすればよいですか?
+
+[@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
+
 
 ## Q. 作成されるサーバーの仕様を教えてください
 
@@ -108,9 +113,12 @@ A. [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハ�
 * メモリ: 1GB
 * HDD: 20GB
 * リージョン: 石狩第二ゾーン
-  
+
+
 ## Q. `ooo.coderdojo.jp` のようなサブドメインは使えますか?
-A. 以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNSの更新・管理のコストが肥大化し他の業務に支障が出てしまったため、現在は [DecaDojo](https://decadojo.coderdojo.jp/) や [DojoCon Japan](https://dojocon2020.coderdojo.jp/) などのケースを除いて、サブドメインの提供には対応しておりません。なお、更新・管理コストの肥大化が原因であるため、DojoPaaS のような自動化が DNS でも実現できれば、受付を再開できる可能性があります。
+
+以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNSの更新・管理のコストが肥大化し他の業務に支障が出てしまったため、現在は [DecaDojo](https://decadojo.coderdojo.jp/) や [DojoCon Japan](https://dojocon2020.coderdojo.jp/) などのケースを除いて、原則としてサブドメインの提供には対応しておりません。
+
 
 ## Q. 開発に貢献する方法を教えてください
 
@@ -147,6 +155,43 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 * 本システムで作成されたすべてのインスタンスには `dojopaas` というタグをつけ、そのタグを利用しています。他の方法で起動したインスタンスにこのタグを付けないでください
 * CSVのフォーマットに対してもテストを行っています。CI の結果に赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べていただけると幸いです
+
+
+## 開発者向け: サーバー初期化依頼への対応方法
+
+[サーバー初期化依頼](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)のIssueは、以下の手順で対応できます。
+
+1. **依頼対象のサーバーを確認**
+```bash
+ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/XXX
+```
+
+2. **サーバー削除を実行**
+```bash
+# 削除するサーバーを確認してから削除する場合（推奨）
+ruby scripts/initialize_server.rb --delete [IPアドレス]
+
+# 削除するサーバーを確認せずに、削除する場合
+ruby scripts/initialize_server.rb --delete [IPアドレス] --force
+```
+
+3. **空コミットでCI実行**  
+削除後、空コミットを push し、GitHub Actionsで新しいサーバーが再作成されます。
+```bash
+git commit --allow-empty -m "Fix #XXX: Empty commit to run CI/CD again to initialize server"  
+```
+
+4. **完了確認**
+```bash
+ruby scripts/initialize_server.rb --find [道場名]
+ruby scripts/initialize_server.rb --find [IPアドレス]
+```
+
+> [!CAUTION]
+> ### 注意事項
+> - サーバー削除は**取り消せません**。必ず削除対象を確認してください
+> - 詳細なオプションは `ruby scripts/initialize_server.rb --help` で確認できます
+> - **原則としてIPアドレスが変わる** 点にご注意ください (稀に同じになる場合もあります)
 
 
 ## DojoPaaS 関連記事
