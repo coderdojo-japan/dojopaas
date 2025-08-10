@@ -63,7 +63,7 @@ class ServerInitializer
     puts "使用方法: #{$0} [options]"
     puts ""
     puts "オプション:"
-    puts "        --find ISSUE_URL             GitHub Issueからサーバー情報を検索"
+    puts "        --find <URL|IP|NAME>         サーバー情報を検索（URL/IP/名前）"
     puts "        --delete IP_ADDRESS          指定したIPアドレスのサーバーを削除（危険）"
     puts "        --dry-run                    削除を実行せず、何が起こるかを表示（開発者向け）"
     puts "        --verbose                    詳細ログを出力"
@@ -74,8 +74,14 @@ class ServerInitializer
     puts "  SACLOUD_ACCESS_TOKEN_SECRET さくらのクラウドAPIシークレット（必須）"
     puts ""
     puts "使用例:"
-    puts "  # Issueからサーバー情報を検索"
+    puts "  # GitHub Issueから検索"
     puts "  #{$0} --find https://github.com/coderdojo-japan/dojopaas/issues/249"
+    puts ""
+    puts "  # IPアドレスで検索"
+    puts "  #{$0} --find 153.127.192.200"
+    puts ""
+    puts "  # サーバー名で検索"
+    puts "  #{$0} --find coderdojo-harumi"
     puts ""
     puts "  # IPアドレスを指定して削除（危険）"
     puts "  #{$0} --delete 192.168.1.1"
@@ -145,19 +151,41 @@ class ServerInitializer
     execute_deletion(server_info, disk_ids)
   end
 
-  # Issueから情報を検索するモード
+  # 汎用検索モード（URL/IP/名前）
   def run_find_mode
-    puts "=== DojoPaaS サーバー初期化スクリプト ==="
+    puts "=== DojoPaaS サーバー検索 ==="
     puts ""
 
     begin
-      # 1. Issue情報の取得
-      @issue_url = @input  # run_find_modeではinputはIssue URL
-      issue_data = fetch_issue_data
-      
-      # 2. 情報の抽出（正規表現のみ、失敗したら即停止）
-      dojo_name = extract_dojo_name(issue_data['body'])
-      ip_address = extract_ip_address(issue_data['body'])
+      # 入力タイプを判定
+      if @input =~ /^https?:\/\//
+        # URLの場合: GitHub Issueから情報を取得
+        find_by_issue_url
+      elsif @input =~ /\d+\.\d+\.\d+\.\d+/
+        # IPアドレスの場合: 直接サーバーを検索
+        find_by_ip_address
+      else
+        # その他のテキスト: サーバー名で検索
+        find_by_name
+      end
+    rescue => e
+      puts "❌ 予期しないエラーが発生しました: #{e.message}"
+      puts e.backtrace if @verbose
+      puts ""
+      puts "処理を中止します（サーバーへの変更は行われません）"
+      exit 1
+    end
+  end
+
+  # GitHub Issueから検索
+  def find_by_issue_url
+    puts "📌 GitHub Issueから情報を取得中..."
+    @issue_url = @input
+    issue_data = fetch_issue_data
+    
+    # 情報の抽出（正規表現のみ、失敗したら即停止）
+    dojo_name = extract_dojo_name(issue_data['body'])
+    ip_address = extract_ip_address(issue_data['body'])
       
       if dojo_name.nil? || ip_address.nil?
         puts "❌ エラー: Issue から必要な情報を抽出できませんでした"
@@ -178,56 +206,110 @@ class ServerInitializer
       puts "  - IPアドレス: #{ip_address}"
       puts ""
 
-      # 3. サーバー情報の取得
-      server_info = find_server_by_ip(ip_address)
-      
-      if server_info.nil?
-        puts "❌ エラー: IPアドレス #{ip_address} に対応するサーバーが見つかりません"
-        puts ""
-        puts "以下を確認してください:"
-        puts "  1. IPアドレスが正しいか"
-        puts "  2. サーバーがまだ存在しているか"
-        puts "  3. さくらのクラウドAPIの接続状態"
-        puts ""
-        puts "処理を中止します（サーバーへの変更は行われません）"
-        exit 1
-      end
-
-      puts "🖥️  サーバー情報:"
-      puts "  - サーバー名: #{server_info['Name']}"
-      puts "  - サーバーID: #{server_info['ID']}"
-      puts "  - 説明: #{server_info['Description']}"
-      puts "  - タグ: #{server_info['Tags'].join(', ')}"
-      puts "  - ステータス: #{server_info['Instance']['Status']}"
+    # サーバー情報の取得
+    server_info = find_server_by_ip(ip_address)
+    
+    if server_info.nil?
+      puts "❌ エラー: IPアドレス #{ip_address} に対応するサーバーが見つかりません"
       puts ""
-
-      # 4. 名前の照合（安全確認）
-      if !verify_server_match(dojo_name, server_info)
-        puts "⚠️  警告: CoderDojo名とサーバー名が一致しません"
-        puts "  - Issue記載: #{dojo_name}"
-        puts "  - サーバー名: #{server_info['Name']}"
-        puts ""
-        
-        print "それでも続行しますか？ (yes/no): "
-        answer = STDIN.gets.chomp.downcase
-        unless ['yes', 'y'].include?(answer)
-          puts "処理を中止しました"
-          exit 0
-        end
-      else
-        puts "✅ 名前の照合: OK"
-      end
-
-      # 5. 削除準備の表示
-      display_deletion_plan(server_info, ip_address, dojo_name)
-
-    rescue => e
-      puts "❌ 予期しないエラーが発生しました: #{e.message}"
-      puts e.backtrace if @verbose
+      puts "以下を確認してください:"
+      puts "  1. IPアドレスが正しいか"
+      puts "  2. サーバーがまだ存在しているか"
+      puts "  3. さくらのクラウドAPIの接続状態"
       puts ""
       puts "処理を中止します（サーバーへの変更は行われません）"
       exit 1
     end
+
+    display_server_info(server_info)
+
+    # 名前の照合（安全確認）
+    if !verify_server_match(dojo_name, server_info)
+      puts "⚠️  警告: CoderDojo名とサーバー名が一致しません"
+      puts "  - Issue記載: #{dojo_name}"
+      puts "  - サーバー名: #{server_info['Name']}"
+      puts ""
+      
+      print "それでも続行しますか？ (yes/no): "
+      answer = STDIN.gets.chomp.downcase
+      unless ['yes', 'y'].include?(answer)
+        puts "処理を中止しました"
+        exit 0
+      end
+    else
+      puts "✅ 名前の照合: OK"
+    end
+
+    # 削除準備の表示
+    display_deletion_plan(server_info, get_server_ip(server_info), dojo_name)
+  end
+  
+  # IPアドレスで直接検索
+  def find_by_ip_address
+    puts "🔍 IPアドレス #{@input} でサーバーを検索中..."
+    puts ""
+    
+    server_info = find_server_by_ip(@input)
+    
+    if server_info.nil?
+      puts "❌ エラー: IPアドレス #{@input} に対応するサーバーが見つかりません"
+      puts ""
+      puts "以下を確認してください:"
+      puts "  1. IPアドレスが正しいか"
+      puts "  2. サーバーがまだ存在しているか"
+      puts "  3. さくらのクラウドAPIの接続状態"
+      puts ""
+      puts "処理を中止します"
+      exit 1
+    end
+    
+    display_server_info(server_info)
+    
+    # 削除準備の表示（IPアドレス検索の場合はCoderDojo名は不明）
+    dojo_name = extract_dojo_from_server_name(server_info['Name'])
+    display_deletion_plan(server_info, @input, dojo_name)
+  end
+  
+  # サーバー名で検索
+  def find_by_name
+    puts "🔍 サーバー名 '#{@input}' で検索中..."
+    puts ""
+    
+    # 全サーバーを取得
+    servers_response = @ssua.get_servers()
+    servers = servers_response['Servers'] || []
+    
+    # 名前で検索（完全一致のみ）
+    matched_servers = servers.select do |server|
+      server['Name'].downcase == @input.downcase
+    end
+    
+    if matched_servers.empty?
+      puts "❌ エラー: '#{@input}' に一致するサーバーが見つかりません"
+      puts ""
+      puts "以下を確認してください:"
+      puts "  1. サーバー名が正しいか（完全一致で検索）"
+      puts "  2. サーバーがまだ存在しているか"
+      puts ""
+      puts "例: coderdojo-harumi （coderdojo- プレフィックスも必要）"
+      puts ""
+      puts "処理を中止します"
+      exit 1
+    end
+    
+    # 完全一致なので複数マッチはありえないが、念のため
+    if matched_servers.length > 1
+      puts "⚠️  内部エラー: 複数のサーバーが見つかりました"
+      exit 1
+    end
+    
+    server_info = matched_servers.first
+    display_server_info(server_info)
+    
+    # 削除準備の表示
+    ip_address = get_server_ip(server_info)
+    dojo_name = extract_dojo_from_server_name(server_info['Name'])
+    display_deletion_plan(server_info, ip_address, dojo_name)
   end
 
   # IPアドレスの検証
@@ -520,6 +602,34 @@ class ServerInitializer
     normalized_dojo.include?(normalized_server)
   end
 
+  # サーバー情報の表示
+  def display_server_info(server)
+    puts "🖥️  サーバー情報:"
+    puts "  - サーバー名: #{server['Name']}"
+    puts "  - サーバーID: #{server['ID']}"
+    puts "  - 説明: #{server['Description']}"
+    puts "  - タグ: #{server['Tags'].join(', ')}"
+    puts "  - ステータス: #{server['Instance']['Status']}"
+    
+    # IPアドレスを取得して表示
+    ip = get_server_ip(server)
+    puts "  - IPアドレス: #{ip || 'N/A'}"
+    puts ""
+  end
+  
+  # サーバーからIPアドレスを取得
+  def get_server_ip(server)
+    interfaces = server['Interfaces'] || []
+    interface = interfaces.first
+    interface ? interface['IPAddress'] : nil
+  end
+  
+  # サーバー名からCoderDojo名を推測
+  def extract_dojo_from_server_name(server_name)
+    # coderdojo-harumi -> harumi のような変換
+    server_name.gsub(/^coderdojo[-_]?/i, '').upcase
+  end
+
   def display_deletion_plan(server_info, ip_address, dojo_name)
     puts ""
     puts "=" * 60
@@ -531,7 +641,7 @@ class ServerInitializer
     puts "  サーバー名: #{server_info['Name']}"
     puts "  サーバーID: #{server_info['ID']}"
     puts "  IPアドレス: #{ip_address}"
-    puts "  CoderDojo: #{dojo_name}"
+    puts "  CoderDojo: #{dojo_name || '(自動判定)'}"
     puts ""
     
     puts "【次のステップ】"
@@ -544,8 +654,12 @@ class ServerInitializer
       puts "3. サーバーを停止してから削除（ディスクも含む）"
       puts ""
       puts "4. 削除完了後、以下のコマンドを実行:"
-      issue_number = @issue_url[/\d+$/]
-      puts "   git commit --allow-empty -m \"Fix ##{issue_number}: Initialize server for CoderDojo #{dojo_name}\""
+      if @issue_url
+        issue_number = @issue_url[/\d+$/]
+        puts "   git commit --allow-empty -m \"Fix ##{issue_number}: Initialize server for CoderDojo #{dojo_name}\""
+      else
+        puts "   git commit --allow-empty -m \"Initialize server: #{server_info['Name']}\""
+      end
       puts "   git push"
       puts ""
       puts "5. CIが自動的に新しいサーバーを作成します"
@@ -565,9 +679,9 @@ if __FILE__ == $0
   OptionParser.new do |opts|
     opts.banner = "Usage: #{$0} [options]"
     
-    opts.on("--find ISSUE_URL", "GitHub Issueからサーバー情報を検索") do |url|
+    opts.on("--find <URL|IP|NAME>", "サーバー情報を検索（URL/IP/名前）") do |query|
       options[:find] = true
-      input = url
+      input = query
     end
     
     opts.on("--delete IP_ADDRESS", "指定したIPアドレスのサーバーを削除（危険）") do |ip|
