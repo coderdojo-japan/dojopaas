@@ -261,6 +261,11 @@ class SakuraServerUserAgent
   def get_disk_status(disk_id)
     send_request('get',"disk/#{disk_id}",nil)
   end
+  
+  # サーバーの詳細情報を取得（ディスク情報を含む）
+  def get_server_details(server_id)
+    send_request('get',"server/#{server_id}",nil)
+  end
 
   private
 

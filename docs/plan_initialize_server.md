@@ -147,20 +147,26 @@ end
 ### コマンドラインオプション
 
 ```bash
-# Issue からサーバー情報を検索
+# GitHub Issueから検索
 ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/249
+
+# IPアドレスで検索
+ruby scripts/initialize_server.rb --find 153.127.192.200
+
+# サーバー名で検索（完全一致）
+ruby scripts/initialize_server.rb --find coderdojo-harumi
 
 # IPアドレスを指定してサーバー削除（危険）
 ruby scripts/initialize_server.rb --delete 192.168.1.1
 
+# 削除のシミュレーション（開発・テスト用）
+ruby scripts/initialize_server.rb --delete 192.168.1.1 --dry-run
+
 # 詳細ログ出力
-ruby scripts/initialize_server.rb --verbose --find https://github.com/coderdojo-japan/dojopaas/issues/249
+ruby scripts/initialize_server.rb --verbose --find coderdojo-harumi
 
 # ヘルプ表示
 ruby scripts/initialize_server.rb --help
-
-# パラメータなしの場合もヘルプを表示（エラーではなくヘルプ）
-ruby scripts/initialize_server.rb
 ```
 
 ## 🔒 セキュリティ管理

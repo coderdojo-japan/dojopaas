@@ -337,13 +337,17 @@ class ServerInitializer
   
   # ディスク情報の取得
   def get_server_disks(server_id)
-    server_detail = @ssua.send_request('get', "server/#{server_id}", nil)
+    puts "DEBUG: Getting disks for server ID: #{server_id}" if @verbose
+    server_detail = @ssua.get_server_details(server_id)
+    puts "DEBUG: Server detail response: #{server_detail.inspect}" if @verbose
     return [] unless server_detail && server_detail['Server']
     
     disks = server_detail['Server']['Disks'] || []
+    puts "DEBUG: Found #{disks.length} disk(s)" if @verbose
     disks.map { |disk| disk['ID'] }
   rescue => e
     puts "⚠️  警告: ディスク情報の取得に失敗しました: #{e.message}" if @verbose
+    puts "DEBUG: Error details: #{e.backtrace.first(3).join("\n")}" if @verbose
     []
   end
   
