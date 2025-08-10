@@ -4,8 +4,8 @@
 # GitHub Issueから情報を抽出し、サーバー削除の準備を支援します
 # 
 # 使用方法:
-#   ruby scripts/initialize_server.rb https://github.com/coderdojo-japan/dojopaas/issues/249
-#   ruby scripts/initialize_server.rb --dry-run https://github.com/coderdojo-japan/dojopaas/issues/249
+#   ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/249
+#   ruby scripts/initialize_server.rb --delete 153.127.192.200  # サーバー削除（危険）
 
 require 'net/http'
 require 'uri'
@@ -26,11 +26,16 @@ class ServerInitializer
   
   # IPアドレスパターン（角カッコあり・なし両対応）
   IP_PATTERN = /(?:IPアドレス|IP)[：:]\s*【?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})】?/
+  
+  # IPアドレスの厳密な検証パターン
+  VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
 
-  def initialize(issue_url, options = {})
-    @issue_url = issue_url
-    @dry_run = options[:dry_run] || false
+  def initialize(input, options = {})
+    @input = input  # Issue URLまたはIPアドレス
     @verbose = options[:verbose] || false
+    @delete_mode = options[:delete] || false
+    @find_mode = options[:find] || false
+    @dry_run = options[:dry_run] || false
     
     # さくらのクラウドAPIクライアント初期化（石狩第二ゾーン）
     @ssua = SakuraServerUserAgent.new(
@@ -41,12 +46,113 @@ class ServerInitializer
   end
 
   def run
+    if @delete_mode
+      run_delete_mode
+    elsif @find_mode
+      run_find_mode
+    else
+      # オプションが指定されていない場合はヘルプを表示
+      show_help
+    end
+  end
+
+  private
+
+  def show_help
+    puts ""  # 上部に空行
+    puts "使用方法: #{$0} [options]"
+    puts ""
+    puts "オプション:"
+    puts "        --find ISSUE_URL             GitHub Issueからサーバー情報を検索"
+    puts "        --delete IP_ADDRESS          指定したIPアドレスのサーバーを削除（危険）"
+    puts "        --dry-run                    削除を実行せず、何が起こるかを表示（開発者向け）"
+    puts "        --verbose                    詳細ログを出力"
+    puts "    -h, --help                       ヘルプを表示"
+    puts ""
+    puts "環境変数:"
+    puts "  SACLOUD_ACCESS_TOKEN       さくらのクラウドAPIトークン（必須）"
+    puts "  SACLOUD_ACCESS_TOKEN_SECRET さくらのクラウドAPIシークレット（必須）"
+    puts ""
+    puts "使用例:"
+    puts "  # Issueからサーバー情報を検索"
+    puts "  #{$0} --find https://github.com/coderdojo-japan/dojopaas/issues/249"
+    puts ""
+    puts "  # IPアドレスを指定して削除（危険）"
+    puts "  #{$0} --delete 192.168.1.1"
+    puts ""
+    puts "  # 削除のシミュレーション（開発・テスト用）"
+    puts "  #{$0} --delete 192.168.1.1 --dry-run"
+    puts ""
+    puts "⚠️  警告: --delete オプションはサーバーとディスクを完全に削除します！"
+    puts "         --dry-run を使用すると、実際には削除せずに動作を確認できます。"
+    puts ""  # 下部に空行
+    exit 0
+  end
+
+  # IPアドレスによる削除モード
+  def run_delete_mode
+    puts "=" * 60
+    if @dry_run
+      puts "🔍 DojoPaaS サーバー削除モード（DRY-RUN）"
+    else
+      puts "⚠️  DojoPaaS サーバー削除モード（危険）"
+    end
+    puts "=" * 60
+    puts ""
+    
+    # IPアドレスの検証
+    unless valid_ip_address?(@input)
+      puts "❌ エラー: 無効なIPアドレス形式です: #{@input}"
+      puts ""
+      puts "正しいIPアドレス形式で指定してください（例: 192.168.1.1）"
+      puts "処理を中止します（サーバーへの変更は行われません）"
+      exit 1
+    end
+    
+    puts "🔍 IPアドレス #{@input} のサーバーを検索中..."
+    puts ""
+    
+    # サーバーの検索
+    server_info = find_server_by_ip(@input)
+    
+    if server_info.nil?
+      puts "❌ エラー: IPアドレス #{@input} に対応するサーバーが見つかりません"
+      puts ""
+      puts "以下を確認してください:"
+      puts "  1. IPアドレスが正しいか"
+      puts "  2. サーバーがまだ存在しているか"
+      puts "  3. さくらのクラウドAPIの接続状態"
+      puts ""
+      puts "処理を中止します（サーバーへの変更は行われません）"
+      exit 1
+    end
+    
+    # サーバー情報の表示
+    display_server_details_for_deletion(server_info)
+    
+    # ディスク情報の取得と表示
+    disk_ids = get_server_disks(server_info['ID'])
+    display_disk_details(disk_ids) if disk_ids.any?
+    
+    # 削除確認
+    unless confirm_deletion(server_info, disk_ids)
+      puts ""
+      puts "削除がキャンセルされました。サーバーは変更されません。"
+      exit 0
+    end
+    
+    # 実際の削除処理
+    execute_deletion(server_info, disk_ids)
+  end
+
+  # Issueから情報を検索するモード
+  def run_find_mode
     puts "=== DojoPaaS サーバー初期化スクリプト ==="
-    puts "モード: #{@dry_run ? 'ドライラン（確認のみ）' : '実行モード'}"
     puts ""
 
     begin
       # 1. Issue情報の取得
+      @issue_url = @input  # run_find_modeではinputはIssue URL
       issue_data = fetch_issue_data
       
       # 2. 情報の抽出（正規表現のみ、失敗したら即停止）
@@ -102,13 +208,11 @@ class ServerInitializer
         puts "  - サーバー名: #{server_info['Name']}"
         puts ""
         
-        unless @dry_run
-          print "それでも続行しますか？ (yes/no): "
-          answer = STDIN.gets.chomp.downcase
-          unless ['yes', 'y'].include?(answer)
-            puts "処理を中止しました"
-            exit 0
-          end
+        print "それでも続行しますか？ (yes/no): "
+        answer = STDIN.gets.chomp.downcase
+        unless ['yes', 'y'].include?(answer)
+          puts "処理を中止しました"
+          exit 0
         end
       else
         puts "✅ 名前の照合: OK"
@@ -126,7 +230,218 @@ class ServerInitializer
     end
   end
 
-  private
+  # IPアドレスの検証
+  def valid_ip_address?(ip)
+    return false if ip.nil? || ip.empty?
+    !!(ip =~ VALID_IP_PATTERN)
+  end
+  
+  # サーバー情報の詳細表示（削除用）
+  def display_server_details_for_deletion(server)
+    puts "=" * 60
+    puts "🖥️  削除対象サーバーの詳細"
+    puts "=" * 60
+    puts ""
+    puts "  サーバー名: #{server['Name']}"
+    puts "  サーバーID: #{server['ID']}"
+    puts "  IPアドレス: #{@input}"
+    puts "  説明: #{server['Description']}"
+    puts "  タグ: #{server['Tags'].join(', ')}"
+    puts "  ステータス: #{server['Instance']['Status']}"
+    puts "  CPU: #{server['ServerPlan']['CPU']}コア"
+    puts "  メモリ: #{server['ServerPlan']['MemoryMB']}MB"
+    puts ""
+  end
+  
+  # ディスク情報の取得
+  def get_server_disks(server_id)
+    server_detail = @ssua.send_request('get', "server/#{server_id}", nil)
+    return [] unless server_detail && server_detail['Server']
+    
+    disks = server_detail['Server']['Disks'] || []
+    disks.map { |disk| disk['ID'] }
+  rescue => e
+    puts "⚠️  警告: ディスク情報の取得に失敗しました: #{e.message}" if @verbose
+    []
+  end
+  
+  # ディスク情報の表示
+  def display_disk_details(disk_ids)
+    puts "💾 接続されているディスク:"
+    disk_ids.each do |disk_id|
+      begin
+        disk_info = @ssua.send_request('get', "disk/#{disk_id}", nil)
+        if disk_info && disk_info['Disk']
+          disk = disk_info['Disk']
+          puts "  - ディスクID: #{disk['ID']}"
+          puts "    名前: #{disk['Name']}"
+          puts "    サイズ: #{disk['SizeMB']}MB"
+          puts "    プラン: #{disk['Plan']['Name']}"
+        end
+      rescue => e
+        puts "  - ディスクID: #{disk_id} (詳細取得失敗)"
+      end
+    end
+    puts ""
+  end
+  
+  # 削除の確認（多重確認）
+  def confirm_deletion(server, disk_ids)
+    # dry-runモードでは確認をスキップ
+    if @dry_run
+      puts "=" * 60
+      puts "🔍 DRY-RUN モード - 確認をスキップ"
+      puts "=" * 60
+      return true
+    end
+    
+    puts "=" * 60
+    puts "⚠️  ⚠️  ⚠️  削除確認 ⚠️  ⚠️  ⚠️"
+    puts "=" * 60
+    puts ""
+    puts "以下のリソースが【完全に削除】されます:"
+    puts ""
+    puts "  🖥️  サーバー: #{server['Name']} (ID: #{server['ID']})"
+    puts "  💾 ディスク数: #{disk_ids.length}個"
+    puts ""
+    puts "⚠️  この操作は取り消せません！"
+    puts "⚠️  すべてのデータが失われます！"
+    puts ""
+    print "本当に削除しますか？ (yes/no): "
+    
+    answer = STDIN.gets.chomp.downcase
+    
+    # yes/y/no/n以外の入力は全て拒否
+    unless ['yes', 'y', 'no', 'n'].include?(answer)
+      puts ""
+      puts "❌ 無効な入力です。'yes', 'y', 'no', 'n' のいずれかを入力してください。"
+      puts "安全のため処理を中止します。"
+      return false
+    end
+    
+    # noまたはnの場合は中止
+    if ['no', 'n'].include?(answer)
+      return false
+    end
+    
+    # yesまたはyの場合、さらに確認
+    puts ""
+    puts "⚠️  最終確認：サーバー #{server['Name']} を本当に削除しますか？"
+    print "削除を実行する場合は 'DELETE' と入力してください: "
+    
+    final_answer = STDIN.gets.chomp
+    
+    if final_answer == 'DELETE'
+      puts ""
+      puts "削除を実行します..."
+      return true
+    else
+      puts ""
+      puts "'DELETE' と入力されなかったため、削除を中止します。"
+      return false
+    end
+  end
+  
+  # 削除の実行
+  def execute_deletion(server, disk_ids)
+    puts ""
+    
+    if @dry_run
+      puts "🔍 [DRY-RUN MODE] 削除シミュレーション開始..."
+    else
+      puts "🗑️  削除処理を開始します..."
+    end
+    
+    puts ""
+    
+    begin
+      server_id = server['ID']
+      
+      # 1. サーバーの電源状態確認
+      if @dry_run
+        puts "🔍 [DRY-RUN] Would check power status: GET /server/#{server_id}/power"
+        puts "🔍 [DRY-RUN] Current status: #{server['Instance']['Status']}"
+      else
+        power_status = @ssua.send_request('get', "server/#{server_id}/power", nil)
+      end
+      
+      # 2. サーバーが起動中なら停止
+      if @dry_run
+        if server['Instance']['Status'] == 'up'
+          puts "⏸️  [DRY-RUN] Would stop server: DELETE /server/#{server_id}/power"
+          puts "⏸️  [DRY-RUN] Would wait for server to stop (max 60 seconds)"
+        else
+          puts "⏸️  [DRY-RUN] Server already stopped, skipping shutdown"
+        end
+      else
+        if power_status && power_status['Instance'] && power_status['Instance']['Status'] == 'up'
+          puts "⏸️  サーバーを停止中..."
+          @ssua.send_request('delete', "server/#{server_id}/power", nil)
+          
+          # 停止を待つ
+          wait_count = 0
+          while wait_count < 30  # 最大60秒待機
+            sleep(2)
+            power_status = @ssua.send_request('get', "server/#{server_id}/power", nil)
+            break if power_status['Instance']['Status'] == 'down'
+            wait_count += 1
+            print "."
+          end
+          puts ""
+          puts "✅ サーバーを停止しました"
+        end
+      end
+      
+      # 3. サーバーの削除（ディスクも同時に削除）
+      if @dry_run
+        puts "🗑️  [DRY-RUN] Would delete server and disks:"
+        puts "    - API call: DELETE /server/#{server_id}"
+        puts "    - Parameters: { WithDisk: #{disk_ids.inspect} }"
+        puts "    - Server name: #{server['Name']}"
+        puts "    - Server ID: #{server_id}"
+        puts "    - Disk IDs: #{disk_ids.join(', ')}"
+      else
+        puts "🗑️  サーバーとディスクを削除中..."
+        delete_params = { WithDisk: disk_ids }
+        @ssua.send_request('delete', "server/#{server_id}", delete_params)
+      end
+      
+      puts ""
+      puts "=" * 60
+      if @dry_run
+        puts "✅ [DRY-RUN] 削除シミュレーションが完了しました"
+        puts "=" * 60
+        puts ""
+        puts "削除される予定のリソース:"
+        puts "  - サーバー: #{server['Name']} (ID: #{server_id})"
+        puts "  - ディスク数: #{disk_ids.length}個"
+        puts ""
+        puts "⚠️  これはドライランです。実際には何も削除されていません。"
+        puts "実際に削除する場合は --dry-run オプションを外して実行してください。"
+      else
+        puts "✅ 削除が完了しました"
+        puts "=" * 60
+        puts ""
+        puts "削除されたリソース:"
+        puts "  - サーバー: #{server['Name']} (ID: #{server_id})"
+        puts "  - ディスク数: #{disk_ids.length}個"
+      end
+      puts ""
+      puts "次のステップ:"
+      puts "  1. servers.csvから該当行を削除"
+      puts "  2. git commit -m 'Remove server: #{server['Name']}'"
+      puts "  3. git push（CIが新しいサーバーを作成）"
+      
+    rescue => e
+      puts ""
+      puts "❌ 削除中にエラーが発生しました: #{e.message}"
+      puts e.backtrace if @verbose
+      puts ""
+      puts "さくらのクラウドコントロールパネルで状態を確認してください:"
+      puts "https://secure.sakura.ad.jp/cloud/"
+      exit 1
+    end
+  end
 
   def fetch_issue_data
     # Issue番号を抽出
@@ -219,11 +534,7 @@ class ServerInitializer
     puts "  CoderDojo: #{dojo_name}"
     puts ""
     
-    if @dry_run
-      puts "🔒 ドライランモード: 実際の処理は実行されません"
-      puts ""
-    else
-      puts "【次のステップ】"
+    puts "【次のステップ】"
       puts ""
       puts "1. さくらのクラウドコントロールパネルにログイン"
       puts "   https://secure.sakura.ad.jp/cloud/"
@@ -238,8 +549,6 @@ class ServerInitializer
       puts "   git push"
       puts ""
       puts "5. CIが自動的に新しいサーバーを作成します"
-    end
-    
     puts ""
     puts "=" * 60
     puts "処理完了"
@@ -250,11 +559,23 @@ end
 # メイン処理
 if __FILE__ == $0
   options = {}
+  input = nil
+  
   
   OptionParser.new do |opts|
-    opts.banner = "Usage: #{$0} [options] ISSUE_URL"
+    opts.banner = "Usage: #{$0} [options]"
     
-    opts.on("--dry-run", "確認のみ実行（削除しない）") do
+    opts.on("--find ISSUE_URL", "GitHub Issueからサーバー情報を検索") do |url|
+      options[:find] = true
+      input = url
+    end
+    
+    opts.on("--delete IP_ADDRESS", "指定したIPアドレスのサーバーを削除（危険）") do |ip|
+      options[:delete] = true
+      input = ip
+    end
+    
+    opts.on("--dry-run", "削除を実行せず、何が起こるかを表示（開発者向け）") do
       options[:dry_run] = true
     end
     
@@ -263,27 +584,20 @@ if __FILE__ == $0
     end
     
     opts.on("-h", "--help", "ヘルプを表示") do
-      puts opts
-      puts ""
-      puts "環境変数:"
-      puts "  SACLOUD_ACCESS_TOKEN       さくらのクラウドAPIトークン（必須）"
-      puts "  SACLOUD_ACCESS_TOKEN_SECRET さくらのクラウドAPIシークレット（必須）"
-      puts ""
-      puts "例:"
-      puts "  #{$0} https://github.com/coderdojo-japan/dojopaas/issues/249"
-      puts "  #{$0} --dry-run https://github.com/coderdojo-japan/dojopaas/issues/249"
-      exit
+      # initializerを作成してヘルプを表示
+      ServerInitializer.new("", {}).send(:show_help)
     end
   end.parse!
   
-  if ARGV.empty?
-    puts "エラー: Issue URLを指定してください"
-    puts "使用方法: #{$0} [options] ISSUE_URL"
-    puts "例: #{$0} https://github.com/coderdojo-japan/dojopaas/issues/249"
-    exit 1
+  # パラメータなしの場合はヘルプを表示
+  if input.nil? && ARGV.empty?
+    ServerInitializer.new("", {}).send(:show_help)
   end
   
-  issue_url = ARGV[0]
+  # 入力の取得
+  if input.nil?
+    input = ARGV[0]
+  end
   
   # 環境変数チェック
   unless ENV['SACLOUD_ACCESS_TOKEN'] && ENV['SACLOUD_ACCESS_TOKEN_SECRET']
@@ -295,6 +609,6 @@ if __FILE__ == $0
   end
   
   # 実行
-  initializer = ServerInitializer.new(issue_url, options)
+  initializer = ServerInitializer.new(input, options)
   initializer.run
 end
