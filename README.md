@@ -115,6 +115,9 @@ A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues
 > [!WARNING]
 > **:warning: 初期化すると IP アドレスが変わる点にご注意ください。**
 
+- :octocat: [サーバー初期化の申請例 - DojoPaaS](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)
+
+
 <br>
 
 
@@ -196,7 +199,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 ## 開発者向け: サーバー初期化依頼への対応方法
 
-[サーバー初期化依頼](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)のIssueは、以下の手順で対応できます。
+[サーバー初期化依頼](#howto-initialize)Issueは、以下の手順で対応できます。
 
 1. **依頼対象のサーバーを確認**
 ```bash
