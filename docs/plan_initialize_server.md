@@ -154,7 +154,7 @@ ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojo
 ruby scripts/initialize_server.rb --find 153.127.192.200
 
 # サーバー名で検索（完全一致）
-ruby scripts/initialize_server.rb --find coderdojo-harumi
+ruby scripts/initialize_server.rb --find coderdojo-japan
 
 # IPアドレスを指定してサーバー削除（危険）
 ruby scripts/initialize_server.rb --delete 192.168.1.1
@@ -163,7 +163,7 @@ ruby scripts/initialize_server.rb --delete 192.168.1.1
 ruby scripts/initialize_server.rb --delete 192.168.1.1 --dry-run
 
 # 詳細ログ出力
-ruby scripts/initialize_server.rb --verbose --find coderdojo-harumi
+ruby scripts/initialize_server.rb --verbose --find coderdojo-japan
 
 # ヘルプ表示
 ruby scripts/initialize_server.rb --help

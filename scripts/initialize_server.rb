@@ -83,7 +83,7 @@ class ServerInitializer
     puts "  #{$0} --find 153.127.192.200"
     puts ""
     puts "  # サーバー名で検索"
-    puts "  #{$0} --find coderdojo-harumi"
+    puts "  #{$0} --find coderdojo-japan"
     puts ""
     puts "  # IPアドレスを指定して削除（危険）"
     puts "  #{$0} --delete 192.168.1.1"
@@ -297,7 +297,7 @@ class ServerInitializer
       puts "  1. サーバー名が正しいか（完全一致で検索）"
       puts "  2. サーバーがまだ存在しているか"
       puts ""
-      puts "例: coderdojo-harumi （coderdojo- プレフィックスも必要）"
+      puts "例: coderdojo-japan （coderdojo- プレフィックスも必要）"
       puts ""
       puts "処理を中止します"
       exit 1
@@ -683,7 +683,7 @@ class ServerInitializer
   
   # サーバー名からCoderDojo名を推測
   def extract_dojo_from_server_name(server_name)
-    # coderdojo-harumi -> harumi のような変換
+    # coderdojo-japan -> japan のような変換
     server_name.gsub(/^coderdojo[-_]?/i, '').upcase
   end
 

@@ -185,13 +185,16 @@ git commit --allow-empty -m "Fix #XXX: Empty commit to run CI/CD again to initia
 ```bash
 ruby scripts/initialize_server.rb --find [道場名]
 ruby scripts/initialize_server.rb --find [IPアドレス]
+
+# 例: サーバー名「coderdojo-japan」の状況を確認する場合
+ruby scripts/initialize_server.rb --find coderdojo-japan  
 ```
 
 > [!CAUTION]
 > ### 注意事項
-> - サーバー削除は**取り消せません**。必ず削除対象を確認してください
-> - 詳細なオプションは `ruby scripts/initialize_server.rb --help` で確認できます
-> - **原則としてIPアドレスが変わる** 点にご注意ください (稀に同じになる場合もあります)
+> - **サーバー削除は取り消せません**。必ず削除対象をご確認ください
+> - 使い方の詳細は `ruby scripts/initialize_server.rb --help` で確認できます
+> - **原則としてIPアドレスが変わる**点にご注意ください (稀に同じになる場合もあります)
 
 
 ## DojoPaaS 関連記事
