@@ -48,7 +48,8 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 
 公開鍵のサンプル: https://github.com/miya0001.keys
 
-**秘密鍵と公開鍵を間違えない** ようお願いします！ `git push`する前によーくご確認ください。
+> [!IMPORTANT]
+> **秘密鍵と公開鍵を間違えない** ようお願いします！ `git push`する前によーくご確認ください。
 
 <br>
 
