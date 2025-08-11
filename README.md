@@ -202,7 +202,7 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 
 ## 開発者向け: サーバー初期化依頼への対応方法
 
-[サーバー初期化依頼](#howto-initialize)Issueは、以下の手順で対応できます。
+[サーバー初期化依頼](#howto-initialize)の Issue は、以下の手順で対応できます。
 
 1. **依頼対象のサーバーを確認**
 ```bash
