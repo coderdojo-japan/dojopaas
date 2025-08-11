@@ -1,4 +1,5 @@
 name: サーバー初期化依頼への自動応答
+# Rakeの依存関係管理を活用した改善版
 
 on:
   issues:
@@ -51,8 +52,8 @@ jobs:
           IP_ADDRESS:                  ${{ steps.extract_ip.outputs.ip_address }}
           CI: true
         run: |
-          # IP検証付きのRakeタスクを使用
-          OUTPUT=$(bundle exec rake server:find_for_initialization 2>&1) || EXIT_CODE=$?
+          # 統一命名パターンに従ったfind_by_ipタスクを使用
+          OUTPUT=$(bundle exec rake server:find_by_ip 2>&1) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"
@@ -64,6 +65,9 @@ jobs:
             echo "server_info<<EOF" >> $GITHUB_OUTPUT
             echo "$OUTPUT" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
+            
+            # 削除準備タスクも実行（インクリメンタル実行用）
+            bundle exec rake server:prepare_deletion 2>&1 || true
           else
             echo "server_found=false" >> $GITHUB_OUTPUT
             echo "error_message<<EOF" >> $GITHUB_OUTPUT
@@ -90,12 +94,25 @@ jobs:
             
             @yasulab このサーバーを初期化する場合は、以下のコマンドを実行してください：
             
+            #### Rakeタスクを使用した完全なフロー（推奨）
             \`\`\`bash
-            # 1. サーバーを削除
-            ruby scripts/initialize_server.rb --delete ${{ steps.extract_ip.outputs.ip_address }} --force
+            # 全ステップを自動実行（依存関係管理付き）
+            bundle exec rake server:initialize[${{ steps.extract_ip.outputs.ip_address }},${{ github.event.issue.number }}]
+            git push
+            \`\`\`
             
-            # 2. 空コミットでCI/CDを実行（新サーバー作成）
-            git commit --allow-empty -m "Fix #${{ github.event.issue.number }}: Initialize server for ${{ github.event.issue.user.login }}"
+            #### または個別ステップ実行
+            \`\`\`bash
+            # 1. 削除準備（情報確認）
+            bundle exec rake server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]
+            
+            # 2. サーバー削除
+            bundle exec rake server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},true]
+            
+            # 3. 空コミット作成
+            bundle exec rake server:create_empty_commit[${{ github.event.issue.number }}]
+            
+            # 4. プッシュでCI/CD実行
             git push
             \`\`\`
             
@@ -131,6 +148,10 @@ jobs:
             
             ### 確認コマンド
             \`\`\`bash
+            # Rakeタスクを使用（統一命名パターン）
+            bundle exec rake server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]
+            
+            # または直接スクリプト実行
             ruby scripts/initialize_server.rb --find ${{ steps.extract_ip.outputs.ip_address }}
             \`\`\`
             `;
