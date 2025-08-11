@@ -204,7 +204,7 @@ namespace :server do
     
     # 前のタスクの結果を確認
     prep_status = load_task_status('prepare_deletion')
-    if prep_status.nil? || prep_status['ip'] != ip
+    if prep_status.nil? || prep_status['status'].nil? || prep_status['status']['ip'] != ip
       abort "❌ エラー: 先に prepare_deletion を実行してください"
     end
     
@@ -228,7 +228,7 @@ namespace :server do
   end
   
   desc "削除後の空コミット作成"
-  task :create_empty_commit, [:issue_number] => :execute_deletion do |t, args|
+  task :create_empty_commit, [:issue_number] do |t, args|
     issue_number = args[:issue_number] || ENV['ISSUE_NUMBER']
     
     unless issue_number
@@ -237,11 +237,12 @@ namespace :server do
     
     # 削除状態を確認
     del_status = load_task_status('execute_deletion')
-    if del_status.nil? || !del_status['success']
+    if del_status.nil? || !del_status['status'] || !del_status['status']['success']
       abort "❌ エラー: サーバー削除が完了していません"
     end
     
-    message = "Fix ##{issue_number}: Initialize server (deleted at #{del_status['deleted_at']})"
+    deleted_at = del_status['status']['deleted_at'] || Time.now.iso8601
+    message = "Fix ##{issue_number}: Initialize server (deleted at #{deleted_at})"
     sh "git commit --allow-empty -m '#{message}'" do |ok, res|
       if ok
         puts "✅ 空コミットを作成しました"
