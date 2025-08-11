@@ -345,6 +345,7 @@ namespace :server do
         else
           puts "  （テスト用サーバーがありません）"
         end
+        puts ""
         
       else
         abort "❌ エラー: サーバー一覧の取得に失敗しました (HTTP #{response.code})"

@@ -17,7 +17,7 @@ jobs:
     
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Ruby環境をセットアップ
         uses: ruby/setup-ruby@v1
@@ -49,11 +49,11 @@ jobs:
         env:
           SACLOUD_ACCESS_TOKEN:        ${{ secrets.SACLOUD_ACCESS_TOKEN }}
           SACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SACLOUD_ACCESS_TOKEN_SECRET }}
-          IP_ADDRESS:                  ${{ steps.extract_ip.outputs.ip_address }}
           CI: true
         run: |
           # 統一命名パターンに従ったfind_by_ipタスクを使用
-          OUTPUT=$(bundle exec rake server:find_by_ip 2>&1) || EXIT_CODE=$?
+          # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
+          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"
@@ -67,7 +67,8 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
             
             # 削除準備タスクも実行（インクリメンタル実行用）
-            bundle exec rake server:prepare_deletion 2>&1 || true
+            # IPアドレスを明示的にパラメータとして渡す
+            bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 || true
           else
             echo "server_found=false" >> $GITHUB_OUTPUT
             echo "error_message<<EOF" >> $GITHUB_OUTPUT
