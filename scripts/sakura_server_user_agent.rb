@@ -21,6 +21,10 @@ class SakuraServerUserAgent
   # dojopaas-default (2017年から使用)
   # 内容: iptables設定、SSH強化、Ansible導入
   STARTUP_SCRIPT_ID = 112900928939
+  
+  # サーバー一覧URL（最新の実サーバー情報）
+  # gh-pagesブランチで公開される実際のサーバー情報
+  INSTANCES_CSV_URL = "https://raw.githubusercontent.com/coderdojo-japan/dojopaas/refs/heads/gh-pages/instances.csv"
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",

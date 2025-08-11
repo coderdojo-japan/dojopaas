@@ -1,0 +1,208 @@
+name: サーバー初期化依頼への自動応答
+# Rakeの依存関係管理を活用した改善版
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  check_and_respond:
+    # Issue タイトルに「初期化依頼」が含まれている場合のみ実行
+    if: contains(github.event.issue.title, '初期化依頼')
+    runs-on: ubuntu-latest
+    
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+      
+      - name: Ruby環境をセットアップ
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      
+      - name: Issue本文からIPアドレスを抽出
+        id: extract_ip
+        run: |
+          # Issue本文を抽出
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          
+          # IPアドレスパターンを抽出（数字とドットのみ）
+          IP_ADDRESS=$(echo "$ISSUE_BODY" | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1)
+          
+          if [ -z "$IP_ADDRESS" ]; then
+            echo "❌ Issue本文にIPアドレスが見つかりませんでした"
+            echo "ip_found=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "📍 IPアドレスを発見: $IP_ADDRESS"
+          echo "ip_address=$IP_ADDRESS" >> $GITHUB_OUTPUT
+          echo "ip_found=true"          >> $GITHUB_OUTPUT
+      
+      - name: IPアドレスを検証してサーバー情報を検索
+        if: steps.extract_ip.outputs.ip_found == 'true'
+        id: find_server
+        env:
+          SACLOUD_ACCESS_TOKEN:        ${{ secrets.SACLOUD_ACCESS_TOKEN }}
+          SACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SACLOUD_ACCESS_TOKEN_SECRET }}
+          CI: true
+        run: |
+          # 統一命名パターンに従ったfind_by_ipタスクを使用
+          # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
+          # セキュリティ: トークン情報をマスキング
+          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 | \
+            sed 's/SACLOUD_ACCESS_TOKEN=.*/SACLOUD_ACCESS_TOKEN=***/' | \
+            sed 's/SACLOUD_ACCESS_TOKEN_SECRET=.*/SACLOUD_ACCESS_TOKEN_SECRET=***/' ) || EXIT_CODE=$?
+          
+          # GitHub Actions用に出力をエスケープ
+          OUTPUT="${OUTPUT//'%'/'%25'}"
+          OUTPUT="${OUTPUT//$'\n'/'%0A'}"
+          OUTPUT="${OUTPUT//$'\r'/'%0D'}"
+          
+          if [ -z "$EXIT_CODE" ] || [ "$EXIT_CODE" = "0" ]; then
+            echo "server_found=true" >> $GITHUB_OUTPUT
+            echo "server_info<<EOF" >> $GITHUB_OUTPUT
+            echo "$OUTPUT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            # 削除準備タスクも実行（インクリメンタル実行用）
+            # IPアドレスを明示的にパラメータとして渡す
+            bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 || true
+          else
+            echo "server_found=false" >> $GITHUB_OUTPUT
+            echo "error_message<<EOF" >> $GITHUB_OUTPUT
+            echo "$OUTPUT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Issueにコメント - サーバーが見つかった場合
+        if: |
+          steps.extract_ip.outputs.ip_found      == 'true' &&
+          steps.find_server.outputs.server_found == 'true'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
+            const serverInfo = `${{ steps.find_server.outputs.server_info }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            
+            const comment = `## 🔍 サーバー情報を確認しました
+            
+            ${serverInfo}
+            
+            ---
+            
+            ### 📋 次のステップ
+            
+            @yasulab このサーバーを初期化する場合は、以下のコマンドを実行してください：
+            
+            #### Rakeタスクを使用した完全なフロー（推奨）
+            \`\`\`bash
+            # 全ステップを自動実行（依存関係管理付き）
+            bundle exec rake server:initialize[${{ steps.extract_ip.outputs.ip_address }},${{ github.event.issue.number }}]
+            git push
+            \`\`\`
+            
+            #### または個別ステップ実行
+            \`\`\`bash
+            # 1. 削除準備（情報確認）
+            bundle exec rake server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]
+            
+            # 2. サーバー削除
+            bundle exec rake server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},true]
+            
+            # 3. 空コミット作成
+            bundle exec rake server:create_empty_commit[${{ github.event.issue.number }}]
+            
+            # 4. プッシュでCI/CD実行
+            git push
+            \`\`\`
+            
+            ⚠️ **注意**: サーバー削除は取り消せません。削除前に必ず確認してください。
+            `;
+            
+            await createIssueComment(comment);
+      
+      - name: Issueにコメント - サーバーが見つからなかった場合
+        if: |
+          steps.extract_ip.outputs.ip_found      == 'true' &&
+          steps.find_server.outputs.server_found == 'false'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
+            const errorMessage = `${{ steps.find_server.outputs.error_message }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            
+            const comment = `## ❌ サーバー情報の取得に失敗しました
+            
+            IPアドレス: \`${{ steps.extract_ip.outputs.ip_address }}\`
+            
+            ### エラー詳細
+            \`\`\`
+            ${errorMessage}
+            \`\`\`
+            
+            @yasulab 手動での確認が必要です。
+            
+            ### 確認コマンド
+            \`\`\`bash
+            # Rakeタスクを使用（統一命名パターン）
+            bundle exec rake server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]
+            
+            # または直接スクリプト実行
+            ruby scripts/initialize_server.rb --find ${{ steps.extract_ip.outputs.ip_address }}
+            \`\`\`
+            `;
+            
+            await createIssueComment(comment);
+      
+      - name: Issueにコメント - IPアドレスが見つからなかった場合
+        if: steps.extract_ip.outputs.ip_found == 'false'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
+            const comment = `## ⚠️ IPアドレスが見つかりませんでした
+            
+            Issueの本文からIPアドレスを抽出できませんでした。
+            
+            ### 正しいフォーマット例
+            \`\`\`
+            CoderDojo【道場名】の【申請者名】です。
+            サーバー（IPアドレス：192.168.1.1）の初期化をお願いします。
+            \`\`\`
+            
+            @yasulab 手動での確認をお願いします。
+            `;
+            
+            await createIssueComment(comment);
