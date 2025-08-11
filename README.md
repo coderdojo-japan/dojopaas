@@ -119,6 +119,7 @@ A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues
 > **:warning: 初期化すると IP アドレスが変わる点にご注意ください。**
 
 - :octocat: [サーバー初期化の申請例 - DojoPaaS](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)
+- :postbox: [サーバー初期化依頼を申請する](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.md)
 
 
 <br>
