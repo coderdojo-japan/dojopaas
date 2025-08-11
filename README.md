@@ -123,7 +123,7 @@ A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues
 
 ## Q. SSH で接続できなくなりました。どうすればよいですか?
 
-CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば[前項にある手順(#howto-initialize)に沿って初期化依頼を出していただけると幸いです。
+CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば[前項にある手順](#howto-initialize)に沿って初期化依頼を出していただけると幸いです。
 
 <br>
 
