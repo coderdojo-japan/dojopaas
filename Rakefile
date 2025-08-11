@@ -157,7 +157,7 @@ namespace :server do
     
     unless name
       abort "❌ エラー: サーバー名が必要です\n" \
-            "使い方: rake server:find_by_name[coderdojo-tokyo]"
+            "使い方: rake server:find_by_name[coderdojo-japan]"
     end
     
     puts "🔍 サーバー名で検索: #{name}"
