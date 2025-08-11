@@ -3,6 +3,9 @@ require 'ipaddr'
 require 'fileutils'
 require 'json'
 require 'time'
+require 'net/http'
+require 'uri'
+require 'csv'
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -20,6 +23,7 @@ task :test => :spec
 # このRakefileは実行可能な操作のカタログとして機能します
 # 'rake -T' ですべての利用可能なタスクを確認できます
 # ================================================================
+
 
 desc "利用可能なDojoPaaS管理タスクをすべて表示"
 task :default do
@@ -296,6 +300,60 @@ namespace :server do
       end
     end
   end
+  
+  # ========================================
+  # サーバー一覧参照タスク
+  # ========================================
+  desc "現在稼働中のサーバー一覧を表示"
+  task :list do
+    require_relative 'scripts/sakura_server_user_agent'
+    
+    puts "📋 サーバー一覧を取得中..."
+    puts "データソース: #{SakuraServerUserAgent::INSTANCES_CSV_URL}"
+    puts "-" * 50
+    
+    begin
+      uri = URI(SakuraServerUserAgent::INSTANCES_CSV_URL)
+      response = Net::HTTP.get_response(uri)
+      
+      if response.code == '200'
+        # エンコーディングを明示的に設定してCSVを解析
+        response.body.force_encoding('UTF-8')
+        csv_data = CSV.parse(response.body, headers: true)
+        
+        puts "📊 サーバー一覧（#{csv_data.length}台）:"
+        puts ""
+        
+        csv_data.each do |row|
+          puts "  🖥️  #{row['Name']}"
+          puts "      IPアドレス: #{row['IP Address']}"  # スペースを追加
+          puts "      説明: #{row['Description']}" if row['Description']
+          puts ""
+        end
+        
+        # テスト用サーバーのチェック
+        require_relative 'scripts/initialize_server'
+        test_servers = csv_data.select do |row|
+          ServerInitializer.safe_test_server?(row['Name'])
+        end
+        
+        puts "🧪 テスト用サーバー（#{test_servers.length}台）:"
+        if test_servers.any?
+          test_servers.each do |server|
+            puts "  ✅ #{server['Name']} - #{server['IP Address']}"  # スペースを追加
+          end
+        else
+          puts "  （テスト用サーバーがありません）"
+        end
+        
+      else
+        abort "❌ エラー: サーバー一覧の取得に失敗しました (HTTP #{response.code})"
+      end
+      
+    rescue => e
+      abort "❌ エラー: #{e.message}"
+    end
+  end
 end
 
 # ヘルパーメソッド（将来のフェーズで拡張予定）
@@ -317,7 +375,6 @@ namespace :parallel do
   desc "複数サーバーの状態を並列チェック"
   multitask :check_all => ['server:validate_env'] do
     # servers.csvから全サーバーをチェック
-    require 'csv'
     servers = CSV.read('servers.csv', headers: true)
     
     # 並列でステータスチェックを実行

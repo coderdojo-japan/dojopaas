@@ -29,6 +29,22 @@ class ServerInitializer
   
   # IPアドレスの厳密な検証パターン
   VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
+  
+  
+  # テスト用サーバー名の安全管理（誤削除防止）
+  # 現在実際に存在するのはcoderdojo-japanのみ
+  # 他は将来のテスト/開発/ステージング環境用として予約
+  SAFE_TEST_SERVERS = [
+    "coderdojo-japan",    # CI/本番環境テスト用固定名（実在）
+    "coderdojo-test",     # 一般テスト用（将来用）
+    "coderdojo-dev",      # 開発環境用（将来用）
+    "coderdojo-staging"   # ステージング用（将来用）
+  ].freeze
+  
+  # テスト用サーバーかどうかを判定
+  def self.safe_test_server?(name)
+    SAFE_TEST_SERVERS.include?(name.to_s.downcase.strip)
+  end
 
   def initialize(input, options = {})
     @input       = input  # Issue URLまたはIPアドレス
@@ -102,6 +118,37 @@ class ServerInitializer
     exit 0
   end
 
+  # 安全性チェック: テスト用サーバー以外の削除には追加確認
+  def confirm_safe_deletion(target)
+    # IPアドレスの場合はサーバー名を取得
+    if valid_ip_address?(target)
+      server_info = find_server_by_ip(target)
+      server_name = server_info ? server_info['Name'] : nil
+    else
+      server_name = target
+    end
+    
+    if server_name && !self.class.safe_test_server?(server_name)
+      puts "⚠️  警告: '#{server_name}' は登録されたテストサーバーではありません"
+      puts "📋 安全なテストサーバー一覧:"
+      SAFE_TEST_SERVERS.each { |name| puts "   - #{name}" }
+      puts ""
+      puts "本当に削除を続行しますか？ 'CONFIRM DELETION' と入力してください:"
+      
+      unless @force
+        user_input = STDIN.gets&.chomp
+        unless user_input == 'CONFIRM DELETION'
+          puts "❌ 削除が中止されました"
+          exit 0
+        end
+      else
+        puts "🔍 --force オプションにより確認をスキップ"
+      end
+    else
+      puts "✅ '#{server_name}' は安全なテストサーバーです"
+    end
+  end
+  
   # IPアドレスによる削除モード
   def run_delete_mode
     puts "=" * 60
@@ -397,6 +444,9 @@ class ServerInitializer
       puts "削除を実行します..."
       return true
     end
+    
+    # 安全性チェック: テスト用サーバー以外は追加確認
+    confirm_safe_deletion(get_server_ip(server))
     
     puts "=" * 60
     puts "⚠️  ⚠️  ⚠️  削除確認 ⚠️  ⚠️  ⚠️"
