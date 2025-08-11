@@ -119,8 +119,8 @@ namespace :server do
     puts "🔍 サーバー情報を検索中..."
     puts "-" * 50
     
-    # 検証済みIPでinitialize_server.rbスクリプトを実行
-    sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}"
+    # 検証済みIPでinitialize_server.rbスクリプトを実行（コマンドエコーを抑制）
+    sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false
   end
   
   # ========================================
@@ -145,7 +145,7 @@ namespace :server do
     puts "🔍 サーバー情報を抽出中..."
     puts "-" * 50
     
-    sh "ruby scripts/initialize_server.rb --find #{issue_url}"
+    sh "ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false
   end
   
   # ========================================
@@ -163,7 +163,7 @@ namespace :server do
     puts "🔍 サーバー名で検索: #{name}"
     puts "-" * 50
     
-    sh "ruby scripts/initialize_server.rb --find #{name}"
+    sh "ruby scripts/initialize_server.rb --find #{name}", verbose: false
   end
   
   # ========================================
