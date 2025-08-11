@@ -113,9 +113,6 @@ jobs:
             #### Rakeタスクを使用した完全なフロー（推奨）
             \`\`\`bash
             # 全ステップを自動実行（依存関係管理付き）
-            # oh-my-zsh等を使用している場合は [ をエスケープ
-            bundle exec rake server:initialize\\[${{ steps.extract_ip.outputs.ip_address }},${{ github.event.issue.number }}\\]
-            # または引用符で囲む
             bundle exec rake "server:initialize[${{ steps.extract_ip.outputs.ip_address }},${{ github.event.issue.number }}]"
             git push
             \`\`\`
@@ -123,16 +120,13 @@ jobs:
             #### または個別ステップ実行
             \`\`\`bash
             # 1. 削除準備（情報確認）
-            bundle exec rake server:prepare_deletion\\[${{ steps.extract_ip.outputs.ip_address }}\\]
-            # または: bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
+            bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
             
             # 2. サーバー削除
-            bundle exec rake server:execute_deletion\\[${{ steps.extract_ip.outputs.ip_address }},true\\]
-            # または: bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},true]"
+            bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},true]"
             
             # 3. 空コミット作成
-            bundle exec rake server:create_empty_commit\\[${{ github.event.issue.number }}\\]
-            # または: bundle exec rake "server:create_empty_commit[${{ github.event.issue.number }}]"
+            bundle exec rake "server:create_empty_commit[${{ github.event.issue.number }}]"
             
             # 4. プッシュでCI/CD実行
             git push
@@ -176,9 +170,6 @@ jobs:
             ### 確認コマンド
             \`\`\`bash
             # Rakeタスクを使用（統一命名パターン）
-            # oh-my-zsh等を使用している場合は [ をエスケープ
-            bundle exec rake server:find_by_ip\\[${{ steps.extract_ip.outputs.ip_address }}\\]
-            # または引用符で囲む
             bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]"
             
             # または直接スクリプト実行
