@@ -82,6 +82,16 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
             const serverInfo = `${{ steps.find_server.outputs.server_info }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
             
             const comment = `## 🔍 サーバー情報を確認しました
@@ -119,12 +129,7 @@ jobs:
             ⚠️ **注意**: サーバー削除は取り消せません。削除前に必ず確認してください。
             `;
             
-            await github.rest.issues.createComment({
-              owner:        context.repo.owner,
-              repo:         context.repo.repo,
-              issue_number: context.issue.number,
-              body:         comment
-            });
+            await createIssueComment(comment);
       
       - name: Issueにコメント - サーバーが見つからなかった場合
         if: |
@@ -133,6 +138,16 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
             const errorMessage = `${{ steps.find_server.outputs.error_message }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
             
             const comment = `## ❌ サーバー情報の取得に失敗しました
@@ -156,18 +171,23 @@ jobs:
             \`\`\`
             `;
             
-            await github.rest.issues.createComment({
-              owner:        context.repo.owner,
-              repo:         context.repo.repo,
-              issue_number: context.issue.number,
-              body:         comment
-            });
+            await createIssueComment(comment);
       
       - name: Issueにコメント - IPアドレスが見つからなかった場合
         if: steps.extract_ip.outputs.ip_found == 'false'
         uses: actions/github-script@v6
         with:
           script: |
+            // ヘルパー関数: コメント作成をDRY化
+            const createIssueComment = (comment) => {
+              return github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body:         comment
+              });
+            };
+            
             const comment = `## ⚠️ IPアドレスが見つかりませんでした
             
             Issueの本文からIPアドレスを抽出できませんでした。
@@ -181,9 +201,4 @@ jobs:
             @yasulab 手動での確認をお願いします。
             `;
             
-            await github.rest.issues.createComment({
-              owner:        context.repo.owner,
-              repo:         context.repo.repo,
-              issue_number: context.issue.number,
-              body:         comment
-            });
+            await createIssueComment(comment);
