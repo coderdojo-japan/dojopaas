@@ -53,7 +53,10 @@ jobs:
         run: |
           # 統一命名パターンに従ったfind_by_ipタスクを使用
           # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
-          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1) || EXIT_CODE=$?
+          # セキュリティ: トークン情報をマスキング
+          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 | \
+            sed 's/SACLOUD_ACCESS_TOKEN=.*/SACLOUD_ACCESS_TOKEN=***/' | \
+            sed 's/SACLOUD_ACCESS_TOKEN_SECRET=.*/SACLOUD_ACCESS_TOKEN_SECRET=***/' ) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"

@@ -199,7 +199,8 @@ namespace :server do
   desc "サーバーを削除（危険・要確認）"
   task :execute_deletion, [:ip, :force] => :prepare_deletion do |t, args|
     ip = args[:ip] || ENV['IP_ADDRESS']
-    force = args[:force] || ENV['FORCE']
+    # forceフラグを明示的にブール値として扱う
+    force = args[:force].to_s.downcase == 'true' || ENV['FORCE'].to_s.downcase == 'true'
     
     # 前のタスクの結果を確認
     prep_status = load_task_status('prepare_deletion')
@@ -317,8 +318,8 @@ namespace :server do
       response = Net::HTTP.get_response(uri)
       
       if response.code == '200'
-        # エンコーディングを明示的に設定してCSVを解析
-        response.body.force_encoding('UTF-8')
+        # エンコーディングを明示的に設定してCSVを解析（無効な文字を安全に処理）
+        response.body.force_encoding('UTF-8').scrub('?')
         csv_data = CSV.parse(response.body, headers: true)
         
         puts "📊 サーバー一覧（#{csv_data.length}台）:"
