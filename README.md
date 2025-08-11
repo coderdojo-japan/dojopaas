@@ -13,6 +13,7 @@
 
 <br>
 
+
 ## 📹 DojoPaaS の使い方
 
 サーバーを申請する準備から利用申請・削除までの手順を説明する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
@@ -20,6 +21,9 @@
 [![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
 
 下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、下記の手順を読みながら直接進めていっても問題ありません 🆗 公開鍵認証がよくわからない場合は[「よく分かる公開鍵認証」～初心者でもよくわかる！VPSによるWebサーバー運用講座](https://knowledge.sakura.ad.jp/3543/)を読んでみてください 📑👀
+
+<br>
+
 
 ## 1. サーバーがほしい方へ
 
@@ -41,6 +45,9 @@ https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv
 公開鍵のサンプル: https://github.com/miya0001.keys
 
 **秘密鍵と公開鍵を間違えない** ようお願いします！ `git push`する前によーくご確認ください。
+
+<br>
+
 
 ## 2. SSHの接続方法
 
@@ -64,6 +71,9 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
 * **ポート番号は22 (SSH), 80 (HTTP), 443 (HTTPS) のみが空いている状態になります。** 詳細は、サーバー生成時に実行される[スタートアップスクリプト](https://github.com/coderdojo-japan/dojopaas/blob/master/startup-scripts/112900928939)をご参照ください。
 
+<br>
+
+
 ## 3. サーバーが不要になったとき
 
 さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から削除することでサーバーの使用を停止できます。
@@ -76,15 +86,19 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 - :postbox: [サーバー削除依頼の申請フォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?title=サーバーの削除依頼&body=CoderDojo【道場名】の【申請者名】です。当該サーバー（IPアドレス：【xxx.xxx.xxx.xxx】）の削除をお願いします。cc/%20@yasulab&labels=サーバー削除依頼&assignee=yasulab)
 -->
 
+<br>
+
 
 # よくある質問と回答
 
 ## Q. サーバーでどんなことができるの?
 
-A. 例えばマインクラフト用のサーバーを立てることができます！[CoderDojo 三島・沼津](https://coderdojo-mn.com/)が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
+例えばマインクラフト用のサーバーを立てることができます！[CoderDojo 三島・沼津](https://coderdojo-mn.com/)が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
 
 :octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/urushibata/minecraft)
   
+<br>
+
 
 ## Q. サーバーを初期化したい場合はどうすればよいですか?
 
@@ -95,15 +109,21 @@ A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues
 > [!WARNING]
 > **:warning: 初期化すると IP アドレスが変わる点にご注意ください。**
 
+<br>
+
 
 ## Q. SSH で接続できなくなりました。どうすればよいですか?
 
 CoderDojo Japan では各サーバーの管理までは対応しておりません。ただし、サーバーの初期化であれば対応できますので、必要であれば上記リンクから初期化依頼を出していただけると幸いです。
 
+<br>
+
 
 ## Q. サーバーの知識があまりないです。どうすればよいですか?
 
 [@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
+
+<br>
 
 
 ## Q. 作成されるサーバーの仕様を教えてください
@@ -114,15 +134,20 @@ CoderDojo Japan では各サーバーの管理までは対応しておりませ�
 * HDD: 20GB
 * リージョン: 石狩第二ゾーン
 
+<br>
+
 
 ## Q. `ooo.coderdojo.jp` のようなサブドメインは使えますか?
 
 以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNS の更新・管理コストが肥大化し他の業務に支障が出てしまったたり、[Subdomain Takeover](https://www.google.com/search?q=Subdomain+Takeover) などのセキュリティ上の課題解決が難しいため、現在は原則としてサブドメインの提供には対応しておりません :bow:
 
+<br>
+
 
 ## Q. 開発に貢献する方法を教えてください
 
 ローカルでテストするには以下の要領でお願いします。
+
 
 ### 環境変数を設定
 
@@ -151,10 +176,16 @@ $ npm run deploy -- --production # 本番環境でインスタンスを作成
 ```
 -->
 
+<br>
+
+
 ### 開発時の注意事項
 
 * 本システムで作成されたすべてのインスタンスには `dojopaas` というタグをつけ、そのタグを利用しています。他の方法で起動したインスタンスにこのタグを付けないでください
 * CSVのフォーマットに対してもテストを行っています。CI の結果に赤いバツ印がある場合はエラーが出ているということなので、マージする前に原因を調べていただけると幸いです
+
+
+<br>
 
 
 ## 開発者向け: サーバー初期化依頼への対応方法
@@ -196,6 +227,8 @@ ruby scripts/initialize_server.rb --find coderdojo-japan
 > - 使い方の詳細は `ruby scripts/initialize_server.rb --help` で確認できます
 > - **原則としてIPアドレスが変わる**点にご注意ください (稀に同じになる場合もあります)
 
+<br>
+
 
 ## DojoPaaS 関連記事
 
@@ -206,6 +239,9 @@ ruby scripts/initialize_server.rb --find coderdojo-japan
 - [さくらインターネット株式会社様より、全国の #CoderDojo を対象としたサーバー環境 (計100台分) のご支援をしていただくことになりました!](https://www.facebook.com/coderdojo.jp/posts/673793186165170)
 - [さくらのクラウドとGitHub+Travis CIを使ってCoderDojo向けのプルリクドリブンのPaaSサービスを3日で作った！](https://tarosky.co.jp/tarog/2086)
   - :memo: 2021年6月より、Travis CI から GitHub Actions に移行されました 🚜💨
+
+<br>
+
 
 # 開発・運営
 
