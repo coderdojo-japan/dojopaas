@@ -24,7 +24,7 @@ class SakuraServerUserAgent
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
-                 tags:nil, pubkey:nil, resolve:nil)
+                 tags:nil, pubkey:nil, resolve:nil, verbose:false)
     @zone             = zone
     @packet_filter_id = packet_filter_id
     @name             = name
@@ -37,6 +37,7 @@ class SakuraServerUserAgent
     @notes            = [{ID: STARTUP_SCRIPT_ID}]
     @sakura_zone_id   = zone_id
     @archive_id       = nil
+    @verbose          = verbose
 
     @client = JSONClient.new
     @client.set_auth(create_endpoint(nil),SAKURA_TOKEN, SAKURA_TOKEN_SECRET)
@@ -57,9 +58,9 @@ class SakuraServerUserAgent
     @pubkey      = params[:pubkey] || @pubkey
     @tags        = ['dojopaas',params[:tag]]
 
-    puts "DEBUG: Creating server with name: #{@name}, description: #{@description}"
-    puts "DEBUG: Tags: #{@tags.inspect}"
-    puts "DEBUG: Public key: #{@pubkey[0..50]}..." if @pubkey
+    puts "DEBUG: Creating server with name: #{@name}, description: #{@description}" if @verbose
+    puts "DEBUG: Tags: #{@tags.inspect}" if @verbose
+    puts "DEBUG: Public key: #{@pubkey[0..50]}..." if @pubkey && @verbose
 
     puts 'create_server_instance'
     create_server_instance()
@@ -101,10 +102,10 @@ class SakuraServerUserAgent
      if /down/ !~ api_status['Instance']['Status']
        status = true
      end
-     p api_status['Instance']['Status']
+     p api_status['Instance']['Status'] if @verbose
     end
 
-    p '---------------------'
+    p '---------------------' if @verbose
     puts 'wait_shutdown'
     
     # スマートウェイトでシャットダウンを待つ
@@ -140,7 +141,7 @@ class SakuraServerUserAgent
         # Icon:         { ID: 112900928939 }  # スタートアップスクリプトIDは一時的に無効化（cloud-initで実行）
       }
     }
-    puts "DEBUG: Server creation request: #{query.inspect}"
+    puts "DEBUG: Server creation request: #{query.inspect}" if @verbose
     response   = send_request('post','server', query)
     @server_id = response['Server']['ID']
 
@@ -298,7 +299,7 @@ class SakuraServerUserAgent
       },
       Notes: @notes
     }
-    puts "DEBUG: Setting SSH key via disk/config API"
+    puts "DEBUG: Setting SSH key via disk/config API" if @verbose
     send_request('put',"disk/#{disk_id}/config",body)
   end
 
@@ -320,8 +321,8 @@ runcmd:
     #{startup_script_content.split("\n").map { |line| line.strip.empty? ? "" : "    #{line}" }.join("\n")}
 EOF
       
-      puts "DEBUG: Starting server with cloud-init for startup script"
-      puts "DEBUG: cloud-config (first 200 chars): #{cloud_config[0..200]}..."
+      puts "DEBUG: Starting server with cloud-init for startup script" if @verbose
+      puts "DEBUG: cloud-config (first 200 chars): #{cloud_config[0..200]}..." if @verbose
       
       body = {
         UserBootVariables: {
@@ -366,15 +367,15 @@ EOF
   # 実際に送信する
   def send_request(http_method,path,query)
     endpoint = create_endpoint(path)
-    puts "DEBUG: #{http_method.upcase} #{endpoint}"
-    puts "DEBUG: Request body: #{query.inspect}" if query
+    puts "DEBUG: #{http_method.upcase} #{endpoint}" if @verbose
+    puts "DEBUG: Request body: #{query.inspect}" if query && @verbose
     response = @client.send(http_method, endpoint, query)
     if response.body.empty?
       raise "Can not send #{http_method} request."
     end
 
     if response.body['is_fatal']
-      puts "DEBUG: Error at endpoint: #{endpoint}"
+      puts "DEBUG: Error at endpoint: #{endpoint}" if @verbose
       pp response.body
       remove_instance()  # 削除はせず、手動削除の案内のみ表示
       raise "Can not success"

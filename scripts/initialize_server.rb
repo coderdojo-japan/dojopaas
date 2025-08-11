@@ -42,7 +42,8 @@ class ServerInitializer
     @ssua = SakuraServerUserAgent.new(
       zone: "31002",
       zone_id: "is1b",
-      packet_filter_id: nil
+      packet_filter_id: nil,
+      verbose: @verbose
     )
   end
 
