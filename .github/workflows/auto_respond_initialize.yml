@@ -65,9 +65,9 @@ jobs:
           
           if [ -z "$EXIT_CODE" ] || [ "$EXIT_CODE" = "0" ]; then
             echo "server_found=true" >> $GITHUB_OUTPUT
-            echo "server_info<<EOF" >> $GITHUB_OUTPUT
-            echo "$OUTPUT" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            echo "server_info<<EOF"  >> $GITHUB_OUTPUT
+            echo "$OUTPUT"           >> $GITHUB_OUTPUT
+            echo "EOF"               >> $GITHUB_OUTPUT
             
             # 削除準備タスクも実行（インクリメンタル実行用）
             # IPアドレスを明示的にパラメータとして渡す
@@ -75,8 +75,8 @@ jobs:
           else
             echo "server_found=false" >> $GITHUB_OUTPUT
             echo "error_message<<EOF" >> $GITHUB_OUTPUT
-            echo "$OUTPUT" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
+            echo "$OUTPUT"            >> $GITHUB_OUTPUT
+            echo "EOF"                >> $GITHUB_OUTPUT
           fi
       
       - name: Issueにコメント - サーバーが見つかった場合
@@ -99,8 +99,10 @@ jobs:
             const serverInfo = `${{ steps.find_server.outputs.server_info }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
             
             const comment = `## 🔍 サーバー情報を確認しました
-            
+
+            \`\`\`
             ${serverInfo}
+            \`\`\`
             
             ---
             

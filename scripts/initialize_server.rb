@@ -379,7 +379,6 @@ class ServerInitializer
     puts "=" * 60
     puts ""
     puts "  サーバー名: #{server['Name']}"
-    puts "  サーバーID: #{server['ID']}"
     puts "  IPアドレス: #{@input}"
     puts "  説明: #{server['Description']}"
     puts "  タグ: #{server['Tags'].join(', ')}"
@@ -603,7 +602,7 @@ class ServerInitializer
         puts "=" * 60
         puts ""
         puts "削除される予定のリソース:"
-        puts "  - サーバー: #{server['Name']} (ID: #{server_id})"
+        puts "  - サーバー: #{server['Name']}"
         puts "  - ディスク数: #{disk_ids.length}個"
         puts ""
         puts "⚠️  これはドライランです。実際には何も削除されていません。"
@@ -613,7 +612,7 @@ class ServerInitializer
         puts "=" * 60
         puts ""
         puts "削除されたリソース:"
-        puts "  - サーバー: #{server['Name']} (ID: #{server_id})"
+        puts "  - サーバー: #{server['Name']}"
         puts "  - ディスク数: #{disk_ids.length}個"
       end
       puts ""
@@ -714,7 +713,6 @@ class ServerInitializer
   def display_server_info(server)
     puts "🖥️  サーバー情報:"
     puts "  - サーバー名: #{server['Name']}"
-    puts "  - サーバーID: #{server['ID']}"
     puts "  - 説明: #{server['Description']}"
     puts "  - タグ: #{server['Tags'].join(', ')}"
     puts "  - ステータス: #{server['Instance']['Status']}"
@@ -747,7 +745,6 @@ class ServerInitializer
     puts "以下のサーバーを初期化（削除して再作成）します："
     puts ""
     puts "  サーバー名: #{server_info['Name']}"
-    puts "  サーバーID: #{server_info['ID']}"
     puts "  IPアドレス: #{ip_address}"
     puts "  CoderDojo: #{dojo_name || '(自動判定)'}"
     puts ""
@@ -757,7 +754,7 @@ class ServerInitializer
       puts "1. さくらのクラウドコントロールパネルにログイン"
       puts "   https://secure.sakura.ad.jp/cloud/"
       puts ""
-      puts "2. サーバーID: #{server_info['ID']} を検索"
+      puts "2. サーバー「#{server_info['Name']}」を検索"
       puts ""
       puts "3. サーバーを停止してから削除（ディスクも含む）"
       puts ""
