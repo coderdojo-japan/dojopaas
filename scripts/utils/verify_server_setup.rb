@@ -6,7 +6,7 @@
 require 'dotenv/load'
 require 'open3'
 require 'json'
-require_relative 'smart_wait_helper'
+require_relative '../smart_wait_helper'
 
 include SmartWaitHelper
 

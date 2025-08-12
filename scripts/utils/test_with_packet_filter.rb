@@ -4,7 +4,7 @@
 # 通常版Ubuntu 24.04 + disk/config API + @notes + パケットフィルター
 
 require 'dotenv/load'
-require_relative '../scripts/sakura_server_user_agent.rb'
+require_relative '../sakura_server_user_agent.rb'
 
 # SSH公開鍵を読み込み
 ssh_public_key_path = ENV['SSH_PUBLIC_KEY_PATH'] || File.expand_path('~/.ssh/id_rsa.pub')

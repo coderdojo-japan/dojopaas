@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'dotenv/load'
-require_relative '../scripts/sakura_server_user_agent.rb'
+require_relative '../sakura_server_user_agent.rb'
 
 if ARGV.empty?
   puts "使い方: ruby #{$0} <サーバー名の一部>"

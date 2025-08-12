@@ -204,7 +204,7 @@ SACLOUD_ACCESS_TOKEN_SECRET=xxxxx
 ### 実証済みテスト結果
 
 ```ruby
-# test/test_regex_patterns.rb
+# scripts/utils/test_regex_patterns.rb
 # 20件の実際のIssueでテスト
 # 結果: 95%成功率（19/20件）
 ```
@@ -213,10 +213,10 @@ SACLOUD_ACCESS_TOKEN_SECRET=xxxxx
 
 ```bash
 # 正規表現パターンのテスト
-ruby test/test_regex_patterns.rb
+ruby scripts/utils/test_regex_patterns.rb
 
 # 実際のIssueでテスト（GitHub CLI必要）
-ruby test/test_regex_patterns.rb --real
+ruby scripts/utils/test_regex_patterns.rb --real
 
 # ドライランで動作確認
 ruby scripts/initialize_server.rb --dry-run https://github.com/coderdojo-japan/dojopaas/issues/249

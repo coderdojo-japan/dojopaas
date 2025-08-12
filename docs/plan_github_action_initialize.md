@@ -609,7 +609,7 @@ permissions:
 ### 1. Ruby IPAddr検証テスト
 
 ```ruby
-# test/test_ip_validation.rb
+# scripts/utils/test_ip_validation.rb
 require 'minitest/autorun'
 require 'ipaddr'
 

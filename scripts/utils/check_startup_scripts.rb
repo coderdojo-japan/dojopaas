@@ -3,7 +3,7 @@
 # 利用可能なスタートアップスクリプト（Noteリソース）を調査
 
 require 'dotenv/load'
-require_relative '../scripts/sakura_server_user_agent.rb'
+require_relative '../sakura_server_user_agent.rb'
 
 params = {
   zone: "31002",

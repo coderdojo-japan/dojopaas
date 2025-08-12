@@ -3,8 +3,8 @@
 # サーバーを起動するスクリプト
 
 require 'dotenv/load'
-require_relative '../scripts/sakura_server_user_agent.rb'
-require_relative 'smart_wait_helper'
+require_relative '../sakura_server_user_agent.rb'
+require_relative '../smart_wait_helper'
 
 include SmartWaitHelper
 

@@ -15,7 +15,7 @@ $ ls scripts/
 deploy.rb  initialize_server.rb  sakura_server_user_agent.rb  smart_wait_helper.rb
 # 「これ何？実行していいの？引数は？」
 
-$ ls test/
+$ ls scripts/utils/
 check_server_status.rb  find_resources.rb  test_regex_patterns.rb  ...
 # 「テスト？ツール？どっち？」
 ```
@@ -172,7 +172,7 @@ namespace :server do
   
   desc "Check server status"
   task :status, [:name] do |t, args|
-    sh "ruby test/check_server_status.rb #{args[:name]}"
+    sh "ruby scripts/utils/check_server_status.rb #{args[:name]}"
   end
 end
 
@@ -191,12 +191,12 @@ namespace :test do
   desc "Find test resources by pattern"
   task :find_resources, [:pattern] do |t, args|
     pattern = args[:pattern] || ""
-    sh "ruby test/find_resources.rb #{pattern}"
+    sh "ruby scripts/utils/find_resources.rb #{pattern}"
   end
   
   desc "Verify server setup and connectivity"
   task :verify, [:ip] => [:validate_ip] do |t, args|
-    sh "ruby test/verify_server_setup.rb #{args[:ip]}"
+    sh "ruby scripts/utils/verify_server_setup.rb #{args[:ip]}"
   end
 end
 ```
