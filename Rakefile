@@ -10,7 +10,8 @@ require 'csv'
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
   t.test_files = FileList['test/*_test.rb']
-  t.verbose = true
+  t.verbose = false  # 詳細な実行コマンドを非表示
+  t.warning = false  # 警告を無効化（必要に応じて）
 end
 
 # 短縮エイリアス
