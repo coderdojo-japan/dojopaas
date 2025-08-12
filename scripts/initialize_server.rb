@@ -28,7 +28,8 @@ class ServerInitializer
   IP_PATTERN = /(?:IPアドレス|IP)[：:]\s*【?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})】?/
   
   # IPアドレスの厳密な検証パターン
-  VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
+  # 注: RakefileでIPAddrクラスによる検証を行うため、ここでの重複検証は不要（YAGNI）
+  # VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
   
   
   # テスト用サーバー名の安全管理（誤削除防止）
@@ -121,7 +122,7 @@ class ServerInitializer
   # 安全性チェック: テスト用サーバー以外の削除には追加確認
   def confirm_safe_deletion(target)
     # IPアドレスの場合はサーバー名を取得
-    if valid_ip_address?(target)
+    if SakuraServerUserAgent.valid_ip_address?(target)
       server_info = find_server_by_ip(target)
       server_name = server_info ? server_info['Name'] : nil
     else
@@ -161,7 +162,7 @@ class ServerInitializer
     puts ""
     
     # IPアドレスの検証
-    unless valid_ip_address?(@input)
+    unless SakuraServerUserAgent.valid_ip_address?(@input)
       puts "❌ エラー: 無効なIPアドレス形式です: #{@input}"
       puts ""
       puts "正しいIPアドレス形式で指定してください（例: 192.168.1.1）"
@@ -366,11 +367,6 @@ class ServerInitializer
     display_deletion_plan(server_info, ip_address, dojo_name)
   end
 
-  # IPアドレスの検証
-  def valid_ip_address?(ip)
-    return false if ip.nil? || ip.empty?
-    !!(ip =~ VALID_IP_PATTERN)
-  end
   
   # サーバー情報の詳細表示（削除用）
   def display_server_details_for_deletion(server)

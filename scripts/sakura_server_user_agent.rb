@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative 'smart_wait_helper'
+require 'ipaddr'  # IP検証用
 
 class SakuraServerUserAgent
   include SmartWaitHelper
@@ -25,6 +26,33 @@ class SakuraServerUserAgent
   # サーバー一覧URL（最新の実サーバー情報）
   # gh-pagesブランチで公開される実際のサーバー情報
   INSTANCES_CSV_URL = "https://raw.githubusercontent.com/coderdojo-japan/dojopaas/refs/heads/gh-pages/instances.csv"
+
+  # IPアドレス検証用のクラスメソッド（共通化）
+  # @param ip [String] 検証するIPアドレス
+  # @return [Boolean] 有効なIPアドレスの場合true、無効な場合false
+  def self.valid_ip_address?(ip)
+    return false if ip.nil? || ip.empty?
+    
+    begin
+      IPAddr.new(ip)
+      true
+    rescue IPAddr::InvalidAddressError
+      false
+    end
+  end
+  
+  # IPアドレスを正規化して返す
+  # @param ip [String] 正規化するIPアドレス
+  # @return [String, nil] 正規化されたIPアドレス、無効な場合はnil
+  def self.normalize_ip_address(ip)
+    return nil if ip.nil? || ip.empty?
+    
+    begin
+      IPAddr.new(ip).to_s
+    rescue IPAddr::InvalidAddressError
+      nil
+    end
+  end
 
   # jsのserver.createで使っているフィールドを参考
   def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",

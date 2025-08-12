@@ -1,5 +1,4 @@
 require "rspec/core/rake_task"
-require 'ipaddr'
 require 'fileutils'
 require 'json'
 require 'time'
@@ -94,26 +93,15 @@ namespace :server do
             "または: IP_ADDRESS=192.168.1.1 rake server:find_by_ip"
     end
     
-    # セキュリティのためRubyのIPAddrを使用してIPアドレスを検証
-    begin
-      validated_ip = IPAddr.new(ip)
-      
-      # プライベート/特殊IPをチェック
-      if validated_ip.private? || validated_ip.loopback? || validated_ip.link_local?
-        abort "❌ エラー: プライベートまたは特殊IPアドレスは許可されていません: #{ip}"
-      end
-      
-      # さくらクラウドのIP範囲の追加検証（オプション）
-      if ENV['VALIDATE_SAKURA_RANGE'] == 'true'
-        unless in_sakura_cloud_range?(validated_ip)
-          abort "❌ エラー: IPアドレスがさくらクラウドの範囲外です: #{ip}"
-        end
-      end
-      
-      validated_ip_str = validated_ip.to_s
-    rescue IPAddr::InvalidAddressError => e
-      abort "❌ エラー: 無効なIPアドレス形式: #{ip}\n#{e.message}"
+    # IPアドレスの検証（SakuraServerUserAgentの共通メソッドを使用）
+    require_relative 'scripts/sakura_server_user_agent'
+    
+    unless SakuraServerUserAgent.valid_ip_address?(ip)
+      abort "❌ エラー: 無効なIPアドレス形式: #{ip}"
     end
+    
+    # IPアドレスを正規化
+    validated_ip_str = SakuraServerUserAgent.normalize_ip_address(ip)
     
     puts "✅ 有効なIPアドレス: #{validated_ip_str}"
     puts "🔍 サーバー情報を検索中..."
@@ -359,51 +347,53 @@ namespace :server do
   end
 end
 
-# ヘルパーメソッド（将来のフェーズで拡張予定）
-def in_sakura_cloud_range?(ip_addr)
-  # さくらクラウドのIP範囲（現時点では簡略化）
-  sakura_ranges = [
-    IPAddr.new("153.127.0.0/16"),  # 石狩第二ゾーン
-    IPAddr.new("163.43.0.0/16"),   # 東京ゾーン
-    IPAddr.new("133.242.0.0/16"),  # 大阪ゾーン
-  ]
-  
-  sakura_ranges.any? { |range| range.include?(ip_addr) }
-end
+# ヘルパーメソッド（将来の拡張用に保持）
+# 注: 現在は使用されていません（YAGNI原則により簡素化）
+# def in_sakura_cloud_range?(ip_addr)
+#   sakura_ranges = [
+#     IPAddr.new("153.127.0.0/16"),  # 石狩第二ゾーン
+#     IPAddr.new("163.43.0.0/16"),   # 東京ゾーン
+#     IPAddr.new("133.242.0.0/16"),  # 大阪ゾーン
+#   ]
+#   sakura_ranges.any? { |range| range.include?(ip_addr) }
+# end
 
 # ================================================================
-# 並列実行タスク（Rakeの高度な機能）
+# 並列実行タスク（将来の実装用にコメントアウト）
 # ================================================================
-namespace :parallel do
-  desc "複数サーバーの状態を並列チェック"
-  multitask :check_all => ['server:validate_env'] do
-    # servers.csvから全サーバーをチェック
-    servers = CSV.read('servers.csv', headers: true)
-    
-    # 並列でステータスチェックを実行
-    threads = servers.map do |server|
-      Thread.new do
-        begin
-          result = `ruby scripts/initialize_server.rb --find #{server['Name']} 2>&1`
-          { name: server['Name'], status: $?.success? ? 'OK' : 'ERROR', details: result }
-        rescue => e
-          { name: server['Name'], status: 'ERROR', details: e.message }
-        end
-      end
-    end
-    
-    results = threads.map(&:value)
-    
-    # 結果をサマリー表示
-    puts "\n" + "=" * 50
-    puts "サーバーステータスサマリー"
-    puts "=" * 50
-    results.each do |r|
-      status_icon = r[:status] == 'OK' ? '✅' : '❌'
-      puts "#{status_icon} #{r[:name]}: #{r[:status]}"
-    end
-  end
-end
+# YAGNI原則により、実際に必要になるまでコメントアウト
+# 注意: 200サーバーの並列チェックはAPI制限のリスクあり
+#
+# namespace :parallel do
+#   desc "複数サーバーの状態を並列チェック"
+#   multitask :check_all => ['server:validate_env'] do
+#     # servers.csvから全サーバーをチェック
+#     servers = CSV.read('servers.csv', headers: true)
+#     
+#     # 並列でステータスチェックを実行
+#     threads = servers.map do |server|
+#       Thread.new do
+#         begin
+#           result = `ruby scripts/initialize_server.rb --find #{server['Name']} 2>&1`
+#           { name: server['Name'], status: $?.success? ? 'OK' : 'ERROR', details: result }
+#         rescue => e
+#           { name: server['Name'], status: 'ERROR', details: e.message }
+#         end
+#       end
+#     end
+#     
+#     results = threads.map(&:value)
+#     
+#     # 結果をサマリー表示
+#     puts "\n" + "=" * 50
+#     puts "サーバーステータスサマリー"
+#     puts "=" * 50
+#     results.each do |r|
+#       status_icon = r[:status] == 'OK' ? '✅' : '❌'
+#       puts "#{status_icon} #{r[:name]}: #{r[:status]}"
+#     end
+#   end
+# end
 
 # ================================================================
 # クリーンタスク（Rake標準機能の活用）
