@@ -3,26 +3,12 @@ GEM
   specs:
     base64 (0.3.0)
     csv (3.3.4)
-    diff-lcs (1.6.2)
     dotenv (3.1.8)
     httpclient (2.9.0)
       mutex_m
     mutex_m (0.3.0)
     net-ssh (7.3.0)
     rake (13.2.1)
-    rspec (3.13.0)
-      rspec-core (~> 3.13.0)
-      rspec-expectations (~> 3.13.0)
-      rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.3)
-      rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.4)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.4)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-support (3.13.3)
 
 PLATFORMS
   ruby
@@ -34,7 +20,6 @@ DEPENDENCIES
   httpclient
   net-ssh
   rake
-  rspec
 
 BUNDLED WITH
    2.6.9

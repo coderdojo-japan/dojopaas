@@ -1,4 +1,4 @@
-require "rspec/core/rake_task"
+require 'rake/testtask'
 require 'fileutils'
 require 'json'
 require 'time'
@@ -6,9 +6,30 @@ require 'net/http'
 require 'uri'
 require 'csv'
 
-RSpec::Core::RakeTask.new(:spec)
+# Minitestタスクの定義
+Rake::TestTask.new(:test) do |t|
+  t.libs << "test"
+  t.test_files = FileList['test/*_test.rb']
+  t.verbose = true
+end
 
-task :test => :spec
+# 短縮エイリアス
+task :t => :test
+
+# テストの詳細情報を表示
+desc "Run all tests with detailed output"
+task :test_verbose do
+  ENV['TESTOPTS'] = '--verbose'
+  Rake::Task[:test].invoke
+end
+
+# CSV検証のみ実行
+desc "Validate CSV format only"
+task :test_csv do
+  ruby "test/csv_test.rb"
+end
+
+task :default => :test
 
 # Rakeの高度な機能を活用した改善
 # - 依存関係の明確化
