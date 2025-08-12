@@ -53,10 +53,7 @@ jobs:
         run: |
           # 統一命名パターンに従ったfind_by_ipタスクを使用
           # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
-          # セキュリティ: トークン情報をマスキング
-          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 | \
-            sed 's/SACLOUD_ACCESS_TOKEN=.*/SACLOUD_ACCESS_TOKEN=***/' | \
-            sed 's/SACLOUD_ACCESS_TOKEN_SECRET=.*/SACLOUD_ACCESS_TOKEN_SECRET=***/' ) || EXIT_CODE=$?
+          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"
@@ -68,10 +65,6 @@ jobs:
             echo "server_info<<EOF"  >> $GITHUB_OUTPUT
             echo "$OUTPUT"           >> $GITHUB_OUTPUT
             echo "EOF"               >> $GITHUB_OUTPUT
-            
-            # 削除準備タスクも実行（インクリメンタル実行用）
-            # IPアドレスを明示的にパラメータとして渡す
-            bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1 || true
           else
             echo "server_found=false" >> $GITHUB_OUTPUT
             echo "error_message<<EOF" >> $GITHUB_OUTPUT
