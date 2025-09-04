@@ -4,7 +4,7 @@
 
 このプロジェクトはさくらインターネット様からご提供いただいた「さくらのクラウド」上の各インスタンス及び、それぞれのサーバーアカウントを管理するためのプロジェクトです。
 
-[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) に記載された情報に基づいて [GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions) 経由で自動的にサーバーが起動します。
+[servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv) に記載された情報に基づいて [GitHub Actions](https://github.com/coderdojo-japan/dojopaas/actions) 経由で自動的にサーバーが起動します。
 
 > [!NOTE]
 > 本システムの背景と概要、および活用例などについては以下の SAKURA internet のレポート記事・動画からご確認いただけます。
@@ -21,7 +21,7 @@
 
 サーバーを申請する準備から利用申請・削除までの手順を説明する動画を作りました! 「文章だけだと分かりにくい」といった場合にご活用ください ;)
 
-[![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/master/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
+[![DojoPaas 解説動画へのリンク](https://raw.githubusercontent.com/coderdojo-japan/dojopaas/main/img/youtube-thumbnail.png)](https://www.youtube.com/playlist?list=PL94GDfaSQTmIHQUGK2OKuXNk_QFs6_NTV)
 
 下記の手順を説明する動画となっておりますので、GitHub や公開鍵認証などに慣れている場合は、[下記の手順](#howto)を読みながら直接進めていっても問題ありません 🆗
 
@@ -36,7 +36,7 @@
 
 以下のリンク先にあるCSVに対して必要事項を記入したプルリクエストをお願いします。
 
-https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv   
+https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv   
 プルリクエストの例: https://github.com/coderdojo-japan/dojopaas/pull/1
 
 > [!NOTE]
@@ -77,14 +77,14 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 * ユーザー名はすべて `ubuntu` です。
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
-* **ポート番号は22 (SSH), 80 (HTTP), 443 (HTTPS) のみが空いている状態になります。** 詳細は、サーバー生成時に実行される[スタートアップスクリプト](https://github.com/coderdojo-japan/dojopaas/blob/master/startup-scripts/112900928939)をご参照ください。
+* **ポート番号は22 (SSH), 80 (HTTP), 443 (HTTPS) のみが空いている状態になります。** 詳細は、サーバー生成時に実行される[スタートアップスクリプト](https://github.com/coderdojo-japan/dojopaas/blob/main/startup-scripts/112900928939)をご参照ください。
 
 <br>
 
 
 ## 3. サーバーが不要になったとき
 
-さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から削除することでサーバーの使用を停止できます。
+さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv) から削除することでサーバーの使用を停止できます。
 
 - :octocat: [サーバー削除の申請例 (#213)](https://github.com/coderdojo-japan/dojopaas/pull/213)  
 
@@ -134,7 +134,7 @@ CoderDojo Japan では各サーバーの管理までは対応しておりませ�
 
 ## Q. サーバーの知識があまりないです。どうすればよいですか?
 
-[@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/master/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
+[@manzyun](https://github.com/manzyun) さんが書いてくれた[簡易ハンドブックがあります](https://github.com/coderdojo-japan/dojopaas/blob/main/docs/ssh.md)。基本的なポイントだけを押さえておりますので、必要に応じてご参照ください。
 
 <br>
 

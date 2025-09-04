@@ -28,4 +28,4 @@ if [ -n "$NEW_SERVERS" ]; then
 fi
 
 git commit --quiet -m    "$COMMIT_MSG"
-git push --force --quiet "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" master:gh-pages
+git push --force --quiet "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" main:gh-pages

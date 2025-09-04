@@ -10,7 +10,7 @@ READMEにあるフォームからサーバー初期化の依頼が来たとき�
 3. (もしStatusが`up`であれば) `/sacloud halt <ID>` でサーバーを停止させる
 4. `/sacloud destroy <ID>` で当該サーバーを削除する
 5. [coderdojo-japan/dojopaas](https://github.com/coderdojo-japan/dojopaas/)リポジトリに空コミットをする
-6. CIが動き、既存の [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/master/servers.csv) から当該サーバーが再生成 (初期化) されます
+6. CIが動き、既存の [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv) から当該サーバーが再生成 (初期化) されます
 7. [instances.csv](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv) を確認し、問題なければ当該 Issue を閉じてください
 
 コードに手を加えていないため、この手順でCIが失敗することはないはずですが、もし失敗していた場合は CI の画面から Restart ボタンを押してみてください。

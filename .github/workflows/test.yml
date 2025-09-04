@@ -2,7 +2,7 @@ name: actions
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
       - "*"
@@ -25,7 +25,7 @@ jobs:
         run: bundle exec rake test
 
   deploy:
-    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     needs: test
     runs-on: ubuntu-latest
     steps:
