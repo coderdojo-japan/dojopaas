@@ -11,8 +11,8 @@ class SakuraServerUserAgent
   SAKURA_CLOUD_SUFFIX = 'api/cloud'
   SAKURA_API_VERSION  = '1.1'
 
-  SAKURA_TOKEN        = ENV.fetch('SACLOUD_ACCESS_TOKEN')
-  SAKURA_TOKEN_SECRET = ENV.fetch('SACLOUD_ACCESS_TOKEN_SECRET')
+  SAKURA_TOKEN        = ENV.fetch('SACLOUD_ACCESS_TOKEN', 'dummy-token-for-test')
+  SAKURA_TOKEN_SECRET = ENV.fetch('SACLOUD_ACCESS_TOKEN_SECRET', 'dummy-secret-for-test')
   
   # ディスク状態確認用の定数
   DISK_CHECK_INTERVAL = 10  # 秒
