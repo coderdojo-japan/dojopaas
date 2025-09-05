@@ -18,9 +18,16 @@ class SakuraServerUserAgent
   DISK_CHECK_INTERVAL = 10  # 秒
   MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
   
-  # 標準スタートアップスクリプトID
-  # dojopaas-default (2017年から使用)
-  # 内容: iptables設定、SSH強化、Ansible導入
+  # 標準スタートアップスクリプトID - dojopaas-default
+  # 作成日: 2017-07-22 (7年間の実績)
+  # 
+  # 実行内容:
+  # - iptables設定（ポート22/80/443のみ開放、DDoS対策含む）
+  # - SSH設定強化（rootログイン無効、パスワード認証無効）
+  # - Ansible導入（自動化基盤）
+  # 
+  # 実行タイミング: disk/config API の Notes で指定後、サーバー初回起動時
+  # 実行ログ: /root/.sacloud-api/notes/112900928939.log
   STARTUP_SCRIPT_ID = 112900928939
   
   # サーバー一覧URL（最新の実サーバー情報）
@@ -66,7 +73,9 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
-    # 標準スタートアップスクリプトを使用（デフォルト値または指定値）
+    # スタートアップスクリプトの設定
+    # disk/config API の Notes配列形式: [{ID: スクリプトID, Variables: 変数Hash}]
+    # デフォルト: dojopaas-default (ID: 112900928939) を使用
     @notes            = notes || [{ID: STARTUP_SCRIPT_ID}]
     @sakura_zone_id   = zone_id
     @archive_id       = nil
@@ -324,12 +333,20 @@ class SakuraServerUserAgent
   private
 
   def _put_ssh_key(disk_id)
-    # disk/config APIを使用してSSH鍵とスタートアップスクリプトを設定
+    # さくらのクラウドAPI v1.1 disk/config エンドポイントを使用
+    # 公式ドキュメント: https://manual.sakura.ad.jp/cloud-api/1.1/disk/index.html#put_disk_diskid_config
+    #
+    # このAPIにより以下が設定される：
+    # 1. SSH公開鍵の登録（SSHKey.PublicKey）
+    # 2. スタートアップスクリプトの指定（Notes配列）
+    #
+    # 重要: Notesで指定されたスクリプトは次回サーバー起動時に自動実行される
+    #       実行後は設定がクリアされるため、重複実行は発生しない
     body = {
       SSHKey: {
         PublicKey: @pubkey
       },
-      Notes: @notes
+      Notes: @notes  # 例: [{ID: 112900928939}] - dojopaas-default スクリプト
     }
     puts "DEBUG: Setting SSH key via disk/config API" if @verbose
     puts "DEBUG: Notes being set: #{@notes.inspect}" if @verbose
@@ -340,13 +357,21 @@ class SakuraServerUserAgent
   end
 
   def _copying_image
-    # SSH鍵とスタートアップスクリプトはdisk/config APIで設定済み
-    # /server/{id}/power APIはパラメータなしで呼び出す（Notesパラメータは無視される）
+    # サーバー起動処理
+    # 
+    # 前段階で disk/config API により以下が既に設定済み：
+    # - SSH鍵（SSHKey.PublicKey）
+    # - スタートアップスクリプト（Notes配列）
+    # 
+    # /server/{id}/power API仕様：
+    # - Notesパラメータは受け付けない（無視される）
+    # - disk/config で設定されたスクリプトが起動時に自動実行
+    # - スクリプト実行ログ: /root/.sacloud-api/notes/<スクリプトID>.log
     
     puts "DEBUG: Starting server (startup script already embedded in disk)" if @verbose
     
     # サーバー起動（パラメータなし）
-    # Note: スタートアップスクリプトはdisk/config APIで既に設定済み
+    # disk/config APIで設定済みのスタートアップスクリプトが自動実行される
     send_request('put',"server/#{@server_id}/power", nil)
 
     rescue => exception
