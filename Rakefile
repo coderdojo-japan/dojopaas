@@ -6,6 +6,9 @@ require 'net/http'
 require 'uri'
 require 'csv'
 
+# 表示用の定数
+SEPARATOR_WIDTH = 60  # セパレーター行の幅
+
 # Minitestタスクの定義
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
@@ -49,10 +52,10 @@ task :default => :test
 desc "利用可能なDojoPaaS管理タスクをすべて表示"
 task :default do
   puts "\n🔧 DojoPaaS 管理タスク"
-  puts "=" * 50
+  puts "=" * SEPARATOR_WIDTH
   puts "'rake -T' ですべての利用可能なタスクを確認"
   puts "'rake -D [タスク名]' で詳細な説明を表示"
-  puts "=" * 50
+  puts "=" * SEPARATOR_WIDTH
   sh "rake -T"
 end
 
@@ -127,7 +130,7 @@ namespace :server do
     
     puts "✅ 有効なIPアドレス: #{validated_ip_str}"
     puts "🔍 サーバー情報を検索中..."
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     # 検証済みIPでinitialize_server.rbスクリプトを実行（コマンドエコーを抑制）
     sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false
@@ -153,7 +156,7 @@ namespace :server do
     
     puts "📋 Issue処理中: #{issue_url}"
     puts "🔍 サーバー情報を抽出中..."
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     sh "ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false
   end
@@ -171,7 +174,7 @@ namespace :server do
     end
     
     puts "🔍 サーバー名で検索: #{name}"
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     sh "ruby scripts/initialize_server.rb --find #{name}", verbose: false
   end
@@ -322,7 +325,7 @@ namespace :server do
     
     puts "📋 サーバー一覧を取得中..."
     puts "データソース: #{SakuraServerUserAgent::INSTANCES_CSV_URL}"
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     begin
       uri = URI(SakuraServerUserAgent::INSTANCES_CSV_URL)
@@ -381,9 +384,9 @@ namespace :server do
             "注意: servers.csvに登録されているサーバー名を指定してください"
     end
     
-    puts "="*60
+    puts "="*SEPARATOR_WIDTH
     puts "🚀 DojoPaaS 個別サーバー作成"
-    puts "="*60
+    puts "="*SEPARATOR_WIDTH
     puts ""
     puts "サーバー名: #{server_name}"
     puts ""
@@ -396,9 +399,9 @@ namespace :server do
     
     if success
       puts ""
-      puts "="*60
+      puts "="*SEPARATOR_WIDTH
       puts "✅ サーバー作成プロセス完了"
-      puts "="*60
+      puts "="*SEPARATOR_WIDTH
       puts ""
       puts "【次のステップ】"
       puts "1. SSHで接続確認:"
@@ -409,9 +412,9 @@ namespace :server do
       puts ""
     else
       puts ""
-      puts "="*60
+      puts "="*SEPARATOR_WIDTH
       puts "❌ サーバー作成に失敗しました"
-      puts "="*60
+      puts "="*SEPARATOR_WIDTH
       exit 1
     end
   end
@@ -425,9 +428,9 @@ namespace :server do
             "使い方: rake server:recreate[coderdojo-japan]"
     end
     
-    puts "="*60
+    puts "="*SEPARATOR_WIDTH
     puts "🔄 DojoPaaS サーバー再作成"
-    puts "="*60
+    puts "="*SEPARATOR_WIDTH
     puts ""
     
     # 1. まず既存サーバーを検索
