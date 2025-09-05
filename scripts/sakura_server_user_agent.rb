@@ -169,8 +169,7 @@ class SakuraServerUserAgent
         },
         Name:         @name,
         Description:  @description,
-        Tags:         @tags,
-        # Icon:         { ID: 112900928939 }  # スタートアップスクリプトIDは一時的に無効化（cloud-initで実行）
+        Tags:         @tags
       }
     }
     puts "DEBUG: Server creation request: #{query.inspect}" if @verbose
