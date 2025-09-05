@@ -70,6 +70,74 @@ class CoderDojoSakuraCLI
     puts "the #{RESULT_INSTANCE_CSV} was saved!"
   end
 
+  # 個別サーバー作成メソッド（Rakeタスク用）
+  # DRY原則: 既存のロジックを最大限再利用
+  def create_single_server(server_name)
+    # 初期化パラメータとAPIクライアントのセットアップ（既存ロジック再利用）
+    request_params = perform_init_params()
+    @ssua = SakuraServerUserAgent.new(**request_params)
+    @ssua.archive_id = initial_archive_id()
+
+    # servers.csvから指定されたサーバー情報を取得
+    server_info = nil
+    CSV.read(INSTANCE_CSV, headers: true).each do |line|
+      if line['name'] == server_name
+        server_info = line
+        break
+      end
+    end
+
+    unless server_info
+      puts "❌ エラー: サーバー '#{server_name}' が servers.csv に見つかりません"
+      return false
+    end
+
+    # 既存サーバーのチェック
+    puts '🔍 既存サーバーをチェック中...'
+    sakura_servers = (@ssua.get_servers())['Servers']
+    sakura_servers.each do |s|
+      if s['Name'] == server_name
+        puts "⚠️  警告: サーバー '#{server_name}' は既に存在します"
+        puts "  IPアドレス: #{s['Interfaces'].first['IPAddress']}"
+        puts "  説明: #{s['Description']}"
+        return false
+      end
+    end
+
+    # サーバー作成（既存のcreateメソッドを再利用）
+    puts "🚀 サーバー '#{server_name}' を作成中..."
+    puts "  説明: #{server_info['description']}"
+    puts "  ブランチ: #{server_info['branch']}"
+    
+    begin
+      @ssua.create(
+        name: server_info['name'],
+        description: server_info['description'],
+        pubkey: server_info['pubkey'],
+        tag: server_info['branch']
+      )
+      
+      # 作成結果の確認
+      sleep(5)  # APIの反映待ち
+      result_servers = (@ssua.get_servers())['Servers']
+      created_server = result_servers.find { |s| s['Name'] == server_name }
+      
+      if created_server
+        puts "✅ サーバー作成成功!"
+        puts "  サーバー名: #{created_server['Name']}"
+        puts "  IPアドレス: #{created_server['Interfaces'].first['IPAddress']}"
+        puts "  説明: #{created_server['Description']}"
+        return true
+      else
+        puts "❌ サーバー作成に失敗した可能性があります"
+        return false
+      end
+    rescue => e
+      puts "❌ エラー: #{e.message}"
+      return false
+    end
+  end
+
 
   private
 

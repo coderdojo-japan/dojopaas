@@ -367,6 +367,113 @@ namespace :server do
       abort "❌ エラー: #{e.message}"
     end
   end
+
+  # ========================================
+  # 個別サーバー作成タスク（テスト用）
+  # ========================================
+  desc "指定したサーバーを個別に作成（テスト用）"
+  task :create, [:server_name] => [:check_api_credentials] do |t, args|
+    server_name = args[:server_name]
+    
+    unless server_name
+      abort "❌ エラー: サーバー名が必要です\n" \
+            "使い方: rake server:create[coderdojo-japan]\n" \
+            "注意: servers.csvに登録されているサーバー名を指定してください"
+    end
+    
+    puts "="*60
+    puts "🚀 DojoPaaS 個別サーバー作成"
+    puts "="*60
+    puts ""
+    puts "サーバー名: #{server_name}"
+    puts ""
+    
+    # deploy.rbのCoderDojoSakuraCLIクラスを使用（DRY原則）
+    require_relative 'scripts/deploy'
+    
+    cli = CoderDojoSakuraCLI.new([])
+    success = cli.create_single_server(server_name)
+    
+    if success
+      puts ""
+      puts "="*60
+      puts "✅ サーバー作成プロセス完了"
+      puts "="*60
+      puts ""
+      puts "【次のステップ】"
+      puts "1. SSHで接続確認:"
+      puts "   ssh ubuntu@<IPアドレス>"
+      puts ""
+      puts "2. スタートアップスクリプトの実行状況確認:"
+      puts "   ssh ubuntu@<IPアドレス> 'sudo tail -f /var/log/cloud-init-output.log'"
+      puts ""
+    else
+      puts ""
+      puts "="*60
+      puts "❌ サーバー作成に失敗しました"
+      puts "="*60
+      exit 1
+    end
+  end
+
+  desc "指定したサーバーを再作成（削除して作成）"
+  task :recreate, [:server_name] => [:check_api_credentials] do |t, args|
+    server_name = args[:server_name]
+    
+    unless server_name
+      abort "❌ エラー: サーバー名が必要です\n" \
+            "使い方: rake server:recreate[coderdojo-japan]"
+    end
+    
+    puts "="*60
+    puts "🔄 DojoPaaS サーバー再作成"
+    puts "="*60
+    puts ""
+    
+    # 1. まず既存サーバーを検索
+    puts "📍 ステップ1: 既存サーバーの検索"
+    require_relative 'scripts/deploy'
+    require_relative 'scripts/sakura_server_user_agent'
+    
+    # 初期化パラメータとAPIクライアントのセットアップ
+    cli = CoderDojoSakuraCLI.new([])
+    request_params = cli.send(:perform_init_params)
+    ssua = SakuraServerUserAgent.new(**request_params)
+    
+    # 既存サーバーを検索
+    servers = ssua.get_servers()['Servers']
+    existing_server = servers.find { |s| s['Name'] == server_name }
+    
+    if existing_server
+      ip_address = existing_server['Interfaces'].first['IPAddress']
+      puts "  ✅ 既存サーバーが見つかりました"
+      puts "     - サーバー名: #{server_name}"
+      puts "     - IPアドレス: #{ip_address}"
+      puts ""
+      
+      # 2. サーバー削除
+      puts "📍 ステップ2: サーバーの削除"
+      puts "  削除実行のため、rake server:execute_deletion を使用してください:"
+      puts "  rake \"server:execute_deletion[#{ip_address},true]\""
+      puts ""
+      puts "  削除完了後、以下のコマンドで再作成:"
+      puts "  rake \"server:create[#{server_name}]\""
+    else
+      puts "  ℹ️ サーバーが存在しません。新規作成します。"
+      puts ""
+      
+      # 3. サーバー作成
+      puts "📍 ステップ3: サーバーの新規作成"
+      success = cli.create_single_server(server_name)
+      
+      if success
+        puts "✅ 再作成完了"
+      else
+        puts "❌ 作成に失敗しました"
+        exit 1
+      end
+    end
+  end
 end
 
 # ヘルパーメソッド（将来の拡張用に保持）
