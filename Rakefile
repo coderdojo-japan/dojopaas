@@ -322,25 +322,66 @@ namespace :server do
   desc "現在稼働中のサーバー一覧を表示"
   task :list do
     require_relative 'scripts/sakura_server_user_agent'
-    
+    require 'dotenv/load'
+
     puts "📋 サーバー一覧を取得中..."
     puts "データソース: #{SakuraServerUserAgent::INSTANCES_CSV_URL}"
     puts "-" * SEPARATOR_WIDTH
-    
+
     begin
       uri = URI(SakuraServerUserAgent::INSTANCES_CSV_URL)
       response = Net::HTTP.get_response(uri)
-      
+
       if response.code == '200'
         # エンコーディングを明示的に設定してCSVを解析（無効な文字を安全に処理）
         response.body.force_encoding('UTF-8').scrub('?')
         csv_data = CSV.parse(response.body, headers: true)
+
+        # APIクライアントを初期化（ステータス確認用）
+        server_statuses = {}
+        if ENV['SACLOUD_ACCESS_TOKEN'] && ENV['SACLOUD_ACCESS_TOKEN_SECRET']
+          begin
+            client = SakuraServerUserAgent.new(
+              zone: "31002",
+              zone_id: "is1b",
+              packet_filter_id: '112900922505',
+              verbose: false
+            )
+            servers_data = client.get_servers()
+            if servers_data && servers_data['Servers']
+              servers_data['Servers'].each do |server|
+                server_statuses[server['Name']] = server['Instance']['Status']
+              end
+            end
+          rescue
+            # エラーは無視してステータスなしで続行
+          end
+        end
         
         puts "📊 サーバー一覧（#{csv_data.length}台）:"
         puts ""
-        
+
         csv_data.each do |row|
-          puts "  🖥️  #{row['Name']}"
+          server_name = row['Name']
+          status = server_statuses[server_name]
+          
+          # ステータスに応じた絵文字と表示を設定
+          status_display = if status
+            case status
+            when 'up'
+              " (✅ up)"
+            when 'down'
+              " (⏸️  down)"
+            when 'cleaning'
+              " (🧹 cleaning)"
+            else
+              " (❓ #{status})"  # 予期しないステータスの場合
+            end
+          else
+            ""  # APIが利用できない場合は何も表示しない
+          end
+          
+          puts "  🖥️  #{server_name}#{status_display}"
           puts "      IPアドレス: #{row['IP Address']}"  # スペースを追加
           puts "      説明: #{row['Description']}" if row['Description']
           puts ""
@@ -359,6 +400,15 @@ namespace :server do
           end
         else
           puts "  （テスト用サーバーがありません）"
+        end
+        puts ""
+        
+        # ステータス表示についての注記
+        if !ENV['SACLOUD_ACCESS_TOKEN'] || !ENV['SACLOUD_ACCESS_TOKEN_SECRET']
+          puts "ℹ️  注: API認証情報が設定されていないため、サーバーステータス(up/down)は表示されていません"
+          puts "     ステータスを表示するには、SACLOUD_ACCESS_TOKEN と SACLOUD_ACCESS_TOKEN_SECRET を設定してください"
+        elsif server_statuses.empty?
+          puts "ℹ️  注: API接続エラーのため、サーバーステータス(up/down)を取得できませんでした"
         end
         puts ""
         
