@@ -21,15 +21,9 @@ puts "サーバー名: #{server_name}"
 puts "スタートアップスクリプトID: #{SakuraServerUserAgent::STARTUP_SCRIPT_ID}"
 puts ""
 
-# サーバー作成パラメータ（シンプル）
-params = {
-  zone: "31002",
-  zone_id: "is1b",
-  packet_filter_id: nil,  # テスト用にパケットフィルター無効
-}
-
 begin
-  ssua = SakuraServerUserAgent.new(**params)
+  # デフォルト値を使用（テスト用にパケットフィルター無効）
+  ssua = SakuraServerUserAgent.new(packet_filter_id: nil)
   
   # 通常版Ubuntu 24.04を検索
   archives = ssua.get_archives()['Archives']

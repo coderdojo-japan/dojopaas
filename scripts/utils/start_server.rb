@@ -15,13 +15,8 @@ end
 
 server_id = ARGV[0]
 
-params = {
-  zone: "31002",
-  zone_id: "is1b",
-  packet_filter_id: nil
-}
-
-ssua = SakuraServerUserAgent.new(**params)
+# デフォルト値を使用（石狩第二ゾーン）
+ssua = SakuraServerUserAgent.new
 
 puts "サーバー #{server_id} を起動中..."
 
