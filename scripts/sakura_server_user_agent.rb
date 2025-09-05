@@ -57,7 +57,7 @@ class SakuraServerUserAgent
   # jsのserver.createで使っているフィールドを参考
   # デフォルト値を本番環境（石狩第二）に設定
   def initialize(zone:"31002", packet_filter_id:'112900922505', name:nil, description:nil, zone_id:"is1b",
-                 tags:nil, pubkey:nil, resolve:nil, verbose:false)
+                 tags:nil, pubkey:nil, resolve:nil, verbose:false, notes:nil)
     @zone             = zone
     @packet_filter_id = packet_filter_id
     @name             = name
@@ -66,8 +66,8 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
-    # 標準スタートアップスクリプトを使用
-    @notes            = [{ID: STARTUP_SCRIPT_ID}]
+    # 標準スタートアップスクリプトを使用（デフォルト値または指定値）
+    @notes            = notes || [{ID: STARTUP_SCRIPT_ID}]
     @sakura_zone_id   = zone_id
     @archive_id       = nil
     @verbose          = verbose
@@ -336,12 +336,16 @@ class SakuraServerUserAgent
   end
 
   def _copying_image
-    # 通常版UbuntuではSSH鍵とスタートアップスクリプトIDは
-    # disk/config APIで既に設定済み（_put_ssh_keyメソッド内）
-    # ここではサーバーを起動するだけでよい
+    # SSH鍵はdisk/config APIで設定済み
+    # スタートアップスクリプトはサーバー起動時に指定する必要がある
     
-    puts "DEBUG: Starting server (SSH key and startup script already configured via disk/config API)" if @verbose
-    send_request('put',"server/#{@server_id}/power", nil)
+    puts "DEBUG: Starting server with startup script ID: #{@notes.first[:ID]}" if @verbose
+    
+    # サーバー起動時にスタートアップスクリプトIDを指定
+    body = {
+      Notes: @notes
+    }
+    send_request('put',"server/#{@server_id}/power", body)
 
     rescue => exception
       puts exception
