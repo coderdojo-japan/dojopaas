@@ -324,7 +324,7 @@ class SakuraServerUserAgent
   private
 
   def _put_ssh_key(disk_id)
-    # disk/config APIを使用してSSH鍵を設定
+    # disk/config APIを使用してSSH鍵とスタートアップスクリプトを設定
     body = {
       SSHKey: {
         PublicKey: @pubkey
@@ -332,20 +332,22 @@ class SakuraServerUserAgent
       Notes: @notes
     }
     puts "DEBUG: Setting SSH key via disk/config API" if @verbose
-    send_request('put',"disk/#{disk_id}/config",body)
+    puts "DEBUG: Notes being set: #{@notes.inspect}" if @verbose
+    puts "DEBUG: Full body for disk/config: #{body.inspect}" if @verbose
+    result = send_request('put',"disk/#{disk_id}/config",body)
+    puts "DEBUG: disk/config API response: #{result.inspect}" if @verbose && result
+    result
   end
 
   def _copying_image
-    # SSH鍵はdisk/config APIで設定済み
-    # スタートアップスクリプトはサーバー起動時に指定する必要がある
+    # SSH鍵とスタートアップスクリプトはdisk/config APIで設定済み
+    # /server/{id}/power APIはパラメータなしで呼び出す（Notesパラメータは無視される）
     
-    puts "DEBUG: Starting server with startup script ID: #{@notes.first[:ID]}" if @verbose
+    puts "DEBUG: Starting server (startup script already embedded in disk)" if @verbose
     
-    # サーバー起動時にスタートアップスクリプトIDを指定
-    body = {
-      Notes: @notes
-    }
-    send_request('put',"server/#{@server_id}/power", body)
+    # サーバー起動（パラメータなし）
+    # Note: スタートアップスクリプトはdisk/config APIで既に設定済み
+    send_request('put',"server/#{@server_id}/power", nil)
 
     rescue => exception
       puts exception

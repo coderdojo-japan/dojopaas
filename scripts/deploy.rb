@@ -147,12 +147,14 @@ class CoderDojoSakuraCLI
        zone: "29001", # サンドボックス
        zone_id: "tk1v",
        packet_filter_id: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       verbose: ENV['VERBOSE'] == 'true'  # デバッグモード
       }
     else
       {
        zone: "31002", # 石狩第二
        zone_id: "is1b", # 石狩第二
        packet_filter_id: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       verbose: ENV['VERBOSE'] == 'true'  # デバッグモード
       }
     end
   end
@@ -167,9 +169,11 @@ class CoderDojoSakuraCLI
       # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
       puts "- Name: #{arch['Name']}"
       # 通常版Ubuntu 24.04を使用（disk/config APIでSSH鍵設定、@notesでスタートアップスクリプト実行）
-      if /ubuntu/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name']) then
+      # "Ubuntu Server"で始まるものだけを対象にして、CData Syncなどを除外
+      if /^Ubuntu Server/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name']) then
         archiveid = arch['ID']
         selected_name = arch['Name']
+        break  # 最初にマッチしたものを使用
       end
     end
 
