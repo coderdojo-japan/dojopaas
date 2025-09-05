@@ -419,64 +419,6 @@ namespace :server do
     end
   end
 
-  desc "指定したサーバーを再作成（削除して作成）"
-  task :recreate, [:server_name] => [:check_api_credentials] do |t, args|
-    server_name = args[:server_name]
-    
-    unless server_name
-      abort "❌ エラー: サーバー名が必要です\n" \
-            "使い方: rake server:recreate[coderdojo-japan]"
-    end
-    
-    puts "="*SEPARATOR_WIDTH
-    puts "🔄 DojoPaaS サーバー再作成"
-    puts "="*SEPARATOR_WIDTH
-    puts ""
-    
-    # 1. まず既存サーバーを検索
-    puts "📍 ステップ1: 既存サーバーの検索"
-    require_relative 'scripts/deploy'
-    require_relative 'scripts/sakura_server_user_agent'
-    
-    # 初期化パラメータとAPIクライアントのセットアップ
-    cli = CoderDojoSakuraCLI.new([])
-    request_params = cli.send(:perform_init_params)
-    ssua = SakuraServerUserAgent.new(**request_params)
-    
-    # 既存サーバーを検索
-    servers = ssua.get_servers()['Servers']
-    existing_server = servers.find { |s| s['Name'] == server_name }
-    
-    if existing_server
-      ip_address = existing_server['Interfaces'].first['IPAddress']
-      puts "  ✅ 既存サーバーが見つかりました"
-      puts "     - サーバー名: #{server_name}"
-      puts "     - IPアドレス: #{ip_address}"
-      puts ""
-      
-      # 2. サーバー削除
-      puts "📍 ステップ2: サーバーの削除"
-      puts "  削除実行のため、rake server:execute_deletion を使用してください:"
-      puts "  rake \"server:execute_deletion[#{ip_address},true]\""
-      puts ""
-      puts "  削除完了後、以下のコマンドで再作成:"
-      puts "  rake \"server:create[#{server_name}]\""
-    else
-      puts "  ℹ️ サーバーが存在しません。新規作成します。"
-      puts ""
-      
-      # 3. サーバー作成
-      puts "📍 ステップ3: サーバーの新規作成"
-      success = cli.create_single_server(server_name)
-      
-      if success
-        puts "✅ 再作成完了"
-      else
-        puts "❌ 作成に失敗しました"
-        exit 1
-      end
-    end
-  end
 end
 
 # ヘルパーメソッド（将来の拡張用に保持）
