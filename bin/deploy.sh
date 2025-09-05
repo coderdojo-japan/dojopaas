@@ -20,12 +20,5 @@ else
     COMMIT_MSG="Deploy from actions"
 fi
 
-# 追加されたサーバー情報を取得（オプション）
-NEW_SERVERS=$(git diff --cached instances.csv | grep '^+' | grep -v '^+++' | cut -d',' -f1 | sed 's/^+//' | head -3 | paste -sd ', ' || echo "")
-
-if [ -n "$NEW_SERVERS" ]; then
-    COMMIT_MSG="$COMMIT_MSG - Added: $NEW_SERVERS"
-fi
-
 git commit --quiet -m    "$COMMIT_MSG"
 git push --force --quiet "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" main:gh-pages

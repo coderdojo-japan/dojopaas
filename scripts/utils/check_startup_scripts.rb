@@ -5,12 +5,6 @@
 require 'dotenv/load'
 require_relative '../sakura_server_user_agent.rb'
 
-params = {
-  zone: "31002",
-  zone_id: "is1b",
-  packet_filter_id: nil
-}
-
 puts "=== スタートアップスクリプト（Note）一覧 ==="
 puts "時刻: #{Time.now}"
 puts ""
@@ -23,7 +17,8 @@ begin
     end
   end
   
-  ssua = StartupScriptChecker.new(**params)
+  # デフォルト値を使用（石狩第二ゾーン）
+  ssua = StartupScriptChecker.new
   
   # Noteリソースの一覧を取得
   response = ssua.get_notes()

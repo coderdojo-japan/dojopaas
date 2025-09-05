@@ -19,19 +19,13 @@ end
 # 検索文字列（引数がなければ全て表示）
 search_term = ARGV[0] || ""
 
-# 石狩第二ゾーンのパラメータ（本番環境）
-params = {
-  zone: "31002",
-  zone_id: "is1b", 
-  packet_filter_id: nil
-}
-
 puts "=== さくらのクラウド リソース検索 ==="
 puts "検索条件: #{search_term.empty? ? '全て' : search_term}"
 puts "時刻: #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
 puts ""
 
-ssua = SakuraServerUserAgent.new(**params)
+# デフォルト値を使用（石狩第二ゾーン）
+ssua = SakuraServerUserAgent.new
 
 # サーバーの確認
 puts "【サーバー一覧】"

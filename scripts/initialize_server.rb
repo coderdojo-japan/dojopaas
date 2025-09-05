@@ -55,13 +55,8 @@ class ServerInitializer
     @dry_run     = options[:dry_run] || false
     @force       = options[:force]   || false
     
-    # さくらのクラウドAPIクライアント初期化（石狩第二ゾーン）
-    @ssua = SakuraServerUserAgent.new(
-      zone: "31002",
-      zone_id: "is1b",
-      packet_filter_id: nil,
-      verbose: @verbose
-    )
+    # さくらのクラウドAPIクライアント初期化（デフォルト値使用）
+    @ssua = SakuraServerUserAgent.new(verbose: @verbose)
   end
 
   def run

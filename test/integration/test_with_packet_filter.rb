@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-# 修正されたsakura_server_user_agent.rbを使用したテスト
-# デフォルトでSTARTUP_SCRIPT_IDが設定される
+# 本番環境と同じパケットフィルター設定でテスト
+# 通常版Ubuntu 24.04 + disk/config API + @notes + パケットフィルター
 
 require 'dotenv/load'
-require_relative '../sakura_server_user_agent.rb'
+require_relative '../../scripts/sakura_server_user_agent.rb'
 
 # SSH公開鍵を読み込み
 ssh_public_key_path = ENV['SSH_PUBLIC_KEY_PATH'] || File.expand_path('~/.ssh/id_rsa.pub')
@@ -14,22 +14,21 @@ unless File.exist?(ssh_public_key_path)
 end
 
 pubkey = File.read(ssh_public_key_path).strip
-server_name = "test-with-startup-#{Time.now.strftime('%Y%m%d%H%M%S')}"
+server_name = "test-with-pf-#{Time.now.strftime('%Y%m%d%H%M%S')}"
 
-puts "=== スタートアップスクリプト有効化テスト ==="
+puts "=== 本番環境設定テスト（パケットフィルター有効） ==="
 puts "サーバー名: #{server_name}"
-puts "スタートアップスクリプトID: #{SakuraServerUserAgent::STARTUP_SCRIPT_ID}"
 puts ""
 
-# サーバー作成パラメータ（シンプル）
-params = {
-  zone: "31002",
-  zone_id: "is1b",
-  packet_filter_id: nil,  # テスト用にパケットフィルター無効
-}
+puts "📋 設定内容:"
+puts "  - ゾーン: 石狩第二 (is1b)"
+puts "  - パケットフィルターID: 112900922505"
+puts "  - スタートアップスクリプトID: #{SakuraServerUserAgent::STARTUP_SCRIPT_ID}"
+puts ""
 
 begin
-  ssua = SakuraServerUserAgent.new(**params)
+  # デフォルト値を使用（パケットフィルター含む）
+  ssua = SakuraServerUserAgent.new
   
   # 通常版Ubuntu 24.04を検索
   archives = ssua.get_archives()['Archives']
@@ -46,14 +45,15 @@ begin
   end
   
   puts "\n🚀 サーバー作成を開始..."
-  puts "設定内容:"
-  puts "  - SSH鍵: disk/config APIで設定"
-  puts "  - スタートアップスクリプト: デフォルトで有効（ID: #{SakuraServerUserAgent::STARTUP_SCRIPT_ID}）"
+  puts "セキュリティ設定:"
+  puts "  1. パケットフィルター（ネットワークレベル）"
+  puts "  2. iptables（ホストレベル）"
+  puts "  3. SSH鍵認証のみ（パスワード認証無効）"
   puts ""
   
   ssua.create(
     name: server_name,
-    description: "Startup script test - DELETE ME",
+    description: "Production config test - DELETE ME",
     pubkey: pubkey,
     tag: 'test'
   )
@@ -71,16 +71,17 @@ begin
     puts "  - ID: #{created_server['ID']}"
     puts "  - IPアドレス: #{ip_address}"
     puts ""
-    puts "⏰ 起動とスタートアップスクリプトの実行まで約2-3分お待ちください"
+    puts "⏰ 起動まで約1-2分お待ちください"
     puts ""
     puts "🔍 確認コマンド:"
     puts "  ruby test/verify_server_setup.rb #{ip_address}"
     puts ""
-    puts "📝 期待される結果:"
-    puts "  1. SSH接続: ✅（disk/config APIで設定）"
-    puts "  2. Ansible: ✅（スタートアップスクリプトで自動インストール）"
-    puts "  3. iptables: ✅（スタートアップスクリプトで自動設定）"
-    puts "  4. SSH設定: ✅（スタートアップスクリプトで自動強化）"
+    puts "📝 期待される結果（本番環境と同等）:"
+    puts "  1. SSH接続: ✅"
+    puts "  2. Ansible: ✅"
+    puts "  3. iptables: ✅"
+    puts "  4. SSH設定: ✅"
+    puts "  5. パケットフィルター: ✅（さくらのクラウド側）"
   end
   
 rescue => e

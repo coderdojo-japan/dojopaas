@@ -11,13 +11,8 @@ end
 
 search_term = ARGV[0]
 
-params = {
-  zone: "31002",
-  zone_id: "is1b", 
-  packet_filter_id: nil
-}
-
-ssua = SakuraServerUserAgent.new(**params)
+# デフォルト値を使用（石狩第二ゾーン）
+ssua = SakuraServerUserAgent.new
 
 puts "=== サーバー詳細情報 ==="
 puts "検索条件: #{search_term}"

@@ -6,6 +6,9 @@ require 'net/http'
 require 'uri'
 require 'csv'
 
+# 表示用の定数
+SEPARATOR_WIDTH = 60  # セパレーター行の幅
+
 # Minitestタスクの定義
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
@@ -49,10 +52,10 @@ task :default => :test
 desc "利用可能なDojoPaaS管理タスクをすべて表示"
 task :default do
   puts "\n🔧 DojoPaaS 管理タスク"
-  puts "=" * 50
+  puts "=" * SEPARATOR_WIDTH
   puts "'rake -T' ですべての利用可能なタスクを確認"
   puts "'rake -D [タスク名]' で詳細な説明を表示"
-  puts "=" * 50
+  puts "=" * SEPARATOR_WIDTH
   sh "rake -T"
 end
 
@@ -127,7 +130,7 @@ namespace :server do
     
     puts "✅ 有効なIPアドレス: #{validated_ip_str}"
     puts "🔍 サーバー情報を検索中..."
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     # 検証済みIPでinitialize_server.rbスクリプトを実行（コマンドエコーを抑制）
     sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false
@@ -153,7 +156,7 @@ namespace :server do
     
     puts "📋 Issue処理中: #{issue_url}"
     puts "🔍 サーバー情報を抽出中..."
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     sh "ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false
   end
@@ -171,7 +174,7 @@ namespace :server do
     end
     
     puts "🔍 サーバー名で検索: #{name}"
-    puts "-" * 50
+    puts "-" * SEPARATOR_WIDTH
     
     sh "ruby scripts/initialize_server.rb --find #{name}", verbose: false
   end
@@ -319,25 +322,62 @@ namespace :server do
   desc "現在稼働中のサーバー一覧を表示"
   task :list do
     require_relative 'scripts/sakura_server_user_agent'
-    
+    require 'dotenv/load'
+
     puts "📋 サーバー一覧を取得中..."
     puts "データソース: #{SakuraServerUserAgent::INSTANCES_CSV_URL}"
-    puts "-" * 50
-    
+    puts "-" * SEPARATOR_WIDTH
+
     begin
       uri = URI(SakuraServerUserAgent::INSTANCES_CSV_URL)
       response = Net::HTTP.get_response(uri)
-      
+
       if response.code == '200'
         # エンコーディングを明示的に設定してCSVを解析（無効な文字を安全に処理）
         response.body.force_encoding('UTF-8').scrub('?')
         csv_data = CSV.parse(response.body, headers: true)
+
+        # APIクライアントを初期化（ステータス確認用）
+        server_statuses = {}
+        if ENV['SACLOUD_ACCESS_TOKEN'] && ENV['SACLOUD_ACCESS_TOKEN_SECRET']
+          begin
+            # デフォルトパラメータ（石狩第二）が自動的に使用される
+            client = SakuraServerUserAgent.new
+            servers_data = client.get_servers()
+            if servers_data && servers_data['Servers']
+              servers_data['Servers'].each do |server|
+                server_statuses[server['Name']] = server['Instance']['Status']
+              end
+            end
+          rescue
+            # エラーは無視してステータスなしで続行
+          end
+        end
         
         puts "📊 サーバー一覧（#{csv_data.length}台）:"
         puts ""
-        
+
         csv_data.each do |row|
-          puts "  🖥️  #{row['Name']}"
+          server_name = row['Name']
+          status = server_statuses[server_name]
+          
+          # ステータスに応じた絵文字と表示を設定
+          status_display = if status
+            case status
+            when 'up'
+              " (✅ up)"
+            when 'down'
+              " (⏸️  down)"
+            when 'cleaning'
+              " (🧹 cleaning)"
+            else
+              " (❓ #{status})"  # 予期しないステータスの場合
+            end
+          else
+            ""  # APIが利用できない場合は何も表示しない
+          end
+          
+          puts "  🖥️  #{server_name}#{status_display}"
           puts "      IPアドレス: #{row['IP Address']}"  # スペースを追加
           puts "      説明: #{row['Description']}" if row['Description']
           puts ""
@@ -359,6 +399,15 @@ namespace :server do
         end
         puts ""
         
+        # ステータス表示についての注記
+        if !ENV['SACLOUD_ACCESS_TOKEN'] || !ENV['SACLOUD_ACCESS_TOKEN_SECRET']
+          puts "ℹ️  注: API認証情報が設定されていないため、サーバーステータス(up/down)は表示されていません"
+          puts "     ステータスを表示するには、SACLOUD_ACCESS_TOKEN と SACLOUD_ACCESS_TOKEN_SECRET を設定してください"
+        elsif server_statuses.empty?
+          puts "ℹ️  注: API接続エラーのため、サーバーステータス(up/down)を取得できませんでした"
+        end
+        puts ""
+        
       else
         abort "❌ エラー: サーバー一覧の取得に失敗しました (HTTP #{response.code})"
       end
@@ -367,6 +416,55 @@ namespace :server do
       abort "❌ エラー: #{e.message}"
     end
   end
+
+  # ========================================
+  # 個別サーバー作成タスク（テスト用）
+  # ========================================
+  desc "指定したサーバーを個別に作成（テスト用）"
+  task :create, [:server_name] => [:check_api_credentials] do |t, args|
+    server_name = args[:server_name]
+    
+    unless server_name
+      abort "❌ エラー: サーバー名が必要です\n" \
+            "使い方: rake server:create[coderdojo-japan]\n" \
+            "注意: servers.csvに登録されているサーバー名を指定してください"
+    end
+    
+    puts "="*SEPARATOR_WIDTH
+    puts "🚀 DojoPaaS 個別サーバー作成"
+    puts "="*SEPARATOR_WIDTH
+    puts ""
+    puts "サーバー名: #{server_name}"
+    puts ""
+    
+    # deploy.rbのCoderDojoSakuraCLIクラスを使用（DRY原則）
+    require_relative 'scripts/deploy'
+    
+    cli = CoderDojoSakuraCLI.new([])
+    success = cli.create_single_server(server_name)
+    
+    if success
+      puts ""
+      puts "="*SEPARATOR_WIDTH
+      puts "✅ サーバー作成プロセス完了"
+      puts "="*SEPARATOR_WIDTH
+      puts ""
+      puts "【次のステップ】"
+      puts "1. SSHで接続確認:"
+      puts "   ssh ubuntu@<IPアドレス>"
+      puts ""
+      puts "2. スタートアップスクリプトの実行状況確認:"
+      puts "   ssh ubuntu@<IPアドレス> 'sudo tail -f /var/log/cloud-init-output.log'"
+      puts ""
+    else
+      puts ""
+      puts "="*SEPARATOR_WIDTH
+      puts "❌ サーバー作成に失敗しました"
+      puts "="*SEPARATOR_WIDTH
+      exit 1
+    end
+  end
+
 end
 
 # ヘルパーメソッド（将来の拡張用に保持）
