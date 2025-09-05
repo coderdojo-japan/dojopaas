@@ -418,6 +418,22 @@ namespace :server do
   end
 
   # ========================================
+  # サーバー状態確認タスク
+  # ========================================
+  desc "サーバーの詳細状態を確認"
+  task :status, [:server_name] => [:check_api_credentials] do |t, args|
+    server_name = args[:server_name]
+    
+    unless server_name
+      abort "❌ エラー: サーバー名が必要です\n" \
+            "使い方: rake server:status[coderdojo-japan]"
+    end
+    
+    puts "🔍 サーバー状態を確認中: #{server_name}"
+    sh "ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false
+  end
+  
+  # ========================================
   # 個別サーバー作成タスク（テスト用）
   # ========================================
   desc "指定したサーバーを個別に作成（テスト用）"
