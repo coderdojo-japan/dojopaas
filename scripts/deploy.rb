@@ -144,16 +144,16 @@ class CoderDojoSakuraCLI
   def perform_init_params
     if @isSandbox
       {
-       zone: "29001", # サンドボックス
-       zone_id: "tk1v",
-       packet_filter_id: '112900927419', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       zone: SakuraServerUserAgent::SANDBOX_ZONE,
+       zone_id: SakuraServerUserAgent::SANDBOX_ZONE_ID,
+       packet_filter_id: SakuraServerUserAgent::SANDBOX_PACKET_FILTER_ID,
        verbose: ENV['VERBOSE'] == 'true'  # デバッグモード
       }
     else
       {
-       zone: "31002", # 石狩第二
-       zone_id: "is1b", # 石狩第二
-       packet_filter_id: '112900922505', # See https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/.
+       zone: SakuraServerUserAgent::PRODUCTION_ZONE,
+       zone_id: SakuraServerUserAgent::PRODUCTION_ZONE_ID,
+       packet_filter_id: SakuraServerUserAgent::PRODUCTION_PACKET_FILTER_ID,
        verbose: ENV['VERBOSE'] == 'true'  # デバッグモード
       }
     end

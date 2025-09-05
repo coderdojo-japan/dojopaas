@@ -4,7 +4,7 @@ require 'ipaddr'  # IP検証用
 
 class SakuraServerUserAgent
   include SmartWaitHelper
-  
+
   require 'jsonclient'
   require 'base64'
   SAKURA_BASE_URL     = 'https://secure.sakura.ad.jp/cloud/zone'
@@ -13,23 +13,44 @@ class SakuraServerUserAgent
 
   SAKURA_TOKEN        = ENV.fetch('SACLOUD_ACCESS_TOKEN', 'dummy-token-for-test')
   SAKURA_TOKEN_SECRET = ENV.fetch('SACLOUD_ACCESS_TOKEN_SECRET', 'dummy-secret-for-test')
-  
+
   # ディスク状態確認用の定数
   DISK_CHECK_INTERVAL = 10  # 秒
   MAX_ATTEMPTS = 30  # 10秒 x 30 = 5分
-  
+
+  # ゾーン設定（さくらのクラウド）
+  # 本番環境: 石狩第二ゾーン
+  PRODUCTION_ZONE    = "31002"
+  PRODUCTION_ZONE_ID = "is1b"
+
+  # サンドボックス環境: 東京サンドボックス
+  SANDBOX_ZONE    = "29001"
+  SANDBOX_ZONE_ID = "tk1v"
+
+  # パケットフィルターID
+  # ファイアウォール設定（ポート22/80/443のみ開放）
+  # 管理画面: https://secure.sakura.ad.jp/cloud/iaas/#!/network/packetfilter/
+  PRODUCTION_PACKET_FILTER_ID = '112900922505'  # 本番環境用（石狩第二）
+  SANDBOX_PACKET_FILTER_ID    = '112900927419'  # サンドボックス環境用
+
   # 標準スタートアップスクリプトID - dojopaas-default
   # 作成日: 2017-07-22 (7年間の実績)
-  # 
+  #
   # 実行内容:
   # - iptables設定（ポート22/80/443のみ開放、DDoS対策含む）
   # - SSH設定強化（rootログイン無効、パスワード認証無効）
   # - Ansible導入（自動化基盤）
-  # 
+  #
   # 実行タイミング: disk/config API の Notes で指定後、サーバー初回起動時
   # 実行ログ: /root/.sacloud-api/notes/112900928939.log
   STARTUP_SCRIPT_ID = 112900928939
-  
+
+  # デフォルトのスタートアップスクリプト設定
+  # disk/config API の Notes配列形式: [{ID: スクリプトID, Variables: 変数Hash}]
+  # デフォルト: dojopaas-default (ID: 112900928939) を使用
+  # https://manual.sakura.ad.jp/cloud-api/1.1/disk/index.html
+  PRODUCTION_NOTES = [{ID: STARTUP_SCRIPT_ID}].freeze
+
   # サーバー一覧URL（最新の実サーバー情報）
   # gh-pagesブランチで公開される実際のサーバー情報
   INSTANCES_CSV_URL = "https://raw.githubusercontent.com/coderdojo-japan/dojopaas/refs/heads/gh-pages/instances.csv"
@@ -63,8 +84,13 @@ class SakuraServerUserAgent
 
   # jsのserver.createで使っているフィールドを参考
   # デフォルト値を本番環境（石狩第二）に設定
-  def initialize(zone:"31002", packet_filter_id:'112900922505', name:nil, description:nil, zone_id:"is1b",
-                 tags:nil, pubkey:nil, resolve:nil, verbose:false, notes:nil)
+  def initialize(
+      name:nil, description:nil,
+      tags:nil, pubkey:nil, resolve:nil, verbose:false,
+      packet_filter_id: PRODUCTION_PACKET_FILTER_ID,
+      notes:  PRODUCTION_NOTES,
+      zone:   PRODUCTION_ZONE,
+      zone_id:PRODUCTION_ZONE_ID)
     @zone             = zone
     @packet_filter_id = packet_filter_id
     @name             = name
@@ -73,10 +99,12 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
+
     # スタートアップスクリプトの設定
     # disk/config API の Notes配列形式: [{ID: スクリプトID, Variables: 変数Hash}]
     # デフォルト: dojopaas-default (ID: 112900928939) を使用
-    @notes            = notes || [{ID: STARTUP_SCRIPT_ID}]
+    # https://manual.sakura.ad.jp/cloud-api/1.1/disk/index.html
+    @notes            = notes
     @sakura_zone_id   = zone_id
     @archive_id       = nil
     @verbose          = verbose
