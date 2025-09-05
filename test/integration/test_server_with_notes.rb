@@ -4,7 +4,7 @@
 # 通常版Ubuntuでdisk/config APIのNotesフィールドが機能するか確認
 
 require 'dotenv/load'
-require_relative '../sakura_server_user_agent.rb'
+require_relative '../../scripts/sakura_server_user_agent.rb'
 
 if ARGV.length < 1
   puts "使用方法: ruby #{$0} <サーバー名>"
