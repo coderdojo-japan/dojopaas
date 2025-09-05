@@ -169,8 +169,7 @@ class SakuraServerUserAgent
         },
         Name:         @name,
         Description:  @description,
-        Tags:         @tags,
-        # Icon:         { ID: 112900928939 }  # スタートアップスクリプトIDは一時的に無効化（cloud-initで実行）
+        Tags:         @tags
       }
     }
     puts "DEBUG: Server creation request: #{query.inspect}" if @verbose
@@ -336,38 +335,12 @@ class SakuraServerUserAgent
   end
 
   def _copying_image
-    # SSH鍵はdisk/configで設定済み
-    # スタートアップスクリプトはcloud-initで実行
-    startup_script_path = './startup-scripts/112900928939'
+    # 通常版UbuntuではSSH鍵とスタートアップスクリプトIDは
+    # disk/config APIで既に設定済み（_put_ssh_keyメソッド内）
+    # ここではサーバーを起動するだけでよい
     
-    if File.exist?(startup_script_path)
-      startup_script_content = File.read(startup_script_path)
-      
-      # cloud-config（SSH鍵とスクリプト実行）
-      cloud_config = <<-EOF
-#cloud-config
-ssh_authorized_keys:
-  - #{@pubkey}
-runcmd:
-  - |
-    #{startup_script_content.split("\n").map { |line| line.strip.empty? ? "" : "    #{line}" }.join("\n")}
-EOF
-      
-      puts "DEBUG: Starting server with cloud-init for startup script" if @verbose
-      puts "DEBUG: cloud-config (first 200 chars): #{cloud_config[0..200]}..." if @verbose
-      
-      body = {
-        UserBootVariables: {
-          CloudInit: {
-            UserData: cloud_config
-          }
-        }
-      }
-      send_request('put',"server/#{@server_id}/power", body)
-    else
-      puts "Warning: Startup script not found at #{startup_script_path}"
-      send_request('put',"server/#{@server_id}/power", nil)
-    end
+    puts "DEBUG: Starting server (SSH key and startup script already configured via disk/config API)" if @verbose
+    send_request('put',"server/#{@server_id}/power", nil)
 
     rescue => exception
       puts exception
