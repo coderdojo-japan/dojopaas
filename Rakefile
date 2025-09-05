@@ -341,12 +341,8 @@ namespace :server do
         server_statuses = {}
         if ENV['SACLOUD_ACCESS_TOKEN'] && ENV['SACLOUD_ACCESS_TOKEN_SECRET']
           begin
-            client = SakuraServerUserAgent.new(
-              zone: "31002",
-              zone_id: "is1b",
-              packet_filter_id: '112900922505',
-              verbose: false
-            )
+            # デフォルトパラメータ（石狩第二）が自動的に使用される
+            client = SakuraServerUserAgent.new
             servers_data = client.get_servers()
             if servers_data && servers_data['Servers']
               servers_data['Servers'].each do |server|

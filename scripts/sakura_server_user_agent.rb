@@ -55,7 +55,8 @@ class SakuraServerUserAgent
   end
 
   # jsのserver.createで使っているフィールドを参考
-  def initialize(zone:0, packet_filter_id:nil, name:nil, description:nil, zone_id:"is1b",
+  # デフォルト値を本番環境（石狩第二）に設定
+  def initialize(zone:"31002", packet_filter_id:'112900922505', name:nil, description:nil, zone_id:"is1b",
                  tags:nil, pubkey:nil, resolve:nil, verbose:false)
     @zone             = zone
     @packet_filter_id = packet_filter_id
