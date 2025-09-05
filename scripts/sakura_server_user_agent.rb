@@ -99,6 +99,14 @@ class SakuraServerUserAgent
     @pubkey           = pubkey
     @resolve          = resolve
     @plan             = 1001 # 1core 1Gb memory
+    # Other example plans: https://knowledge.sakura.ad.jp/1939/3/
+    # 1001:プラン/1Core-1GB       3001:プラン/1Core-3GB       5001:プラン/1Core-5GB
+    # 2001:プラン/1Core-2GB       3002:プラン/2Core-3GB       5002:プラン/2Core-5GB
+    # 2002:プラン/2Core-2GB       3003:プラン/3Core-3GB       5003:プラン/3Core-5GB
+    # 8003:プラン/3Core-8GB       4001:プラン/1Core-4GB       5004:プラン/4Core-5GB
+    # 8004:プラン/4Core-8GB       4002:プラン/2Core-4GB       6002:プラン/2Core-6GB
+    # 8005:プラン/5Core-8GB       4003:プラン/3Core-4GB       6003:プラン/3Core-6GB
+    # 96012:プラン/12Core-96GB    4004:プラン/4Core-4GB       6004:プラン/4Core-6GB
 
     # スタートアップスクリプトの設定
     # disk/config API の Notes配列形式: [{ID: スクリプトID, Variables: 変数Hash}]
