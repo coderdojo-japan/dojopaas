@@ -152,7 +152,7 @@ CoderDojo Japan では各サーバーの管理までは対応しておりませ�
 
 ## Q. `ooo.coderdojo.jp` のようなサブドメインは使えますか?
 
-以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNS の更新・管理コストが肥大化し他の業務に支障が出てしまったたり、[Subdomain Takeover](https://www.google.com/search?q=Subdomain+Takeover) などのセキュリティ上の課題解決が難しいため、現在は原則としてサブドメインの提供には対応しておりません :bow:
+以前、実験的にサブドメインを各 Dojo に提供した期間がありましたが、DNS の更新・管理コストが肥大化し他の業務に支障が出てしまったり、[Subdomain Takeover](https://www.google.com/search?q=Subdomain+Takeover) などのセキュリティ上の課題解決が難しいため、現在は原則としてサブドメインの提供には対応しておりません :bow:
 
 <br>
 
