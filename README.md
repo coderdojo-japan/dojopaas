@@ -238,7 +238,7 @@ ruby scripts/initialize_server.rb --find coderdojo-japan
 > ### 注意事項
 > - **サーバー削除は取り消せません**。必ず削除対象をご確認ください
 > - 使い方の詳細は `ruby scripts/initialize_server.rb --help` で確認できます
-> - **原則としてIPアドレスが変わる**点にご注意ください (稀に同じになる場合もあります)
+> - **原則としてIPアドレスが変わる可能性がある**点にご注意ください (同じになる場合もあります)
 
 <br>
 
