@@ -27,7 +27,8 @@ module WorkshopCheck
   # @param today [Date] 例示する日付の基準。テストから固定値を渡す
   # @return [Hash] status: :ok / :problem / :broken / :none
   #                markdown: Checks に出す本文
-  #                problems: [{line:, message:}] アノテーション用
+  #                problems: [{line:, message:}] 問題の注釈用
+  #                notices:  [{line:, message:}] 成功時の注記用
   def self.report(csv_text, today: today_jst)
     rows = begin
       CSV.parse(csv_text, headers: true)
@@ -36,7 +37,7 @@ module WorkshopCheck
     end
 
     candidates = workshop_candidates(rows)
-    return { status: :none, markdown: '', problems: [] } if candidates.empty?
+    return { status: :none, markdown: '', problems: [], notices: [] } if candidates.empty?
 
     problems = candidates.flat_map { |row| problems_in(row, today) }
     problems.empty? ? ok_report(candidates) : problem_report(problems, today)
@@ -101,7 +102,13 @@ module WorkshopCheck
               "作成後、IP アドレスは[サーバー一覧](#{INSTANCES_URL})に載ります。",
               '開催日のあとにサーバーを削除し、この行も削除します。']
 
-    { status: :ok, markdown: lines.join("\n"), problems: [] }
+    notices = rows.map do |row|
+      date = Date.strptime(SakuraServerUserAgent.workshop_date(row[:branch]), '%Y%m%d')
+      { line: row[:line],
+        message: "#{row[:name]} を #{date.strftime('%Y-%m-%d')} に #{PLAN_TEXT}（ふだんの#{PLAN[:CPU]}倍）で作成します" }
+    end
+
+    { status: :ok, markdown: lines.join("\n"), problems: [], notices: notices }
   end
   private_class_method :ok_report
 
@@ -111,7 +118,7 @@ module WorkshopCheck
     lines += ['', "このままマージすると、ふだんと同じ #{DEFAULT_TEXT} のサーバーが作られます。",
               "`#{example_branch(today)}` のような形に直すと、Checks の表示も更新されます。"]
 
-    { status: :problem, markdown: lines.join("\n"), problems: problems }
+    { status: :problem, markdown: lines.join("\n"), problems: problems, notices: [] }
   end
   private_class_method :problem_report
 
@@ -129,7 +136,8 @@ module WorkshopCheck
       markdown: ['### servers.csv を読めませんでした', '', "- #{message}", '',
                  '1行は `name,branch,description,pubkey` の4項目です。' \
                  '説明に読点やカンマを含める場合は、全体を引用符で囲んで閉じてください。'].join("\n"),
-      problems: [{ line: line || 1, message: message }] }
+      problems: [{ line: line || 1, message: message }],
+      notices: [] }
   end
   private_class_method :broken_report
 end
