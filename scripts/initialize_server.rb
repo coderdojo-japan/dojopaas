@@ -27,6 +27,15 @@ class ServerInitializer
   # IPアドレスパターン（角カッコあり・なし両対応）
   IP_PATTERN = /(?:IPアドレス|IP)[：:]\s*【?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})】?/
 
+  # Issue フォーム（.github/ISSUE_TEMPLATE/initialize_server.yml）の本文は
+  # 「### ラベル」+ 空行 + 値 に整形される。見出しの直下だけを読むので、
+  # コメント欄に書かれた IP や道場名は拾わない
+  FORM_DOJO_LABEL = '道場名'
+  FORM_IP_LABEL   = 'IPアドレス'
+
+  # 未入力の欄は GitHub がこの文字列で埋める。値として扱わない
+  NO_RESPONSE = '_No response_'
+
   # IPアドレスの厳密な検証パターン
   # 注: RakefileでIPAddrクラスによる検証を行うため、ここでの重複検証は不要（YAGNI）
   # VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
@@ -679,8 +688,27 @@ class ServerInitializer
     JSON.parse(response.body)
   end
 
-  def extract_dojo_name(text)
-    return nil if text.nil? || text.empty?
+  # Issue フォームの見出し直下の値を返す。見つからなければ nil
+  #
+  # 正規表現で「見出しから次の行まで」を書くと改行の扱いで壊れやすいので、行で探す
+  def self.form_value(text, label)
+    lines = text.to_s.lines.map(&:chomp)
+    index = lines.index { |line| line =~ /\A###[[:blank:]]*#{Regexp.escape(label)}[[:blank:]]*\z/ }
+    return nil unless index
+
+    value = lines[(index + 1)..].find { |line| !line.strip.empty? }&.strip
+    return nil if value.nil? || value == NO_RESPONSE || value.start_with?('###')
+
+    value
+  end
+  private_class_method :form_value
+
+  # フォームの値を先に見て、無ければ旧テンプレート（自由記述）のパターンで探す
+  def self.extract_dojo_name(text)
+    return nil if text.nil? || text.to_s.empty?
+
+    value = form_value(text, FORM_DOJO_LABEL)
+    return value.sub(/\ACoderDojo[[:blank:]]*/i, '').strip unless value.nil?
 
     DOJO_PATTERNS.each do |pattern|
       match = text.match(pattern)
@@ -689,11 +717,23 @@ class ServerInitializer
     nil
   end
 
-  def extract_ip_address(text)
-    return nil if text.nil? || text.empty?
+  def self.extract_ip_address(text)
+    return nil if text.nil? || text.to_s.empty?
+
+    value = form_value(text, FORM_IP_LABEL)
+    ip = value&.slice(/\d{1,3}(?:\.\d{1,3}){3}/)
+    return ip if ip
 
     match = text.match(IP_PATTERN)
     match ? match[1] : nil
+  end
+
+  def extract_dojo_name(text)
+    self.class.extract_dojo_name(text)
+  end
+
+  def extract_ip_address(text)
+    self.class.extract_ip_address(text)
   end
 
   def find_server_by_ip(ip_address)

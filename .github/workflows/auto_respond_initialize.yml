@@ -31,8 +31,11 @@ jobs:
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          # IPアドレスパターンを抽出（数字とドットのみ）
-          IP_ADDRESS=$(printf '%s' "$ISSUE_BODY" | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1)
+          # 抽出は Ruby 側（テスト済み）に任せる。シェルと二重に持たない
+          # Issue フォームの「### IPアドレス」の直下だけを読むので、
+          # コメント欄に書かれた IP は拾わない（旧テンプレートの Issue はフォールバックで読む）
+          IP_ADDRESS=$(bundle exec ruby -r./scripts/initialize_server \
+                         -e 'puts ServerInitializer.extract_ip_address(ENV["ISSUE_BODY"]).to_s')
 
           if [ -z "$IP_ADDRESS" ]; then
             echo "❌ Issue本文にIPアドレスが見つかりませんでした"
@@ -184,13 +187,12 @@ jobs:
 
             const comment = `## ⚠️ IPアドレスが見つかりませんでした
 
-            Issueの本文からIPアドレスを抽出できませんでした。
+            Issue の本文から IP アドレスを読み取れませんでした。
 
-            ### 正しいフォーマット例
-            \`\`\`
-            CoderDojo【道場名】の【申請者名】です。
-            サーバー（IPアドレス：192.168.1.1）の初期化をお願いします。
-            \`\`\`
+            [初期化依頼フォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)の
+            **IPアドレス** の欄に、半角の数字とドットで入力して送信していただけますか（`133.242.xxx.xxx` の形です）。
+
+            ご自身のサーバーの IP アドレスは、[サーバー一覧](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)で確認できます。
 
             @yasulab 手動での確認をお願いします。
             `;
