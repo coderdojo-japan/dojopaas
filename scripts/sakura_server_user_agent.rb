@@ -169,6 +169,9 @@ class SakuraServerUserAgent
     @pubkey      = params[:pubkey] || @pubkey
     @tags        = ['dojopaas',params[:tag]]
     @branch      = params[:tag]
+    # 前の行の ID が残ると、失敗した行の処理が別のサーバーに向かう
+    @server_id    = nil
+    @interface_id = nil
 
     puts "DEBUG: Creating server with name: #{@name}, description: #{@description}" if @verbose
     puts "DEBUG: Tags: #{@tags.inspect}" if @verbose
@@ -251,9 +254,6 @@ class SakuraServerUserAgent
     puts "DEBUG: Server creation request: #{query.inspect}" if @verbose
     response   = send_request('post','server', query)
     @server_id = response['Server']['ID']
-
-    rescue => exception
-      puts exception
   end
 
   #ネットワークインターフェイスの作成
