@@ -568,16 +568,31 @@ namespace :workshop do
     require_relative "scripts/workshop_check"
 
     result = WorkshopCheck.report(File.read("servers.csv"))
-    case result[:status]
-    when :none
+
+    if result[:status] == :none
       puts "ワークショップ用の行はありません"
     else
       body = result[:markdown].strip
       puts body
+
       # CI では PR の Checks から読めるようにサマリーへ書く
       summary = ENV["GITHUB_STEP_SUMMARY"]
       File.write(summary, body + "\n", mode: "a") if summary && !summary.to_s.empty?
+
+      # 該当行にインラインで出す（read-only のまま。追加の権限は不要）
+      if ENV["GITHUB_ACTIONS"]
+        result[:problems].each do |problem|
+          # 注釈は Markdown を描画しないのでバッククォートを落とす
+          # エスケープの順序は % → \r → \n（actions/toolkit と同じ）
+          text = problem[:message].delete("`")
+                                  .gsub("%", "%25")
+                                  .gsub("\r", "%0D")
+                                  .gsub("\n", "%0A")
+          puts "::error file=servers.csv,line=#{problem[:line]},title=ワークショップ用の指定::#{text}"
+        end
+      end
     end
-    abort "ワークショップ用の指定に問題があります" if result[:status] == :problem
+
+    abort "ワークショップ用の指定に問題があります" if [:problem, :broken].include?(result[:status])
   end
 end
