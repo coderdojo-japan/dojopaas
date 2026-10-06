@@ -561,3 +561,23 @@ end
 # 
 # 詳細なロードマップは docs/plan_rakefile_migration.md を参照
 # ================================================================
+
+namespace :workshop do
+  desc "servers.csv のワークショップ用の行（branch の隠しコマンド）を確認"
+  task :check do
+    require_relative "scripts/workshop_check"
+
+    result = WorkshopCheck.report(File.read("servers.csv"))
+    case result[:status]
+    when :none
+      puts "ワークショップ用の行はありません"
+    else
+      body = result[:markdown].strip
+      puts body
+      # CI では PR の Checks から読めるようにサマリーへ書く
+      summary = ENV["GITHUB_STEP_SUMMARY"]
+      File.write(summary, body + "\n", mode: "a") if summary && !summary.to_s.empty?
+    end
+    abort "ワークショップ用の指定に問題があります" if result[:status] == :problem
+  end
+end

@@ -51,6 +51,38 @@ class SakuraServerUserAgent
   # https://manual.sakura.ad.jp/cloud-api/1.1/disk/index.html
   PRODUCTION_NOTES = [{ID: STARTUP_SCRIPT_ID}].freeze
 
+  # サーバープラン（API は ServerPlan に CPU とメモリを直接渡す）
+  # 提供中のプランの組み合わせのみ指定できる
+  # https://cloud.sakura.ad.jp/products/
+  SERVER_GENERATION = 100    # 石狩第2ゾーン
+  DEFAULT_PLAN  = { CPU: 1, MemoryMB: 1024 }.freeze  # ふだんの Dojo サーバー
+  WORKSHOP_PLAN = { CPU: 8, MemoryMB: 8192 }.freeze  # 1日ワークショップ用: ふだんの8倍（8コア8GB）
+
+  # branch 名が「隠しコマンド」として働く
+  # workshop-20261115 のみ高スペック。日付が無い・表記が違うものは発動しない
+  # 日付はこの仕組みの情報そのもの（いつ作り、いつ消すかの根拠）なので必須にする
+  # 'workshops' や 'naha-workshop' では発動しない（既存の79行を巻き込まないため）
+  # 'workshop' 単体のような惜しい書き方は、黙って通常スペックで作られないよう
+  # test/csv_test.rb で PR を落とす
+  WORKSHOP_BRANCH = /\Aworkshop-(\d{8})\z/
+
+  # 惜しい書き方を拾って、CSV のテストで指摘するための緩いパターン
+  WORKSHOP_BRANCH_LOOSE = /workshop/i
+
+  # branch からサーバープランを決める
+  # @param branch [String, nil] servers.csv の branch 列
+  # @return [Hash] ServerPlan に渡す CPU とメモリ
+  def self.plan_for(branch)
+    workshop_date(branch) ? WORKSHOP_PLAN : DEFAULT_PLAN
+  end
+
+  # branch に書かれた開催日を取り出す
+  # servers.csv には前後に空白が入った行が実在するため strip してから判定する
+  # @return [String, nil] "20261115" 形式。隠しコマンドでなければ nil
+  def self.workshop_date(branch)
+    WORKSHOP_BRANCH.match(branch.to_s.strip)&.captures&.first
+  end
+
   # サーバー一覧URL（最新の実サーバー情報）
   # gh-pagesブランチで公開される実際のサーバー情報
   INSTANCES_CSV_URL = "https://raw.githubusercontent.com/coderdojo-japan/dojopaas/refs/heads/gh-pages/instances.csv"
@@ -96,10 +128,11 @@ class SakuraServerUserAgent
     @name             = name
     @description      = description
     @tags             = tags || ['dojopaas']
+    @branch           = (tags || [])[1]
     @pubkey           = pubkey
     @resolve          = resolve
-    @plan             = 1001 # 1core 1Gb memory
-    # Other example plans: https://knowledge.sakura.ad.jp/1939/3/
+    # プランは plan_for で branch から決める（例: 下記は旧プランID の対応表）
+    # https://knowledge.sakura.ad.jp/1939/3/
     # 1001:プラン/1Core-1GB       3001:プラン/1Core-3GB       5001:プラン/1Core-5GB
     # 2001:プラン/1Core-2GB       3002:プラン/2Core-3GB       5002:プラン/2Core-5GB
     # 2002:プラン/2Core-2GB       3003:プラン/3Core-3GB       5003:プラン/3Core-5GB
@@ -135,6 +168,7 @@ class SakuraServerUserAgent
     @description = params[:description] || @description
     @pubkey      = params[:pubkey] || @pubkey
     @tags        = ['dojopaas',params[:tag]]
+    @branch      = params[:tag]
 
     puts "DEBUG: Creating server with name: #{@name}, description: #{@description}" if @verbose
     puts "DEBUG: Tags: #{@tags.inspect}" if @verbose
@@ -208,11 +242,7 @@ class SakuraServerUserAgent
     puts "Create a server for #{@name}."
     query = {
       Server:  {
-        ServerPlan:   {
-          CPU: 1,
-          MemoryMB: 1024,
-          Generation: 100
-        },
+        ServerPlan:   self.class.plan_for(@branch).merge(Generation: SERVER_GENERATION),
         Name:         @name,
         Description:  @description,
         Tags:         @tags

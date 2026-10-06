@@ -1,5 +1,7 @@
 require 'minitest/autorun'
 require 'csv'
+require 'date'
+require_relative '../scripts/sakura_server_user_agent'
 
 class CSVTest < Minitest::Test
   INSTANCE_CSV = "servers.csv".freeze
@@ -55,3 +57,43 @@ class CSVTest < Minitest::Test
     end
   end
 end
+# ここから下は、隠しコマンド（branch が workshop で始まる行）の取り違えを防ぐ検証
+class WorkshopRowTest < Minitest::Test
+  INSTANCE_CSV = "servers.csv".freeze
+
+  def test_workshop_branch_rows_have_matching_name
+    CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
+      branch = line['branch'].to_s.strip
+      next unless SakuraServerUserAgent::WORKSHOP_BRANCH =~ branch
+
+      assert_match(/-workshop\z/, line['name'].to_s.strip,
+                   "Row #{index + 1}: branch '#{branch}' は高スペックの隠しコマンドです。" \
+                   "意図した行であれば name を -workshop で終わらせてください")
+    end
+  end
+# 「惜しい書き方」で黙って通常スペックが作られるのを防ぐ
+  def test_workshop_like_branches_must_use_the_strict_form
+  CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
+    branch = line["branch"].to_s.strip
+    next unless SakuraServerUserAgent::WORKSHOP_BRANCH_LOOSE =~ branch
+
+    assert_match(SakuraServerUserAgent::WORKSHOP_BRANCH, branch,
+                 "Row #{index + 1}: ワークショップ用の branch は workshop-YYYYMMDD の形で書いてください" \
+                 "（この形でないと、ふだんと同じ 1コア1GB で作られます）")
+  end
+  end
+
+  # 日付が実在すること（20261332 のような値を弾く）
+  def test_workshop_branch_date_exists_on_the_calendar
+  CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
+    date = SakuraServerUserAgent.workshop_date(line["branch"].to_s.strip)
+    next unless date
+
+    begin
+      Date.strptime(date, "%Y%m%d")
+    rescue Date::Error
+      flunk "Row #{index + 1}: branch の日付 #{date} は存在しない日付です"
+    end
+  end
+  end
+  end
