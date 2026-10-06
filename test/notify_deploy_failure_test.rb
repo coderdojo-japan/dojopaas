@@ -11,8 +11,11 @@ class NotifyDeployFailureTest < Minitest::Test
     assert_equal '280', DeployFailureNotice.pr_number(message)
   end
 
-  def test_extracts_pr_number_from_squash_commit
-    assert_equal '281', DeployFailureNotice.pr_number("feat: ワークショップ用サーバー (#281)")
+  # このリポジトリはマージコミット運用なので、その形だけを認める
+  # 本文中の #番号 を拾うと、関係ない Issue 番号に通知しかねない
+  def test_ignores_numbers_that_are_not_a_merge_commit
+    assert_nil DeployFailureNotice.pr_number("feat: ワークショップ用サーバー (#281)")
+    assert_nil DeployFailureNotice.pr_number("Fix #269: Initialize server")
   end
 
   def test_returns_nil_without_a_pr_number

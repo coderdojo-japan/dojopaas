@@ -2,12 +2,7 @@
 
 set -e
 
-# サーバーの作成に失敗したら、PR を出した人に伝えてから落ちる
-# （マージ後の失敗は、ここで伝えないと誰にも届かない）
-if ! bundle exec ruby scripts/deploy.rb; then
-    bundle exec ruby scripts/notify_deploy_failure.rb || true
-    exit 1
-fi
+bundle exec ruby scripts/deploy.rb
 
 git config user.name  "Yohei Yasukawa"
 git config user.email "yohei@yasslab.jp"
@@ -27,3 +22,8 @@ fi
 
 git commit --quiet -m    "$COMMIT_MSG"
 git push --force --quiet "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" main:gh-pages
+
+# 公開のあとに、行の数だけサーバーが実際にあるかを確かめる
+# 作成の失敗は終了コードに出ないため、ここで初めて気づける
+# 公開の後に置くのは、1台の失敗で他の道場の IP まで止めないため
+bundle exec ruby scripts/verify_created.rb

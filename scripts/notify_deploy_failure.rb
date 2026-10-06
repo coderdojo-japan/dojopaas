@@ -9,10 +9,11 @@
 # 使い方: bundle exec ruby scripts/notify_deploy_failure.rb
 module DeployFailureNotice
   # マージコミットのメッセージから PR 番号を取り出す
-  # "Merge pull request #280 from ..." / "feat: ... (#281)" のどちらにも対応する
+  # このリポジトリはマージコミット運用なので、その形に固定する
+  # （squash を使う日が来たら GitHub API で PR 番号を引く）
   # @return [String, nil] 数字のみ。見つからなければ nil
   def self.pr_number(message)
-    message.to_s[/#(\d+)/, 1]
+    message.to_s[/\AMerge pull request #(\d+)/, 1]
   end
 
   # @param run_url [String, nil] 実行ログの URL
