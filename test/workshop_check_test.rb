@@ -56,7 +56,19 @@ class WorkshopCheckTest < Minitest::Test
   # CSV は fork 側の未検証データなので、壊れていても落ちないこと
   def test_broken_csv_does_not_raise
     result = WorkshopCheck.report("これは CSV ではありません\"\"\"")
-    assert_includes [:none, :problem], result[:status]
+    assert_equal :broken, result[:status]
+  end
+
+  # 壊れた CSV を「ワークショップ用の行はありません」と報告してはいけない
+  # （行はあるのに読めなかっただけで、PR 作成者が原因を取り違える）
+  def test_unclosed_quote_is_reported_as_broken_csv
+    broken = HEADER + %Q{coderdojo-naha-workshop,workshop-20261115,"説明が閉じていない,ssh-ed25519 AAAA\n}
+    result = WorkshopCheck.report(broken)
+
+    assert_equal :broken, result[:status]
+    assert_includes result[:markdown], "CSV", "CSV として読めないことを伝える"
+    assert_includes result[:markdown], "2", "何行目かを伝える"
+    refute_includes result[:markdown], "ワークショップ用の行はありません"
   end
 end
 
