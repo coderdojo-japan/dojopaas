@@ -104,22 +104,22 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 例えばマインクラフト用のサーバーを立てることができます！[CoderDojo 三島・沼津](https://coderdojo-mn.com/)が用意したマイクラサーバー構築スクリプトがあるので、サーバーに詳しくない方でも手順に沿って進みやすくなっています。興味あればぜひ! :wink:
 
 :octocat: [マインクラフトサーバー構築方法 (DojoPaaS利用者向け) - GitHub](https://github.com/urushibata/minecraft)
-  
+
 <br>
 
 <div id='howto-initialize'></div>
 
 ## Q. サーバーを初期化したい場合はどうすればよいですか?
 
-A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.md)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
+A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)から依頼してもらえれば! 道場名・申請者名・IPアドレスの入力欄があるので、それぞれ埋めて送信してください。
 
 初期化処理が開始したらステータスが `Closed` になるので、[2. SSHの接続方法](#2-sshの接続方法)を参考に当該サーバーに接続してみてください。
 
 > [!WARNING]
-> **:warning: 初期化すると IP アドレスが変わる点にご注意ください。**
+> **:warning: 初期化すると IP アドレスが変わる可能性がある**点にご注意ください (同じになる場合もあります)。
 
 - :octocat: [サーバー初期化の申請例 - DojoPaaS](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)
-- :postbox: [サーバー初期化依頼を申請する](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.md)
+- :postbox: [サーバー初期化依頼を申請する](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)
 
 
 <br>

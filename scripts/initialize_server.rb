@@ -2,7 +2,7 @@
 
 # DojoPaaS サーバー初期化支援スクリプト
 # GitHub Issueから情報を抽出し、サーバー削除の準備を支援します
-# 
+#
 # 使用方法:
 #   ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/249
 #   ruby scripts/initialize_server.rb --delete 153.127.192.200 --name coderdojo-naha  # サーバー削除（危険）
@@ -23,15 +23,24 @@ class ServerInitializer
     /CoderDojo\s+([^\s【]+)\s+の/,        # スペースあり形式
     /CoderDojo\s*([^\s【の]+)の/,         # スペースなし形式
   ]
-  
+
   # IPアドレスパターン（角カッコあり・なし両対応）
   IP_PATTERN = /(?:IPアドレス|IP)[：:]\s*【?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})】?/
-  
+
+  # Issue フォーム（.github/ISSUE_TEMPLATE/initialize_server.yml）の本文は
+  # 「### ラベル」+ 空行 + 値 に整形される。見出しの直下だけを読むので、
+  # コメント欄に書かれた IP や道場名は拾わない
+  FORM_DOJO_LABEL = '道場名'
+  FORM_IP_LABEL   = 'IPアドレス'
+
+  # 未入力の欄は GitHub がこの文字列で埋める。値として扱わない
+  NO_RESPONSE = '_No response_'
+
   # IPアドレスの厳密な検証パターン
   # 注: RakefileでIPAddrクラスによる検証を行うため、ここでの重複検証は不要（YAGNI）
   # VALID_IP_PATTERN = /\A(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\z/
-  
-  
+
+
   # テスト用サーバー名の安全管理（誤削除防止）
   # 現在実際に存在するのはcoderdojo-japanのみ
   # 他は将来のテスト/開発/ステージング環境用として予約
@@ -41,7 +50,7 @@ class ServerInitializer
     "coderdojo-dev",      # 開発環境用（将来用）
     "coderdojo-staging"   # ステージング用（将来用）
   ].freeze
-  
+
   # 削除対象の確認: IP で見つけたサーバーと、人が書いた名前が一致するか
   # Issue に貼られた IP が別の道場のものだった場合に、ここで止まる
   def self.name_matches?(server_name, expected)
@@ -63,7 +72,7 @@ class ServerInitializer
     @dry_run     = options[:dry_run] || false
     @force       = options[:force]   || false
     @name        = options[:name]
-    
+
     # さくらのクラウドAPIクライアント初期化（デフォルト値使用）
     @ssua = SakuraServerUserAgent.new(verbose: @verbose)
   end
@@ -131,14 +140,14 @@ class ServerInitializer
     else
       server_name = target
     end
-    
+
     if server_name && !self.class.safe_test_server?(server_name)
       puts "⚠️  警告: '#{server_name}' は登録されたテストサーバーではありません"
       puts "📋 安全なテストサーバー一覧:"
       SAFE_TEST_SERVERS.each { |name| puts "   - #{name}" }
       puts ""
       puts "本当に削除を続行しますか？ 'CONFIRM DELETION' と入力してください:"
-      
+
       unless @force
         user_input = STDIN.gets&.chomp
         unless user_input == 'CONFIRM DELETION'
@@ -152,7 +161,7 @@ class ServerInitializer
       puts "✅ '#{server_name}' は安全なテストサーバーです"
     end
   end
-  
+
   # IPアドレスによる削除モード
   def run_delete_mode
     puts "=" * 60
@@ -163,7 +172,7 @@ class ServerInitializer
     end
     puts "=" * 60
     puts ""
-    
+
     # IPアドレスの検証
     unless SakuraServerUserAgent.valid_ip_address?(@input)
       puts "❌ エラー: 無効なIPアドレス形式です: #{@input}"
@@ -172,13 +181,13 @@ class ServerInitializer
       puts "処理を中止します（サーバーへの変更は行われません）"
       exit 1
     end
-    
+
     puts "🔍 IPアドレス #{@input} のサーバーを検索中..."
     puts ""
-    
+
     # サーバーの検索
     server_info = find_server_by_ip(@input)
-    
+
     if server_info.nil?
       puts "❌ エラー: IPアドレス #{@input} に対応するサーバーが見つかりません"
       puts ""
@@ -190,7 +199,7 @@ class ServerInitializer
       puts "処理を中止します（サーバーへの変更は行われません）"
       exit 1
     end
-    
+
     # サーバー情報の表示
     display_server_details_for_deletion(server_info)
 
@@ -206,18 +215,18 @@ class ServerInitializer
       puts "処理を中止します（サーバーへの変更は行われません）"
       exit 1
     end
-    
+
     # ディスク情報の取得と表示
     disk_ids = get_server_disks(server_info['ID'])
     display_disk_details(disk_ids) if disk_ids.any?
-    
+
     # 削除確認
     unless confirm_deletion(server_info, disk_ids)
       puts ""
       puts "削除がキャンセルされました。サーバーは変更されません。"
       exit 0
     end
-    
+
     # 実際の削除処理
     execute_deletion(server_info, disk_ids)
   end
@@ -253,11 +262,11 @@ class ServerInitializer
     puts "📌 GitHub Issueから情報を取得中..."
     @issue_url = @input
     issue_data = fetch_issue_data
-    
+
     # 情報の抽出（正規表現のみ、失敗したら即停止）
     dojo_name = extract_dojo_name(issue_data['body'])
     ip_address = extract_ip_address(issue_data['body'])
-      
+
       if dojo_name.nil? || ip_address.nil?
         puts "❌ エラー: Issue から必要な情報を抽出できませんでした"
         puts ""
@@ -271,7 +280,7 @@ class ServerInitializer
         puts "処理を中止します（サーバーへの変更は行われません）"
         exit 1
       end
-      
+
       puts "📝 抽出された情報:"
       puts "  - CoderDojo名: #{dojo_name}"
       puts "  - IPアドレス: #{ip_address}"
@@ -279,7 +288,7 @@ class ServerInitializer
 
     # サーバー情報の取得
     server_info = find_server_by_ip(ip_address)
-    
+
     if server_info.nil?
       puts "❌ エラー: IPアドレス #{ip_address} に対応するサーバーが見つかりません"
       puts ""
@@ -300,7 +309,7 @@ class ServerInitializer
       puts "  - Issue記載: #{dojo_name}"
       puts "  - サーバー名: #{server_info['Name']}"
       puts ""
-      
+
       print "それでも続行しますか？ (yes/no): "
       answer = STDIN.gets.chomp.downcase
       unless ['yes', 'y'].include?(answer)
@@ -314,14 +323,14 @@ class ServerInitializer
     # 削除準備の表示
     display_deletion_plan(server_info, get_server_ip(server_info), dojo_name)
   end
-  
+
   # IPアドレスで直接検索
   def find_by_ip_address
     puts "🔍 IPアドレス #{@input} でサーバーを検索中..."
     puts ""
-    
+
     server_info = find_server_by_ip(@input)
-    
+
     if server_info.nil?
       puts "❌ エラー: IPアドレス #{@input} に対応するサーバーが見つかりません"
       puts ""
@@ -333,28 +342,28 @@ class ServerInitializer
       puts "処理を中止します"
       exit 1
     end
-    
+
     display_server_info(server_info)
-    
+
     # 削除準備の表示（IPアドレス検索の場合はCoderDojo名は不明）
     dojo_name = extract_dojo_from_server_name(server_info['Name'])
     display_deletion_plan(server_info, @input, dojo_name)
   end
-  
+
   # サーバー名で検索
   def find_by_name
     puts "🔍 サーバー名 '#{@input}' で検索中..."
     puts ""
-    
+
     # 全サーバーを取得
     servers_response = @ssua.get_servers()
     servers = servers_response['Servers'] || []
-    
+
     # 名前で検索（完全一致のみ）
     matched_servers = servers.select do |server|
       server['Name'].downcase == @input.downcase
     end
-    
+
     if matched_servers.empty?
       puts "❌ エラー: '#{@input}' に一致するサーバーが見つかりません"
       puts ""
@@ -367,23 +376,23 @@ class ServerInitializer
       puts "処理を中止します"
       exit 1
     end
-    
+
     # 完全一致なので複数マッチはありえないが、念のため
     if matched_servers.length > 1
       puts "⚠️  内部エラー: 複数のサーバーが見つかりました"
       exit 1
     end
-    
+
     server_info = matched_servers.first
     display_server_info(server_info)
-    
+
     # 削除準備の表示
     ip_address = get_server_ip(server_info)
     dojo_name = extract_dojo_from_server_name(server_info['Name'])
     display_deletion_plan(server_info, ip_address, dojo_name)
   end
 
-  
+
   # サーバー情報の詳細表示（削除用）
   def display_server_details_for_deletion(server)
     puts "=" * 60
@@ -399,14 +408,14 @@ class ServerInitializer
     puts "  メモリ: #{server['ServerPlan']['MemoryMB']}MB"
     puts ""
   end
-  
+
   # ディスク情報の取得
   def get_server_disks(server_id)
     puts "DEBUG: Getting disks for server ID: #{server_id}" if @verbose
     server_detail = @ssua.get_server_details(server_id)
     puts "DEBUG: Server detail response: #{server_detail.inspect}" if @verbose
     return [] unless server_detail && server_detail['Server']
-    
+
     disks = server_detail['Server']['Disks'] || []
     puts "DEBUG: Found #{disks.length} disk(s)" if @verbose
     disks.map { |disk| disk['ID'] }
@@ -415,7 +424,7 @@ class ServerInitializer
     puts "DEBUG: Error details: #{e.backtrace.first(3).join("\n")}" if @verbose
     []
   end
-  
+
   # ディスク情報の表示
   def display_disk_details(disk_ids)
     puts "💾 接続されているディスク:"
@@ -435,7 +444,7 @@ class ServerInitializer
     end
     puts ""
   end
-  
+
   # 削除の確認（多重確認）
   def confirm_deletion(server, disk_ids)
     # dry-runモードでは確認をスキップ
@@ -445,7 +454,7 @@ class ServerInitializer
       puts "=" * 60
       return true
     end
-    
+
     # --forceオプションが指定されている場合は確認をスキップ
     if @force
       puts "=" * 60
@@ -455,10 +464,10 @@ class ServerInitializer
       puts "削除を実行します..."
       return true
     end
-    
+
     # 安全性チェック: テスト用サーバー以外は追加確認
     confirm_safe_deletion(get_server_ip(server))
-    
+
     puts "=" * 60
     puts "⚠️  ⚠️  ⚠️  削除確認 ⚠️  ⚠️  ⚠️"
     puts "=" * 60
@@ -472,7 +481,7 @@ class ServerInitializer
     puts "⚠️  すべてのデータが失われます！"
     puts ""
     print "本当に削除しますか？ (yes/no): "
-    
+
     # Claude Code環境では入力が取得できないため、エラーハンドリングを追加
     begin
       input = STDIN.gets
@@ -491,7 +500,7 @@ class ServerInitializer
       puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
       return false
     end
-    
+
     # yes/y/no/n以外の入力は全て拒否
     unless ['yes', 'y', 'no', 'n'].include?(answer)
       puts ""
@@ -499,12 +508,12 @@ class ServerInitializer
       puts "安全のため処理を中止します。"
       return false
     end
-    
+
     # noまたはnの場合は中止
     if ['no', 'n'].include?(answer)
       return false
     end
-    
+
     # yesまたはyの場合、さらに確認（FORCE_DELETE環境変数の場合はスキップ）
     if ENV['FORCE_DELETE'] == 'yes'
       puts ""
@@ -512,11 +521,11 @@ class ServerInitializer
       puts "削除を実行します..."
       return true
     end
-    
+
     puts ""
     puts "⚠️  最終確認：サーバー #{server['Name']} を本当に削除しますか？"
     print "削除を実行する場合は 'DELETE' と入力してください: "
-    
+
     begin
       input = STDIN.gets
       if input.nil?
@@ -532,7 +541,7 @@ class ServerInitializer
       puts "Claude Code環境での削除には FORCE_DELETE=yes 環境変数を使用してください"
       return false
     end
-    
+
     if final_answer == 'DELETE'
       puts ""
       puts "削除を実行します..."
@@ -543,22 +552,22 @@ class ServerInitializer
       return false
     end
   end
-  
+
   # 削除の実行
   def execute_deletion(server, disk_ids)
     puts ""
-    
+
     if @dry_run
       puts "🔍 [DRY-RUN MODE] 削除シミュレーション開始..."
     else
       puts "🗑️  削除処理を開始します..."
     end
-    
+
     puts ""
-    
+
     begin
       server_id = server['ID']
-      
+
       # 1. サーバーの電源状態確認
       if @dry_run
         puts "🔍 [DRY-RUN] Would check power status: GET /server/#{server_id}/power"
@@ -566,7 +575,7 @@ class ServerInitializer
       else
         power_status = @ssua.get_server_power_status_by_id(server_id)
       end
-      
+
       # 2. サーバーが起動中なら停止
       if @dry_run
         if server['Instance']['Status'] == 'up'
@@ -579,7 +588,7 @@ class ServerInitializer
         if power_status && power_status['Instance'] && power_status['Instance']['Status'] == 'up'
           puts "⏸️  サーバーを停止中..."
           @ssua.stop_server(server_id)
-          
+
           # 停止を待つ
           wait_count = 0
           while wait_count < 30  # 最大60秒待機
@@ -593,7 +602,7 @@ class ServerInitializer
           puts "✅ サーバーを停止しました"
         end
       end
-      
+
       # 3. サーバーの削除（ディスクも同時に削除）
       if @dry_run
         puts "🗑️  [DRY-RUN] Would delete server and disks:"
@@ -606,7 +615,7 @@ class ServerInitializer
         puts "🗑️  サーバーとディスクを削除中..."
         @ssua.delete_server(server_id, disk_ids)
       end
-      
+
       puts ""
       puts "=" * 60
       if @dry_run
@@ -631,7 +640,7 @@ class ServerInitializer
       puts "次のステップ: 空コミットを作って push すると、CI が同じ名前で作り直します"
       puts %(  bundle exec rake "server:create_empty_commit[<Issue番号>]")
       puts "  gpush"
-      
+
     rescue => e
       puts ""
       puts "❌ 削除中にエラーが発生しました: #{e.message}"
@@ -661,27 +670,67 @@ class ServerInitializer
 
     # GitHub API経由で取得
     uri = URI("https://api.github.com/repos/#{owner}/#{repo}/issues/#{issue_number}")
-    
+
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
-    
+
     request = Net::HTTP::Get.new(uri)
     request['Accept'] = 'application/vnd.github.v3+json'
-    
+
     response = http.request(request)
-    
+
     if response.code != '200'
       puts "❌ エラー: GitHub APIエラー (#{response.code})"
       puts "Issue が存在するか、公開されているか確認してください"
       exit 1
     end
-    
+
     JSON.parse(response.body)
   end
 
-  def extract_dojo_name(text)
-    return nil if text.nil? || text.empty?
-    
+  # Issue フォームの見出しの行番号。無ければ nil
+  #
+  # 正規表現で「見出しから次の行まで」を書くと改行の扱いで壊れやすいので、行で探す
+  def self.form_label_index(lines, label)
+    lines.index { |line| line =~ /\A###[[:blank:]]*#{Regexp.escape(label)}[[:blank:]]*\z/ }
+  end
+  private_class_method :form_label_index
+
+  # Issue フォームの見出し直下の値を返す。見出しが無い、または値が無ければ nil
+  def self.form_value(text, label)
+    lines = text.to_s.lines.map(&:chomp)
+    index = form_label_index(lines, label)
+    return nil unless index
+
+    value = lines[(index + 1)..].find { |line| !line.strip.empty? }&.strip
+    return nil if value.nil? || value == NO_RESPONSE || value.start_with?('###')
+
+    value
+  end
+  private_class_method :form_value
+
+  # フォームで送られたか（見出しがあるか）。値が空でも true
+  #
+  # 見出しがあるなら、値は見出しの下にしか無い。本文の他の場所を探すと、
+  # コメント欄に書かれた IP や道場名を拾ってしまう
+  def self.form_field?(text, label)
+    !form_label_index(text.to_s.lines.map(&:chomp), label).nil?
+  end
+  private_class_method :form_field?
+
+  # フォームの見出しがあればその値だけを見る。無ければ旧テンプレート（自由記述）を探す
+  def self.extract_dojo_name(text)
+    return nil if text.nil? || text.to_s.empty?
+
+    if form_field?(text, FORM_DOJO_LABEL)
+      value = form_value(text, FORM_DOJO_LABEL)
+      return nil if value.nil?
+
+      # 「CoderDojo 那覇」と書かれても道場名だけを返す
+      name = value.sub(/\ACoderDojo[[:blank:]]*/i, '').strip
+      return name.empty? ? nil : name
+    end
+
     DOJO_PATTERNS.each do |pattern|
       match = text.match(pattern)
       return match[1].strip if match
@@ -689,20 +738,32 @@ class ServerInitializer
     nil
   end
 
-  def extract_ip_address(text)
-    return nil if text.nil? || text.empty?
-    
+  def self.extract_ip_address(text)
+    return nil if text.nil? || text.to_s.empty?
+
+    if form_field?(text, FORM_IP_LABEL)
+      return form_value(text, FORM_IP_LABEL)&.slice(/\d{1,3}(?:\.\d{1,3}){3}/)
+    end
+
     match = text.match(IP_PATTERN)
     match ? match[1] : nil
   end
 
+  def extract_dojo_name(text)
+    self.class.extract_dojo_name(text)
+  end
+
+  def extract_ip_address(text)
+    self.class.extract_ip_address(text)
+  end
+
   def find_server_by_ip(ip_address)
     puts "🔍 サーバーを検索中..."
-    
+
     # 全サーバーを取得
     servers_response = @ssua.get_servers()
     servers = servers_response['Servers'] || []
-    
+
     # IPアドレスで検索
     servers.find do |server|
       interfaces = server['Interfaces'] || []
@@ -714,9 +775,9 @@ class ServerInitializer
     # 名前の正規化（小文字化、ハイフン・アンダースコア統一）
     normalized_dojo = dojo_name.downcase.gsub(/[-_]/, '')
     normalized_server = server_info['Name'].downcase.gsub(/[-_]/, '')
-    
+
     # 部分一致チェック
-    normalized_server.include?(normalized_dojo) || 
+    normalized_server.include?(normalized_dojo) ||
     normalized_dojo.include?(normalized_server)
   end
 
@@ -727,20 +788,20 @@ class ServerInitializer
     puts "  - 説明: #{server['Description']}"
     puts "  - タグ: #{server['Tags'].join(', ')}"
     puts "  - ステータス: #{server['Instance']['Status']}"
-    
+
     # IPアドレスを取得して表示
     ip = get_server_ip(server)
     puts "  - IPアドレス: #{ip || 'N/A'}"
     puts ""
   end
-  
+
   # サーバーからIPアドレスを取得
   def get_server_ip(server)
     interfaces = server['Interfaces'] || []
     interface = interfaces.first
     interface ? interface['IPAddress'] : nil
   end
-  
+
   # サーバー名からCoderDojo名を推測
   def extract_dojo_from_server_name(server_name)
     # coderdojo-japan -> japan のような変換
@@ -759,7 +820,7 @@ class ServerInitializer
     puts "  IPアドレス: #{ip_address}"
     puts "  CoderDojo: #{dojo_name || '(自動判定)'}"
     puts ""
-    
+
     issue_number = @issue_url ? @issue_url[/\d+$/] : "<Issue番号>"
     puts "【次のステップ】"
     puts ""
@@ -780,21 +841,21 @@ end
 if __FILE__ == $0
   options = {}
   input = nil
-  
-  
+
+
   OptionParser.new do |opts|
     opts.banner = "Usage: #{$0} [options]"
-    
+
     opts.on("--find <URL|IP|NAME>", "サーバー情報を検索（URL/IP/名前）") do |query|
       options[:find] = true
       input = query
     end
-    
+
     opts.on("--delete IP_ADDRESS", "指定したIPアドレスのサーバーを削除（危険）") do |ip|
       options[:delete] = true
       input = ip
     end
-    
+
     opts.on("--name SERVER_NAME", "削除するサーバー名（--delete では必須。IP との一致を確認する）") do |name|
       options[:name] = name
     end
@@ -802,31 +863,31 @@ if __FILE__ == $0
     opts.on("--force", "削除時の確認をスキップ（危険）") do
       options[:force] = true
     end
-    
+
     opts.on("--dry-run", "削除を実行せず、何が起こるかを表示（開発者向け）") do
       options[:dry_run] = true
     end
-    
+
     opts.on("--verbose", "詳細ログを出力") do
       options[:verbose] = true
     end
-    
+
     opts.on("-h", "--help", "ヘルプを表示") do
       # initializerを作成してヘルプを表示
       ServerInitializer.new("", {}).send(:show_help)
     end
   end.parse!
-  
+
   # パラメータなしの場合はヘルプを表示
   if input.nil? && ARGV.empty?
     ServerInitializer.new("", {}).send(:show_help)
   end
-  
+
   # 入力の取得
   if input.nil?
     input = ARGV[0]
   end
-  
+
   # 環境変数チェック
   unless ENV['SACLOUD_ACCESS_TOKEN'] && ENV['SACLOUD_ACCESS_TOKEN_SECRET']
     puts "エラー: さくらのクラウドAPIトークンが設定されていません"
@@ -835,7 +896,7 @@ if __FILE__ == $0
     puts "  export SACLOUD_ACCESS_TOKEN_SECRET=xxx"
     exit 1
   end
-  
+
   # 実行
   initializer = ServerInitializer.new(input, options)
   initializer.run
