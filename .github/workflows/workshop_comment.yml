@@ -1,0 +1,54 @@
+name: ワークショップ用の指定をPRにコメント
+
+# 初期化依頼の Issue が自動コメントで返しているのと同じ考え方を、PR にも広げる。
+# fork から来た PR にコメントするには base 側の文脈で動く必要があるため
+# pull_request_target を使う。そのぶん、次の約束を必ず守る:
+#
+#   1. fork のコードはチェックアウトも実行もしない（ref を指定せず base のまま）
+#   2. 読むのは PR の servers.csv の中身（テキスト）だけ
+#   3. 判定するコードは base ブランチのもの
+#   4. このジョブに本番の秘密情報（SACLOUD_*）は渡さない
+#
+# 判定の正は従来どおり test ジョブ（rake test）。このコメントは案内にすぎない。
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+# 古い実行が後から完走して、新しい判定を上書きするのを防ぐ
+concurrency:
+  group: workshop-comment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # ref を指定しない = base ブランチ。fork のコードは持ち込まない
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # PR 側の servers.csv を「データとして」取得する（実行はしない）
+      - name: PR の servers.csv を取得
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "repos/$GITHUB_REPOSITORY/contents/servers.csv?ref=$HEAD_SHA" \
+            > "$RUNNER_TEMP/servers.csv"
+
+      - name: 判定してコメント
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: bundle exec ruby scripts/comment_workshop_check.rb "$RUNNER_TEMP/servers.csv"

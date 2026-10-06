@@ -43,6 +43,17 @@ module WorkshopCheck
     problems.empty? ? ok_report(candidates) : problem_report(problems, today)
   end
 
+  # CSV の値は fork 側が自由に書ける。そのまま Markdown に埋めると、
+  # コードスパンから抜け出してリンクやメンションを仕込めてしまう。
+  # 表示に使うのは「名前として妥当な文字」だけにする
+  SAFE = /[^a-zA-Z0-9._\-]/.freeze
+
+  def self.safe(value)
+    cleaned = value.to_s.gsub(SAFE, '')
+    cleaned = '(空)' if cleaned.empty?
+    cleaned.slice(0, 64)
+  end
+
   # 日付の判断は JST で行う（CI は UTC で動く）
   def self.today_jst
     Time.now.getlocal('+09:00').to_date
@@ -68,7 +79,7 @@ module WorkshopCheck
 
     unless date
       return [{ line: row[:line],
-                message: "`branch` が `#{row[:branch]}` になっています。" \
+                message: "`branch` が `#{safe(row[:branch])}` になっています。" \
                          '開催日を含めて `workshop-YYYYMMDD` の形で書いてください' \
                          "（例: 1週間後なら `#{example_branch(today)}`）" }]
     end
@@ -83,7 +94,7 @@ module WorkshopCheck
 
     unless row[:name].end_with?('-workshop')
       problems << { line: row[:line],
-                    message: "`name` が `#{row[:name]}` になっています。" \
+                    message: "`name` が `#{safe(row[:name])}` になっています。" \
                              'ワークショップ用の行は `-workshop` で終わる名前にしてください' \
                              '（ふだんのサーバーと取り違えないためです）' }
     end
@@ -96,7 +107,7 @@ module WorkshopCheck
              '| サーバー名 | 開催日 | スペック |', '|---|---|---|']
     rows.each do |row|
       date = Date.strptime(SakuraServerUserAgent.workshop_date(row[:branch]), '%Y%m%d')
-      lines << "| `#{row[:name]}` | #{date.strftime('%Y-%m-%d')} | #{PLAN_TEXT}（ふだんの#{PLAN[:CPU]}倍） |"
+      lines << "| `#{safe(row[:name])}` | #{date.strftime('%Y-%m-%d')} | #{PLAN_TEXT}（ふだんの#{PLAN[:CPU]}倍） |"
     end
     lines += ['', 'この PR が**マージされると、サーバーが作成されます**（ふだんの流れと同じです）。',
               "作成後、IP アドレスは[サーバー一覧](#{INSTANCES_URL})に載ります。",
@@ -105,7 +116,7 @@ module WorkshopCheck
     notices = rows.map do |row|
       date = Date.strptime(SakuraServerUserAgent.workshop_date(row[:branch]), '%Y%m%d')
       { line: row[:line],
-        message: "#{row[:name]} を #{date.strftime('%Y-%m-%d')} に #{PLAN_TEXT}（ふだんの#{PLAN[:CPU]}倍）で作成します" }
+        message: "#{safe(row[:name])} を #{date.strftime('%Y-%m-%d')} に #{PLAN_TEXT}（ふだんの#{PLAN[:CPU]}倍）で作成します" }
     end
 
     { status: :ok, markdown: lines.join("\n"), problems: [], notices: notices }
@@ -116,7 +127,7 @@ module WorkshopCheck
     lines = ['### ワークショップ用の指定を読み取れませんでした', '']
     problems.each { |p| lines << "- #{p[:line]}行目: #{p[:message]}" }
     lines += ['', "このままマージすると、ふだんと同じ #{DEFAULT_TEXT} のサーバーが作られます。",
-              "`#{example_branch(today)}` のような形に直すと、Checks の表示も更新されます。"]
+              "`#{example_branch(today)}` のような形に直して push すると、この内容も更新されます。"]
 
     { status: :problem, markdown: lines.join("\n"), problems: problems, notices: [] }
   end
