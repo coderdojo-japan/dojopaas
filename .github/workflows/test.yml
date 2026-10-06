@@ -21,13 +21,13 @@ jobs:
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
-      - name: Run bundle exec rake test
-        run: bundle exec rake test
-
       # ワークショップ用の行があれば、内容と作られるスペックを Checks のサマリーに出す
       # 権限は read-only のまま。PR へのコメント投稿はしない
       - name: ワークショップ用の指定を確認
         run: bundle exec rake workshop:check
+
+      - name: Run bundle exec rake test
+        run: bundle exec rake test
 
   deploy:
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
