@@ -77,9 +77,10 @@ class SakuraServerUserAgent
   end
 
   # branch に書かれた開催日を取り出す
+  # servers.csv には前後に空白が入った行が実在するため strip してから判定する
   # @return [String, nil] "20261115" 形式。隠しコマンドでなければ nil
   def self.workshop_date(branch)
-    WORKSHOP_BRANCH.match(branch.to_s)&.captures&.first
+    WORKSHOP_BRANCH.match(branch.to_s.strip)&.captures&.first
   end
 
   # サーバー一覧URL（最新の実サーバー情報）

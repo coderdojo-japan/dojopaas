@@ -44,9 +44,18 @@ class WorkshopPlanTest < Minitest::Test
     assert_equal SakuraServerUserAgent::DEFAULT_PLAN, SakuraServerUserAgent.plan_for(nil)
   end
 
-  def test_workshop_plan_is_a_real_sakura_plan
+  # servers.csv には前後に空白が入った行が実在する（55行目の branch など）
+  def test_branch_with_surrounding_spaces_still_fires
+    ['workshop-20261115 ', ' workshop-20261115', '  workshop-20261115  '].each do |branch|
+      assert_equal SakuraServerUserAgent::WORKSHOP_PLAN,
+                   SakuraServerUserAgent.plan_for(branch),
+                   "前後の空白では判定が変わらない: #{branch.inspect}"
+    end
+  end
+
+  def test_workshop_plan_values
     plan = SakuraServerUserAgent::WORKSHOP_PLAN
-    assert_equal 8, plan[:CPU], "8コア8GB は提供中のプラン（ふだんの8倍）"
+    assert_equal 8, plan[:CPU]
     assert_equal 8192, plan[:MemoryMB]
   end
 
