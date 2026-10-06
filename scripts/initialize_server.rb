@@ -630,10 +630,9 @@ class ServerInitializer
         puts "  - ディスク数: #{disk_ids.length}個"
       end
       puts ""
-      puts "次のステップ:"
-      puts "  1. servers.csvから該当行を削除"
-      puts "  2. git commit -m 'Remove server: #{server['Name']}'"
-      puts "  3. git push（CIが新しいサーバーを作成）"
+      puts "次のステップ: 空コミットを作って push すると、CI が同じ名前で作り直します"
+      puts %(  bundle exec rake "server:create_empty_commit[<Issue番号>]")
+      puts "  gpush"
       
     rescue => e
       puts ""
@@ -763,25 +762,15 @@ class ServerInitializer
     puts "  CoderDojo: #{dojo_name || '(自動判定)'}"
     puts ""
     
+    issue_number = @issue_url ? @issue_url[/\d+$/] : "<Issue番号>"
     puts "【次のステップ】"
-      puts ""
-      puts "1. さくらのクラウドコントロールパネルにログイン"
-      puts "   https://secure.sakura.ad.jp/cloud/"
-      puts ""
-      puts "2. サーバー「#{server_info['Name']}」を検索"
-      puts ""
-      puts "3. サーバーを停止してから削除（ディスクも含む）"
-      puts ""
-      puts "4. 削除完了後、以下のコマンドを実行:"
-      if @issue_url
-        issue_number = @issue_url[/\d+$/]
-        puts "   git commit --allow-empty -m \"Fix ##{issue_number}: Initialize server for CoderDojo #{dojo_name}\""
-      else
-        puts "   git commit --allow-empty -m \"Initialize server: #{server_info['Name']}\""
-      end
-      puts "   git push"
-      puts ""
-      puts "5. CIが自動的に新しいサーバーを作成します"
+    puts ""
+    puts %(1. bundle exec rake "server:execute_deletion[#{ip_address},#{server_info['Name']}]")
+    puts "   サーバー名は上の表示と Issue の道場名を見比べて入力します"
+    puts ""
+    puts %(2. bundle exec rake "server:create_empty_commit[#{issue_number}]")
+    puts ""
+    puts "3. gpush すると、CI が同じ名前でサーバーを作り直します"
     puts ""
     puts "=" * 60
     puts "処理完了"
