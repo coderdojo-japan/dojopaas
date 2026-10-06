@@ -18,13 +18,20 @@ module DeployFailureNotice
 
   # @param run_url [String, nil] 実行ログの URL
   # @return [String] PR に投稿する本文
-  def self.body(run_url: nil)
+  def self.body(run_url: nil, missing: [])
     lines = []
     lines << '### サーバーの作成に失敗しました'
     lines << ''
     lines << 'マージは完了していますが、サーバーを作る処理の途中で止まりました。'
     lines << 'このままでは IP アドレスが一覧に出ません。'
     lines << ''
+    unless missing.to_a.empty?
+      lines << '作れていないサーバー:'
+      missing.each { |name| lines << "- `#{name}`" }
+      lines << ''
+      lines << 'この PR とは別の行かもしれません。名前をご確認ください。'
+      lines << ''
+    end
     lines << "ログ: #{run_url}" if run_url && !run_url.empty?
     lines << ''
     lines << 'CoderDojo Japan が内容を確認して対応します。'
@@ -33,7 +40,7 @@ module DeployFailureNotice
   end
 
   # gh コマンドでコメントする。失敗しても deploy の結果は変えない
-  def self.post(message:, run_url:)
+  def self.post(message:, run_url:, missing: [])
     number = pr_number(message)
     if number.nil?
       warn 'PR 番号が見つからないため、通知しません'
@@ -41,7 +48,7 @@ module DeployFailureNotice
     end
 
     require 'open3'
-    _out, err, status = Open3.capture3('gh', 'pr', 'comment', number, '--body', body(run_url: run_url))
+    _out, err, status = Open3.capture3('gh', 'pr', 'comment', number, '--body', body(run_url: run_url, missing: missing))
     if status.success?
       puts "PR ##{number} に失敗を通知しました"
       true
@@ -57,5 +64,8 @@ if __FILE__ == $PROGRAM_NAME
   run_url = if ENV['GITHUB_SERVER_URL'] && ENV['GITHUB_REPOSITORY'] && ENV['GITHUB_RUN_ID']
               "#{ENV['GITHUB_SERVER_URL']}/#{ENV['GITHUB_REPOSITORY']}/actions/runs/#{ENV['GITHUB_RUN_ID']}"
             end
-  DeployFailureNotice.post(message: message, run_url: run_url)
+  missing_file = 'tmp/missing_servers.txt'
+  missing = File.exist?(missing_file) ? File.read(missing_file).split("\n") : []
+
+  DeployFailureNotice.post(message: message, run_url: run_url, missing: missing)
 end

@@ -9,12 +9,25 @@
 #
 # 使い方: bundle exec ruby scripts/verify_created.rb
 module VerifyCreated
+  # 失敗したときに、通知のステップへ名前を渡すための置き場
+  MISSING_FILE = 'tmp/missing_servers.txt'.freeze
+
   # @param csv_names [Array<String>] servers.csv の name
   # @param live_names [Array<String>] さくらのクラウドにあるサーバー名
   # @return [Array<String>] 行はあるのにサーバーが無い name
   def self.missing(csv_names, live_names)
     live = live_names.map { |n| n.to_s.strip }
     csv_names.map { |n| n.to_s.strip }.reject { |n| n.empty? || live.include?(n) }
+  end
+
+  # サーバーの一覧（API の応答）から判定する
+  # 名前はあるが IP が無いものも「作れていない」と見なす
+  # （サーバー本体の作成後、NIC やディスクで失敗すると起きる）
+  # @param servers [Array<Hash>] さくらのクラウドの Servers 配列
+  def self.missing_from(csv_names, servers)
+    usable = servers.reject { |s| s.dig('Interfaces', 0, 'IPAddress').to_s.strip.empty? }
+                    .map { |s| s['Name'] }
+    missing(csv_names, usable)
   end
 
   def self.message(missing_names)
@@ -26,13 +39,15 @@ if __FILE__ == $PROGRAM_NAME
   require 'csv'
   require_relative 'sakura_server_user_agent'
 
-  csv_names  = CSV.read('servers.csv', headers: true).map { |row| row['name'] }
-  live_names = SakuraServerUserAgent.new.get_servers['Servers'].map { |s| s['Name'] }
+  csv_names = CSV.read('servers.csv', headers: true).map { |row| row['name'] }
+  servers   = SakuraServerUserAgent.new.get_servers['Servers']
 
-  missing = VerifyCreated.missing(csv_names, live_names)
+  missing = VerifyCreated.missing_from(csv_names, servers)
   if missing.empty?
     puts "servers.csv の #{csv_names.size} 行は、すべてサーバーがあります"
   else
+    # 次のステップ（通知）が名前を使えるように書き出す
+    File.write(MISSING_FILE, missing.join("\n"))
     abort VerifyCreated.message(missing)
   end
 end

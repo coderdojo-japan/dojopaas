@@ -24,6 +24,18 @@ class VerifyCreatedTest < Minitest::Test
     assert_empty VerifyCreated.missing([' coderdojo-naha '], ['coderdojo-naha'])
   end
 
+  # 名前だけあって IP が無いサーバーは「作れていない」と見なす
+  # （サーバー本体の作成後、NIC やディスクで失敗すると起きる）
+  def test_servers_without_an_ip_count_as_missing
+    live = [{ 'Name' => 'coderdojo-naha', 'Interfaces' => [] }]
+    assert_equal ['coderdojo-naha'], VerifyCreated.missing_from(%w[coderdojo-naha], live)
+  end
+
+  def test_servers_with_an_ip_are_fine
+    live = [{ 'Name' => 'coderdojo-naha', 'Interfaces' => [{ 'IPAddress' => '192.0.2.1' }] }]
+    assert_empty VerifyCreated.missing_from(%w[coderdojo-naha], live)
+  end
+
   def test_message_names_the_rows
     message = VerifyCreated.message(%w[coderdojo-naha coderdojo-ome])
     assert_includes message, 'coderdojo-naha'

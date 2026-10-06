@@ -38,6 +38,14 @@ class NotifyDeployFailureTest < Minitest::Test
     refute_includes body, 'SACLOUD', '秘密情報の名前は出さない'
   end
 
+  # 本文に名前が無いと、別の PR の作者が「自分の申請が失敗した」と誤解する
+  def test_body_names_the_missing_servers
+    body = DeployFailureNotice.body(run_url: nil, missing: %w[coderdojo-naha-workshop])
+
+    assert_includes body, 'coderdojo-naha-workshop'
+    assert_includes body, 'この PR とは別の行', '他の行の失敗かもしれないと伝える'
+  end
+
   def test_body_works_without_a_run_url
     body = DeployFailureNotice.body(run_url: nil)
     assert_includes body, 'サーバーの作成に失敗'
