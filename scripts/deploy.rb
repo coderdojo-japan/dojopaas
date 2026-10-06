@@ -59,7 +59,7 @@ class CoderDojoSakuraCLI
     result_csv_elements = []
     result_sakura_servers = (@ssua.get_servers())['Servers']
     result_sakura_servers.each do |s|
-      result_csv_elements.push([s['Name'], s['Interfaces'].first['IPAddress'], s['Description']])
+      result_csv_elements.push(instance_row(s))
     end
 
     CSV.open(RESULT_INSTANCE_CSV, 'wb') do |csv|
@@ -98,7 +98,7 @@ class CoderDojoSakuraCLI
     sakura_servers.each do |s|
       if s['Name'] == server_name
         puts "⚠️  警告: サーバー '#{server_name}' は既に存在します"
-        puts "  IPアドレス: #{s['Interfaces'].first['IPAddress']}"
+        puts "  IPアドレス: #{s.dig('Interfaces', 0, 'IPAddress')}"
         puts "  説明: #{s['Description']}"
         return false
       end
@@ -125,7 +125,7 @@ class CoderDojoSakuraCLI
       if created_server
         puts "✅ サーバー作成成功!"
         puts "  サーバー名: #{created_server['Name']}"
-        puts "  IPアドレス: #{created_server['Interfaces'].first['IPAddress']}"
+        puts "  IPアドレス: #{created_server.dig('Interfaces', 0, 'IPAddress')}"
         puts "  説明: #{created_server['Description']}"
         return true
       else
@@ -138,6 +138,12 @@ class CoderDojoSakuraCLI
     end
   end
 
+
+  # instances.csv の1行。NIC が無いサーバーでも落ちないようにする
+  # （作成が途中で失敗すると Interfaces が空のサーバーが残りうる）
+  def instance_row(server)
+    [server['Name'], server.dig('Interfaces', 0, 'IPAddress'), server['Description']]
+  end
 
   private
 
@@ -181,11 +187,11 @@ class CoderDojoSakuraCLI
       puts "Selected Archive: #{selected_name}"
       puts "Archive ID: #{archiveid}"
     else
-      puts "Can't get archive id"
-      exit
+      abort "Can't get archive id"
     end
     archiveid
   end
 end
 
-CoderDojoSakuraCLI.new(ARGV).run()
+# require されただけでは実行しない（rake server:create が全件 deploy を走らせていた）
+CoderDojoSakuraCLI.new(ARGV).run() if __FILE__ == $PROGRAM_NAME
