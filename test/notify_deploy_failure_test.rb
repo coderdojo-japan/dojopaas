@@ -1,0 +1,42 @@
+require 'minitest/autorun'
+require_relative '../scripts/notify_deploy_failure'
+
+# マージ後にサーバー作成が失敗したとき、PR を出した人に伝える
+#
+# マージ前の失敗は Checks と該当行の注釈で見えるが、マージ後の失敗は
+# 誰にも届かない。申請者は来ない IP を待ち続けることになる
+class NotifyDeployFailureTest < Minitest::Test
+  def test_extracts_pr_number_from_merge_commit
+    message = "Merge pull request #280 from coderdojo-japan/demo-workshop-success\n\ndemo: ..."
+    assert_equal '280', DeployFailureNotice.pr_number(message)
+  end
+
+  def test_extracts_pr_number_from_squash_commit
+    assert_equal '281', DeployFailureNotice.pr_number("feat: ワークショップ用サーバー (#281)")
+  end
+
+  def test_returns_nil_without_a_pr_number
+    assert_nil DeployFailureNotice.pr_number("Fix typo")
+    assert_nil DeployFailureNotice.pr_number("")
+    assert_nil DeployFailureNotice.pr_number(nil)
+  end
+
+  # 番号らしきものが複数あるときは、最初のものを使う（マージコミットの形）
+  def test_uses_the_first_number
+    assert_equal '270', DeployFailureNotice.pr_number("Merge pull request #270 from x (closes #269)")
+  end
+
+  def test_body_tells_what_happened_and_what_is_next
+    body = DeployFailureNotice.body(run_url: 'https://github.com/x/y/actions/runs/1')
+
+    assert_includes body, 'サーバーの作成に失敗', '何が起きたかを書く'
+    assert_includes body, 'https://github.com/x/y/actions/runs/1', 'ログへのリンクを載せる'
+    assert_includes body, 'CoderDojo Japan', '誰が対応するかを書く'
+    refute_includes body, 'SACLOUD', '秘密情報の名前は出さない'
+  end
+
+  def test_body_works_without_a_run_url
+    body = DeployFailureNotice.body(run_url: nil)
+    assert_includes body, 'サーバーの作成に失敗'
+  end
+end
