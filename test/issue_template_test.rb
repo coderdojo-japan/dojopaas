@@ -1,5 +1,6 @@
 require 'minitest/autorun'
 require 'yaml'
+require_relative '../scripts/initialize_server'
 
 # Issue フォームが GitHub に読まれる形になっているか
 #
@@ -10,7 +11,10 @@ class IssueTemplateTest < Minitest::Test
   TEMPLATE = File.expand_path('../.github/ISSUE_TEMPLATE/initialize_server.yml', __dir__)
 
   # 抽出側（scripts/initialize_server.rb）が見出しで探すラベル
-  REQUIRED_LABELS = ['道場名', '申請者名', 'IPアドレス'].freeze
+  # 抽出側の定数をそのまま使う。手で写すと、片方だけ変えた時に気づけない
+  REQUIRED_LABELS = [ServerInitializer::FORM_DOJO_LABEL,
+                     '申請者名',
+                     ServerInitializer::FORM_IP_LABEL].freeze
 
   def setup
     @form = YAML.load_file(TEMPLATE)

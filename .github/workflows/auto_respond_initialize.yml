@@ -190,7 +190,7 @@ jobs:
             Issue の本文から IP アドレスを読み取れませんでした。
 
             [初期化依頼フォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)の
-            **IPアドレス** の欄に、半角の数字とドットで入力して送信していただけますか（`133.242.xxx.xxx` の形です）。
+            **IPアドレス** の欄に、半角の数字とドットで入力して送信していただけますか（\`133.242.xxx.xxx\` の形です）。
 
             ご自身のサーバーの IP アドレスは、[サーバー一覧](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)で確認できます。
 
