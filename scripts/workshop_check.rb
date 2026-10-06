@@ -115,6 +115,8 @@ module WorkshopCheck
   end
   private_class_method :problem_report
 
+  # 行番号は CSV のレコード番号。引用符内に改行を含むセルがあると物理行とずれる
+  # （servers.csv に複数行セルは無いため、現状は一致する）
   # CSV として読めないときは、黙って「行はありません」と言わない
   # （行はあるのに読めなかっただけで、原因を取り違えるため）
   def self.broken_report(error)

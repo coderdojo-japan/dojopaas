@@ -582,7 +582,12 @@ namespace :workshop do
       # 該当行にインラインで出す（read-only のまま。追加の権限は不要）
       if ENV["GITHUB_ACTIONS"]
         result[:problems].each do |problem|
-          text = problem[:message].gsub("\n", "%0A")
+          # 注釈は Markdown を描画しないのでバッククォートを落とす
+          # エスケープの順序は % → \r → \n（actions/toolkit と同じ）
+          text = problem[:message].delete("`")
+                                  .gsub("%", "%25")
+                                  .gsub("\r", "%0D")
+                                  .gsub("\n", "%0A")
           puts "::error file=servers.csv,line=#{problem[:line]},title=ワークショップ用の指定::#{text}"
         end
       end

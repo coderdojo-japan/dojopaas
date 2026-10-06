@@ -67,7 +67,7 @@ class WorkshopCheckTest < Minitest::Test
 
     assert_equal :broken, result[:status]
     assert_includes result[:markdown], "CSV", "CSV として読めないことを伝える"
-    assert_includes result[:markdown], "2", "何行目かを伝える"
+    assert_includes result[:markdown], "2行目", "何行目かを伝える"
     refute_includes result[:markdown], "ワークショップ用の行はありません"
   end
 end
