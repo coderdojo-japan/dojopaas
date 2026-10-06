@@ -11,6 +11,25 @@ class WorkshopCheckTest < Minitest::Test
     WorkshopCheck.report(HEADER + rows.join)
   end
 
+  # CSV の値は fork 側が自由に書ける。Markdown にそのまま埋めると、
+  # bot 名義のコメントに任意のリンクやメンションを仕込めてしまう
+  def test_values_cannot_break_out_of_the_markdown
+    row = "coderdojo-x-workshop,workshop-20261115,説明,ssh-ed25519 AAAA\n"
+            .sub("coderdojo-x-workshop", "coderdojo-`](http://example.com)-workshop")
+    body = WorkshopCheck.report(HEADER + row)[:markdown]
+
+    refute_includes body, "](http://example.com)", "リンクの形を持ち込ませない"
+    refute_includes body, "`](", "コードスパンから抜け出させない"
+  end
+
+  def test_mentions_are_defused
+    row = "coderdojo-x-workshop,workshop,@yasulab を呼ぶ説明,ssh-ed25519 AAAA\n"
+            .sub("coderdojo-x-workshop", "@yasulab-workshop")
+    body = WorkshopCheck.report(HEADER + row)[:markdown]
+
+    refute_includes body, "@yasulab", "メンションをそのまま出さない"
+  end
+
   def test_no_workshop_row_reports_nothing_to_say
     result = report(REGULAR_ROW)
     assert_equal :none, result[:status], "ふだんの申請では何も言わない（コメントしない）"
