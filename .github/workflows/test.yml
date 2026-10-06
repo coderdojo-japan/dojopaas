@@ -33,6 +33,12 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
     needs: test
     runs-on: ubuntu-latest
+
+    # contents: gh-pages への push に必要（従来どおり）
+    # pull-requests: 作成に失敗したとき PR に知らせるために必要
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -46,3 +52,12 @@ jobs:
         env:
           SACLOUD_ACCESS_TOKEN:        ${{ secrets.SACLOUD_ACCESS_TOKEN }}
           SACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SACLOUD_ACCESS_TOKEN_SECRET }}
+          GH_TOKEN:                    ${{ secrets.GITHUB_TOKEN }}
+
+      # deploy が失敗したら、PR を出した人に知らせる
+      # gh-pages への push が失敗した場合もここで拾える
+      - name: 失敗を PR に知らせる
+        if: failure()
+        run: bundle exec ruby scripts/notify_deploy_failure.rb
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
