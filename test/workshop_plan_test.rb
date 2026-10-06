@@ -40,6 +40,21 @@ class WorkshopPlanTest < Minitest::Test
     end
   end
 
+  # 惜しい書き方の一覧。いずれも発動せず、CSV のテストで PR が落ちる
+  def test_near_miss_branches_do_not_fire
+    [
+      "workshop_20261013",   # 区切りがアンダースコア
+      "workshop-2026-10-13", # ハイフン区切りの日付
+      "workshop-261013",     # 6桁
+      "workshop-202610131",  # 9桁
+      "WORKSHOP-20261013",   # 大文字
+    ].each do |branch|
+      assert_equal SakuraServerUserAgent::DEFAULT_PLAN,
+                   SakuraServerUserAgent.plan_for(branch),
+                   "#{branch} では発動しない"
+    end
+  end
+
   def test_nil_branch_gets_default_plan
     assert_equal SakuraServerUserAgent::DEFAULT_PLAN, SakuraServerUserAgent.plan_for(nil)
   end

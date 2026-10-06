@@ -84,6 +84,18 @@ class WorkshopRowTest < Minitest::Test
   end
 
   # 日付が実在すること（20261332 のような値を弾く）
+  # name が重複すると、deploy.rb は片方だけ作って残りを黙って飛ばす
+  # （既存サーバーの名前と一致した行は「もうある」と判断されるため）
+  def test_names_are_unique
+    names = CSV.read(INSTANCE_CSV, headers: true).map { |line| line["name"].to_s.strip }
+    duplicated = names.tally.select { |_, count| count > 1 }.keys
+
+    assert_empty duplicated,
+                 "name が重複しています: #{duplicated.join(", ")}。" \
+                 "1行が1台に対応するので、名前は一意にしてください" \
+                 "（ワークショップ用は coderdojo-<道場名>-workshop のように分けます）"
+  end
+
   def test_workshop_branch_date_exists_on_the_calendar
   CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
     date = SakuraServerUserAgent.workshop_date(line["branch"].to_s.strip)
