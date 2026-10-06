@@ -1,4 +1,6 @@
 require 'minitest/autorun'
+require 'tmpdir'
+require 'fileutils'
 require_relative '../scripts/verify_created'
 
 # 作成できたかどうかは、終了コードではなく「実際にあるか」で判定する
@@ -34,6 +36,20 @@ class VerifyCreatedTest < Minitest::Test
   def test_servers_with_an_ip_are_fine
     live = [{ 'Name' => 'coderdojo-naha', 'Interfaces' => [{ 'IPAddress' => '192.0.2.1' }] }]
     assert_empty VerifyCreated.missing_from(%w[coderdojo-naha], live)
+  end
+
+  # 失敗したときに、通知のステップへ名前を渡すための書き出し
+  # 定数がトップレベルから見えないと NameError になり、
+  # 置き場のディレクトリが無いと ENOENT になる（どちらも CI でしか起きない）
+  def test_records_missing_names_for_the_next_step
+    dir = File.join(Dir.tmpdir, "verify_created_test_#{Process.pid}")
+    path = File.join(dir, 'missing.txt')
+
+    VerifyCreated.record_missing(%w[coderdojo-naha coderdojo-ome], path: path)
+
+    assert_equal "coderdojo-naha\ncoderdojo-ome", File.read(path).strip
+  ensure
+    FileUtils.rm_rf(dir) if dir
   end
 
   def test_message_names_the_rows
