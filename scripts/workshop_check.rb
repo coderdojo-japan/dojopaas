@@ -116,7 +116,7 @@ module WorkshopCheck
     lines = ['### ワークショップ用の指定を読み取れませんでした', '']
     problems.each { |p| lines << "- #{p[:line]}行目: #{p[:message]}" }
     lines += ['', "このままマージすると、ふだんと同じ #{DEFAULT_TEXT} のサーバーが作られます。",
-              "`#{example_branch(today)}` のような形に直すと、Checks の表示も更新されます。"]
+              "`#{example_branch(today)}` のような形に直して push すると、この内容も更新されます。"]
 
     { status: :problem, markdown: lines.join("\n"), problems: problems, notices: [] }
   end
