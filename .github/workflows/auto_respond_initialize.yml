@@ -26,12 +26,13 @@ jobs:
       
       - name: Issue本文からIPアドレスを抽出
         id: extract_ip
+        # Issue 本文は誰でも書けるため、${{ }} でシェルに展開せず env 経由で渡す
+        # （展開するとコマンド注入になり、後続ステップの SACLOUD_* に手が届く）
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          # Issue本文を抽出
-          ISSUE_BODY="${{ github.event.issue.body }}"
-          
           # IPアドレスパターンを抽出（数字とドットのみ）
-          IP_ADDRESS=$(echo "$ISSUE_BODY" | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1)
+          IP_ADDRESS=$(printf '%s' "$ISSUE_BODY" | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1)
           
           if [ -z "$IP_ADDRESS" ]; then
             echo "❌ Issue本文にIPアドレスが見つかりませんでした"
@@ -50,10 +51,11 @@ jobs:
           SACLOUD_ACCESS_TOKEN:        ${{ secrets.SACLOUD_ACCESS_TOKEN }}
           SACLOUD_ACCESS_TOKEN_SECRET: ${{ secrets.SACLOUD_ACCESS_TOKEN_SECRET }}
           CI: true
+          IP_ADDRESS: ${{ steps.extract_ip.outputs.ip_address }}
         run: |
           # 統一命名パターンに従ったfind_by_ipタスクを使用
           # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
-          OUTPUT=$(bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]" 2>&1) || EXIT_CODE=$?
+          OUTPUT=$(bundle exec rake "server:find_by_ip[$IP_ADDRESS]" 2>&1) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"
