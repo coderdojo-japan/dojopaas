@@ -28,11 +28,12 @@ class WorkflowSafetyTest < Minitest::Test
         run = step['run']
         next unless run.is_a?(String)
 
-        found = run.scan(/\$\{\{[^}]*\}\}/).uniq
-        assert_empty found,
-                     "#{File.basename(path)} の #{job_name} step#{index} の run: に " \
-                     "#{found.join(', ')} が書かれています。env: 経由で渡してください" \
-                     '（シェルに展開するとコマンド注入になります）'
+        # 式の中に } を含む書き方（${{ format('{0}', ...) }} など）も
+        # 取りこぼさないよう、開始記号の有無だけで判定する
+        refute_includes run, '${{',
+                        "#{File.basename(path)} の #{job_name} step#{index} の run: に " \
+                        '${{ }} が書かれています。env: 経由で渡してください' \
+                        '（シェルに展開するとコマンド注入になります）'
       end
     end
   end

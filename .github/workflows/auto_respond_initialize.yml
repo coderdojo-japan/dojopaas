@@ -54,7 +54,7 @@ jobs:
           IP_ADDRESS: ${{ steps.extract_ip.outputs.ip_address }}
         run: |
           # 統一命名パターンに従ったfind_by_ipタスクを使用
-          # IPアドレスを明示的にパラメータとして渡す（ENV経由ではなく）
+          # IP は数字とドットのみなので、env 経由で受けて rake の引数に渡す
           OUTPUT=$(bundle exec rake "server:find_by_ip[$IP_ADDRESS]" 2>&1) || EXIT_CODE=$?
           
           # GitHub Actions用に出力をエスケープ
