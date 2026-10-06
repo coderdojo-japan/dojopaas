@@ -61,7 +61,13 @@ class WorkflowSafetyTest < Minitest::Test
       end
     end
 
-    assert_operator checked, :>, 0, 'github-script のステップが見つかりません（テストが空振りしています）'
+    # 固定値と比べると、ステップを増やしたときに数字の更新を忘れて取りこぼす。
+    # ファイルに書かれている github-script の数と突き合わせる
+    written = workflows.sum { |path| File.read(path).scan(/uses:\s*actions\/github-script/).size }
+    assert_operator written, :>, 0, 'github-script のステップが見つかりません（テストが空振りしています）'
+    assert_equal written, checked,
+                 "github-script が #{written} 個あるのに #{checked} 個しか検査していません" \
+                 '（script: が文字列でないステップは読み飛ばされます）'
   end
 
   private

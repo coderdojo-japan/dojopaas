@@ -37,6 +37,11 @@ module IssueFormRules
     return problems + ['body が配列ではありません'] unless body.is_a?(Array)
 
     problems << 'body が空です' if body.empty?
+
+    # markdown は表示専用なので、入力欄が 1 つも無いフォームは成立しない
+    fields = body.select { |item| item.is_a?(Hash) && item['type'] != 'markdown' }
+    problems << 'body に入力欄（markdown 以外）がありません' if !body.empty? && fields.empty?
+
     body.each_with_index { |item, i| problems.concat(problems_in_item(item, i + 1)) }
     problems.concat(duplicate_id_problems(body))
     problems
@@ -54,8 +59,8 @@ module IssueFormRules
       problems << "body[#{position}]（#{type}）に attributes.#{needed} がありません"
     end
 
-    if type == 'dropdown' && !item.dig('attributes', 'options').is_a?(Array)
-      problems << "body[#{position}]（dropdown）に attributes.options がありません"
+    if %w[dropdown checkboxes].include?(type) && !item.dig('attributes', 'options').is_a?(Array)
+      problems << "body[#{position}]（#{type}）に attributes.options がありません"
     end
 
     id = item['id']
@@ -197,6 +202,19 @@ class IssueFormRulesTest < Minitest::Test
   def test_body_that_is_not_an_array_is_detected
     broken = deep_dup(VALID)
     broken['body'] = 'input'
+    refute_empty IssueFormRules.problems_in(broken)
+  end
+
+  def test_checkboxes_without_options_is_detected
+    broken = deep_dup(VALID)
+    broken['body'][0] = { 'type' => 'checkboxes', 'attributes' => { 'label' => '同意' } }
+    refute_empty IssueFormRules.problems_in(broken)
+  end
+
+  # markdown だけの body は GitHub が受け取らない（入力欄が 1 つも無いため）
+  def test_markdown_only_body_is_detected
+    broken = deep_dup(VALID)
+    broken['body'] = [{ 'type' => 'markdown', 'attributes' => { 'value' => '説明' } }]
     refute_empty IssueFormRules.problems_in(broken)
   end
 

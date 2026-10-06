@@ -688,12 +688,18 @@ class ServerInitializer
     JSON.parse(response.body)
   end
 
-  # Issue フォームの見出し直下の値を返す。見つからなければ nil
+  # Issue フォームの見出しの行番号。無ければ nil
   #
   # 正規表現で「見出しから次の行まで」を書くと改行の扱いで壊れやすいので、行で探す
+  def self.form_label_index(lines, label)
+    lines.index { |line| line =~ /\A###[[:blank:]]*#{Regexp.escape(label)}[[:blank:]]*\z/ }
+  end
+  private_class_method :form_label_index
+
+  # Issue フォームの見出し直下の値を返す。見出しが無い、または値が無ければ nil
   def self.form_value(text, label)
     lines = text.to_s.lines.map(&:chomp)
-    index = lines.index { |line| line =~ /\A###[[:blank:]]*#{Regexp.escape(label)}[[:blank:]]*\z/ }
+    index = form_label_index(lines, label)
     return nil unless index
 
     value = lines[(index + 1)..].find { |line| !line.strip.empty? }&.strip
@@ -703,12 +709,27 @@ class ServerInitializer
   end
   private_class_method :form_value
 
-  # フォームの値を先に見て、無ければ旧テンプレート（自由記述）のパターンで探す
+  # フォームで送られたか（見出しがあるか）。値が空でも true
+  #
+  # 見出しがあるなら、値は見出しの下にしか無い。本文の他の場所を探すと、
+  # コメント欄に書かれた IP や道場名を拾ってしまう
+  def self.form_field?(text, label)
+    !form_label_index(text.to_s.lines.map(&:chomp), label).nil?
+  end
+  private_class_method :form_field?
+
+  # フォームの見出しがあればその値だけを見る。無ければ旧テンプレート（自由記述）を探す
   def self.extract_dojo_name(text)
     return nil if text.nil? || text.to_s.empty?
 
-    value = form_value(text, FORM_DOJO_LABEL)
-    return value.sub(/\ACoderDojo[[:blank:]]*/i, '').strip unless value.nil?
+    if form_field?(text, FORM_DOJO_LABEL)
+      value = form_value(text, FORM_DOJO_LABEL)
+      return nil if value.nil?
+
+      # 「CoderDojo 那覇」と書かれても道場名だけを返す
+      name = value.sub(/\ACoderDojo[[:blank:]]*/i, '').strip
+      return name.empty? ? nil : name
+    end
 
     DOJO_PATTERNS.each do |pattern|
       match = text.match(pattern)
@@ -720,9 +741,9 @@ class ServerInitializer
   def self.extract_ip_address(text)
     return nil if text.nil? || text.to_s.empty?
 
-    value = form_value(text, FORM_IP_LABEL)
-    ip = value&.slice(/\d{1,3}(?:\.\d{1,3}){3}/)
-    return ip if ip
+    if form_field?(text, FORM_IP_LABEL)
+      return form_value(text, FORM_IP_LABEL)&.slice(/\d{1,3}(?:\.\d{1,3}){3}/)
+    end
 
     match = text.match(IP_PATTERN)
     match ? match[1] : nil

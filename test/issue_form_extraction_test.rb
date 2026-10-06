@@ -65,3 +65,44 @@ class IssueFormExtractionTest < Minitest::Test
     assert_nil ServerInitializer.extract_ip_address(body)
   end
 end
+
+# 見出しがあるのに値が無い場合は、旧パターンのフォールバックに降りない
+#
+# フォームで送られた以上、値は見出しの下にしか無い。本文の他の場所を探すと、
+# コメント欄に書かれた IP を拾ってしまう（UI では required で防げるが、API 経由では起きうる）
+class IssueFormEmptyFieldTest < Minitest::Test
+  def body_with(ip_value:, dojo_value:, comment:)
+    <<~BODY
+      ### 道場名
+
+      #{dojo_value}
+
+      ### IPアドレス
+
+      #{ip_value}
+
+      ### コメント欄（任意）
+
+      #{comment}
+    BODY
+  end
+
+  def test_empty_ip_field_does_not_fall_back_to_the_comment
+    body = body_with(ip_value: '_No response_', dojo_value: '那覇',
+                     comment: 'IPアドレス：133.242.1.1 のサーバーです')
+    assert_nil ServerInitializer.extract_ip_address(body)
+  end
+
+  def test_empty_dojo_field_does_not_fall_back_to_the_comment
+    body = body_with(ip_value: '133.242.224.96', dojo_value: '_No response_',
+                     comment: 'CoderDojo【名護】の例を見ました')
+    assert_nil ServerInitializer.extract_dojo_name(body)
+  end
+
+  # 見出しそのものが無い（旧テンプレート）時だけフォールバックする
+  def test_old_format_still_falls_back
+    old = 'CoderDojo【那覇】です。当該サーバー（IPアドレス：【133.242.224.96】）の初期化をお願いします。'
+    assert_equal '那覇',           ServerInitializer.extract_dojo_name(old)
+    assert_equal '133.242.224.96', ServerInitializer.extract_ip_address(old)
+  end
+end
