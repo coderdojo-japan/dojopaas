@@ -3,7 +3,7 @@ require 'date'
 require_relative 'sakura_server_user_agent'
 
 # servers.csv を読んで、ワークショップ用の指定（branch の隠しコマンド）を
-# 申請者に伝えるメッセージを作る
+# 申請者に伝えるメッセージを作る（PR の Checks のサマリーに出す）
 #
 # 申請者が知りたいのは次の2つだけ:
 #   1. 隠しコマンドが読み取れたか
@@ -90,7 +90,6 @@ module WorkshopCheck
 
   def self.ok_report(rows)
     lines = []
-    lines << MARKER
     lines << '### ワークショップ用サーバーとして受け付けました'
     lines << ''
     lines << '| サーバー名 | 開催日 | スペック |'
@@ -110,13 +109,12 @@ module WorkshopCheck
 
   def self.problem_report(problems, today = today_jst)
     lines = []
-    lines << MARKER
     lines << '### ワークショップ用の指定を読み取れませんでした'
     lines << ''
     problems.each { |p| lines << "- #{p}" }
     lines << ''
     lines << "このままマージすると、ふだんと同じ #{DEFAULT_TEXT} のサーバーが作られます。"
-    lines << "`#{example_branch(today)}` のような形に直すと、このコメントも更新されます。"
+    lines << "`#{example_branch(today)}` のような形に直すと、Checks の表示も更新されます。"
 
     { status: :problem, markdown: lines.join("\n") }
   end

@@ -572,7 +572,7 @@ namespace :workshop do
     when :none
       puts "ワークショップ用の行はありません"
     else
-      body = result[:markdown].sub(WorkshopCheck::MARKER, "").strip
+      body = result[:markdown].strip
       puts body
       # CI では PR の Checks から読めるようにサマリーへ書く
       summary = ENV["GITHUB_STEP_SUMMARY"]

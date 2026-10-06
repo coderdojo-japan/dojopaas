@@ -72,7 +72,7 @@ class WorkshopRowTest < Minitest::Test
     end
   end
 # 「惜しい書き方」で黙って通常スペックが作られるのを防ぐ
-def test_workshop_like_branches_must_use_the_strict_form
+  def test_workshop_like_branches_must_use_the_strict_form
   CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
     branch = line["branch"].to_s.strip
     next unless SakuraServerUserAgent::WORKSHOP_BRANCH_LOOSE =~ branch
@@ -81,10 +81,10 @@ def test_workshop_like_branches_must_use_the_strict_form
                  "Row #{index + 1}: ワークショップ用の branch は workshop-YYYYMMDD の形で書いてください" \
                  "（この形でないと、ふだんと同じ 1コア1GB で作られます）")
   end
-end
+  end
 
-# 日付が実在すること（20261332 のような値を弾く）
-def test_workshop_branch_date_exists_on_the_calendar
+  # 日付が実在すること（20261332 のような値を弾く）
+  def test_workshop_branch_date_exists_on_the_calendar
   CSV.read(INSTANCE_CSV, headers: true).each_with_index do |line, index|
     date = SakuraServerUserAgent.workshop_date(line["branch"].to_s.strip)
     next unless date
@@ -95,5 +95,5 @@ def test_workshop_branch_date_exists_on_the_calendar
       flunk "Row #{index + 1}: branch の日付 #{date} は存在しない日付です"
     end
   end
-end
-end
+  end
+  end
