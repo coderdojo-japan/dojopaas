@@ -24,6 +24,6 @@ git commit --quiet -m    "$COMMIT_MSG"
 git push --force --quiet "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" main:gh-pages
 
 # 公開のあとに、行の数だけサーバーが実際にあるかを確かめる
-# サーバー本体より後（NIC・ディスク・SSH 鍵）の失敗は終了コードに出ないため、ここで気づける
+# サーバー本体より後（NIC・ディスク・電源投入）の失敗は終了コードに出ないため、ここで気づける
 # 公開の後に置くのは、1台の失敗で他の道場の IP まで止めないため
 bundle exec ruby scripts/verify_created.rb
