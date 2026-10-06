@@ -105,7 +105,7 @@ jobs:
             
             @yasulab このサーバーを初期化する場合は、以下のコマンドを実行してください：
             
-            #### 3ステップを順に実行します
+            #### 順に実行します
             \`\`\`bash
             # 1. 削除準備（サーバー名と道場名を Issue と見比べる）
             bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
