@@ -68,7 +68,9 @@ if __FILE__ == $PROGRAM_NAME
   run_url = if ENV['GITHUB_SERVER_URL'] && ENV['GITHUB_REPOSITORY'] && ENV['GITHUB_RUN_ID']
               "#{ENV['GITHUB_SERVER_URL']}/#{ENV['GITHUB_REPOSITORY']}/actions/runs/#{ENV['GITHUB_RUN_ID']}"
             end
-  missing_file = 'tmp/missing_servers.txt'
+  # verify_created が書き出した名前を読む（同じ場所を参照する）
+  require_relative 'verify_created'
+  missing_file = VerifyCreated::MISSING_FILE
   missing = File.exist?(missing_file) ? File.read(missing_file).split("\n") : []
 
   DeployFailureNotice.post(message: message, run_url: run_url, missing: missing)

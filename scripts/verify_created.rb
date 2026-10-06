@@ -30,6 +30,15 @@ module VerifyCreated
     missing(csv_names, usable)
   end
 
+  # 失敗したときに、通知のステップへ名前を渡す
+  # 置き場のディレクトリは CI に無い（tmp/ は gitignore）ので作ってから書く
+  def self.record_missing(missing_names, path: MISSING_FILE)
+    require 'fileutils'
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, missing_names.join("\n"))
+    path
+  end
+
   def self.message(missing_names)
     "作成できなかったサーバーが #{missing_names.size} 台あります: #{missing_names.join(', ')}"
   end
@@ -47,7 +56,7 @@ if __FILE__ == $PROGRAM_NAME
     puts "servers.csv の #{csv_names.size} 行は、すべてサーバーがあります"
   else
     # 次のステップ（通知）が名前を使えるように書き出す
-    File.write(MISSING_FILE, missing.join("\n"))
+    VerifyCreated.record_missing(missing)
     abort VerifyCreated.message(missing)
   end
 end
