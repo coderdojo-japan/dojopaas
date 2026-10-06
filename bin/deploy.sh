@@ -2,7 +2,12 @@
 
 set -e
 
-bundle exec ruby scripts/deploy.rb 
+# サーバーの作成に失敗したら、PR を出した人に伝えてから落ちる
+# （マージ後の失敗は、ここで伝えないと誰にも届かない）
+if ! bundle exec ruby scripts/deploy.rb; then
+    bundle exec ruby scripts/notify_deploy_failure.rb || true
+    exit 1
+fi
 
 git config user.name  "Yohei Yasukawa"
 git config user.email "yohei@yasslab.jp"
