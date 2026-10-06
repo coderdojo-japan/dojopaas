@@ -108,18 +108,16 @@ class ServerInitializer
     puts "  # サーバー名で検索"
     puts "  #{$0} --find coderdojo-japan"
     puts ""
-    puts "  # IPアドレスを指定して削除（危険）"
-    puts "  #{$0} --delete 192.168.1.1"
-    puts ""
-    puts "  # 確認なしで削除（非常に危険）"
-    puts "  #{$0} --delete 192.168.1.1 --force"
+    puts "  # 削除（名前の指定が必須。IP で見つけたサーバーと一致しないと中断する）"
+    puts "  #{$0} --delete 192.168.1.1 --name coderdojo-japan"
     puts ""
     puts "  # 削除のシミュレーション（開発・テスト用）"
-    puts "  #{$0} --delete 192.168.1.1 --dry-run"
+    puts "  #{$0} --delete 192.168.1.1 --name coderdojo-japan --dry-run"
     puts ""
     puts "⚠️  警告: --delete オプションはサーバーとディスクを完全に削除します！"
-    puts "         --force を使用すると確認なしで削除されます（非常に危険）！"
-    puts "         --dry-run を使用すると、実際には削除せずに動作を確認できます。"
+    puts "         ふだんは rake 経由で実行してください:"
+    puts %(           bundle exec rake "server:prepare_deletion[IP]")
+    puts %(           bundle exec rake "server:execute_deletion[IP,サーバー名]")
     puts ""  # 下部に空行
     exit 0
   end
