@@ -25,6 +25,24 @@ class WorkshopCheckTest < Minitest::Test
     assert_includes result[:markdown], "マージ", "マージで作成されることを伝える"
   end
 
+  # 成功時も PR の該当行に出す（Checks を開かなくても分かるように）
+  def test_valid_row_returns_a_notice_for_the_line
+    result = report(REGULAR_ROW, "coderdojo-naha-workshop,workshop-20261115,那覇ワークショップ用,ssh-ed25519 AAAA\n")
+
+    assert_equal :ok, result[:status]
+    notice = result[:notices].first
+    refute_nil notice, "成功時にも行ごとの注記を返す"
+    assert_equal 3, notice[:line], "ヘッダーを含めた行番号"
+    assert_includes notice[:message], "coderdojo-naha-workshop"
+    assert_includes notice[:message], "2026-11-15"
+    assert_includes notice[:message], "8コア"
+  end
+
+  def test_problem_report_has_no_notices
+    result = report("coderdojo-naha-workshop,workshop,那覇,ssh-ed25519 AAAA\n")
+    assert_empty result[:notices]
+  end
+
   def test_branch_without_date_is_reported_as_a_problem
     result = report("coderdojo-naha-workshop,workshop,那覇ワークショップ用,ssh-ed25519 AAAA\n")
     assert_equal :problem, result[:status]

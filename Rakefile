@@ -580,7 +580,13 @@ namespace :workshop do
       File.write(summary, body + "\n", mode: "a") if summary && !summary.to_s.empty?
 
       # 該当行にインラインで出す（read-only のまま。追加の権限は不要）
+      # 成功時も notice を出す。Checks を開かなくても PR の該当行で分かる
       if ENV["GITHUB_ACTIONS"]
+        result[:notices].to_a.each do |notice|
+          text = notice[:message].delete("`").gsub("%", "%25").gsub("\r", "%0D").gsub("\n", "%0A")
+          puts "::notice file=servers.csv,line=#{notice[:line]},title=ワークショップ用サーバー::#{text}"
+        end
+
         result[:problems].each do |problem|
           # 注釈は Markdown を描画しないのでバッククォートを落とす
           # エスケープの順序は % → \r → \n（actions/toolkit と同じ）
