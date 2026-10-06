@@ -9,6 +9,9 @@ require_relative 'sakura_server_user_agent'
 #   1. 隠しコマンドが読み取れたか
 #   2. 読み取れたなら、いつ・どのスペックで作られるか
 #
+# 片付けの順序に注意: 先に CSV の行を消し、マージしてからサーバーを削除する
+# （逆にすると、次に main へ何かがマージされた時点で作り直される）
+#
 # 使い方:
 #   WorkshopCheck.report(File.read('servers.csv'))  # => { status:, markdown: }
 #   bundle exec rake workshop:check
@@ -101,7 +104,8 @@ module WorkshopCheck
     lines << ''
     lines << 'この PR が**マージされると、サーバーが作成されます**（ふだんの申請と同じ流れです）。'
     lines << "作成後、IP アドレスは[サーバー一覧](#{INSTANCES_URL})に載ります。"
-    lines << '開催日のあとにサーバーを削除し、この行も削除します。'
+    lines << '開催日のあとは、この行を削除する Pull Request を出してください。' \
+             'マージされたあとに CoderDojo Japan がサーバーを削除します。'
 
     { status: :ok, markdown: lines.join("\n") }
   end
