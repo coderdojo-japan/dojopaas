@@ -41,10 +41,19 @@ class CommentWorkshopCheckTest < Minitest::Test
   # 既にあるコメントを探して更新するための判定
   def test_finds_its_own_previous_comment
     comments = [
-      { 'id' => 1, 'body' => 'ふつうのコメント' },
-      { 'id' => 2, 'body' => "#{CommentWorkshopCheck::MARKER}\n前回の内容" },
+      { 'id' => 1, 'body' => 'ふつうのコメント', 'user' => { 'login' => 'someone' } },
+      { 'id' => 2, 'body' => "#{CommentWorkshopCheck::MARKER}\n前回の内容",
+        'user' => { 'login' => 'github-actions[bot]' } },
     ]
     assert_equal 2, CommentWorkshopCheck.previous_comment_id(comments)
-    assert_nil CommentWorkshopCheck.previous_comment_id([{ 'id' => 1, 'body' => 'x' }])
+    assert_nil CommentWorkshopCheck.previous_comment_id([{ 'id' => 1, 'body' => 'x',
+                                                           'user' => { 'login' => 'someone' } }])
+  end
+
+  # 同じ目印を書いた人のコメントを、bot が書き換えてはいけない
+  def test_does_not_touch_comments_written_by_people
+    comments = [{ 'id' => 9, 'body' => CommentWorkshopCheck::MARKER,
+                  'user' => { 'login' => 'volunteer' } }]
+    assert_nil CommentWorkshopCheck.previous_comment_id(comments)
   end
 end

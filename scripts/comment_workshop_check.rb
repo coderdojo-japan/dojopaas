@@ -29,8 +29,11 @@ module CommentWorkshopCheck
 
   # @param comments [Array<Hash>] GitHub API が返すコメントの配列
   # @return [Integer, nil] 自分が前に書いたコメントの id
-  def self.previous_comment_id(comments)
-    found = comments.find { |c| c['body'].to_s.include?(MARKER) }
+  # 目印だけで判定すると、同じ文字列を書いた人のコメントを書き換えてしまう
+  def self.previous_comment_id(comments, author: 'github-actions[bot]')
+    found = comments.find do |c|
+      c['body'].to_s.include?(MARKER) && c.dig('user', 'login') == author
+    end
     found && found['id']
   end
 
@@ -42,7 +45,9 @@ module CommentWorkshopCheck
   end
 
   def self.post(pr_number:, body:, repo: ENV['GITHUB_REPOSITORY'])
-    comments = JSON.parse(gh('api', "repos/#{repo}/issues/#{pr_number}/comments", '--paginate'))
+    # --slurp が無いとページごとの配列が連結され、JSON.parse が落ちる
+    pages = JSON.parse(gh('api', "repos/#{repo}/issues/#{pr_number}/comments", '--paginate', '--slurp'))
+    comments = pages.flatten(1)
     id = previous_comment_id(comments)
 
     if id
