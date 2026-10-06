@@ -5,7 +5,7 @@
 # 
 # 使用方法:
 #   ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/249
-#   ruby scripts/initialize_server.rb --delete 153.127.192.200  # サーバー削除（危険）
+#   ruby scripts/initialize_server.rb --delete 153.127.192.200 --name coderdojo-naha  # サーバー削除（危険）
 
 require 'net/http'
 require 'uri'
@@ -87,6 +87,7 @@ class ServerInitializer
     puts ""
     puts "オプション:"
     puts "        --find <URL|IP|NAME>         サーバー情報を検索（URL/IP/名前）"
+    puts "        --name <SERVER_NAME>         削除するサーバー名（--delete では必須）"
     puts "        --delete IP_ADDRESS          指定したIPアドレスのサーバーを削除（危険）"
     puts "        --force                      削除時の確認をスキップ（危険）"
     puts "        --dry-run                    削除を実行せず、何が起こるかを表示（開発者向け）"

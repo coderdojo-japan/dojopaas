@@ -182,8 +182,16 @@ namespace :server do
   # ========================================
   # サーバー削除タスク（段階的実行）
   # ========================================
+  # 前回の削除結果を引き継がない。残っていると、削除せずに
+  # create_empty_commit が通り、Issue だけが閉じる
+  def clear_execute_deletion_status
+    file = status_file_for('execute_deletion')
+    File.delete(file) if File.exist?(file)
+  end
+
   desc "サーバー削除の準備（情報確認のみ）"
   task :prepare_deletion, [:ip] => [:check_api_credentials, :validate_env] do |t, args|
+    clear_execute_deletion_status
     ip = args[:ip] || ENV['IP_ADDRESS']
     
     unless ip
@@ -203,7 +211,8 @@ namespace :server do
       })
       puts result
       puts "\n✅ 削除準備が完了しました"
-      puts "次のステップ: rake server:execute_deletion[#{ip}]"
+      puts %(次のステップ: rake "server:execute_deletion[#{ip},<サーバー名>]")
+      puts "サーバー名は上の表示を Issue の道場名と見比べて入力してください"
     else
       abort "❌ サーバー情報の取得に失敗しました\n#{result}"
     end
@@ -229,10 +238,10 @@ namespace :server do
     end
 
     # 削除実行（確認の打鍵は省くが、名前の一致は必ず確認される）
-    cmd = "ruby scripts/initialize_server.rb --delete #{ip} --name #{name} --force"
+    cmd = ['ruby', 'scripts/initialize_server.rb', '--delete', ip, '--name', name, '--force']
     
     puts "⚠️  サーバー削除を実行します: #{ip}"
-    sh cmd do |ok, res|
+    sh(*cmd) do |ok, res|
       if ok
         save_task_status('execute_deletion', {
           success: true,
