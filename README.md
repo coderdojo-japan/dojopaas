@@ -84,7 +84,7 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 ## 3. サーバーが不要になったとき
 
-さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv) から削除することでサーバーの使用を停止できます。
+さくらインターネット様からご提供いただいているサーバーの台数には限りがあり、みなさんで共同利用するカタチとなっております。サーバー申請の流れと同じで、申請時に追加した行を [servers.csv](https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv) から削除する Pull Request を送ってください。マージされたあと、CoderDojo Japan がサーバーを削除します（行を消すだけでは自動で削除されません）。
 
 - :octocat: [サーバー削除の申請例 (#213)](https://github.com/coderdojo-japan/dojopaas/pull/213)  
 
@@ -113,10 +113,11 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.md)から依頼してもらえれば! 角カッコ `【】` に依頼する道場名、申請者名、IPアドレスをそれぞれ入力してください。
 
-初期化処理が開始したらステータスが `Closed` になるので、[2. SSHの接続方法](#2-sshの接続方法)を参考に当該サーバーに接続してみてください。
+初期化処理が始まるとステータスが `Closed` になります。サーバーの作り直しには数分かかるので、しばらく待ってから [2. SSHの接続方法](#2-sshの接続方法)を参考に接続してみてください。
 
 > [!WARNING]
-> **:warning: 初期化すると IP アドレスが変わる点にご注意ください。**
+> **:warning: 初期化すると、サーバー内のデータはすべて消えます。** 残したいファイルやワールドデータは、事前に手元へコピーしてください。
+> IP アドレスは多くの場合そのままですが、変わることがあります。
 
 - :octocat: [サーバー初期化の申請例 - DojoPaaS](https://github.com/coderdojo-japan/dojopaas/issues?q=初期化依頼)
 - :postbox: [サーバー初期化依頼を申請する](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.md)
