@@ -105,20 +105,13 @@ jobs:
             
             @yasulab このサーバーを初期化する場合は、以下のコマンドを実行してください：
             
-            #### Rakeタスクを使用した完全なフロー（推奨）
+            #### 3ステップを順に実行します
             \`\`\`bash
-            # 全ステップを自動実行（依存関係管理付き）
-            bundle exec rake "server:initialize[${{ steps.extract_ip.outputs.ip_address }},${{ github.event.issue.number }}]"
-            git push
-            \`\`\`
-            
-            #### または個別ステップ実行
-            \`\`\`bash
-            # 1. 削除準備（情報確認）
+            # 1. 削除準備（サーバー名と道場名を Issue と見比べる）
             bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
             
-            # 2. サーバー削除
-            bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},true]"
+            # 2. サーバー削除（サーバー名は 1 の出力を見て入力する）
+            bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},<サーバー名>]"
             
             # 3. 空コミット作成
             bundle exec rake "server:create_empty_commit[${{ github.event.issue.number }}]"

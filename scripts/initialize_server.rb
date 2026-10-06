@@ -5,7 +5,7 @@
 # 
 # 使用方法:
 #   ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojopaas/issues/249
-#   ruby scripts/initialize_server.rb --delete 153.127.192.200  # サーバー削除（危険）
+#   ruby scripts/initialize_server.rb --delete 153.127.192.200 --name coderdojo-naha  # サーバー削除（危険）
 
 require 'net/http'
 require 'uri'
@@ -42,6 +42,14 @@ class ServerInitializer
     "coderdojo-staging"   # ステージング用（将来用）
   ].freeze
   
+  # 削除対象の確認: IP で見つけたサーバーと、人が書いた名前が一致するか
+  # Issue に貼られた IP が別の道場のものだった場合に、ここで止まる
+  def self.name_matches?(server_name, expected)
+    return false if expected.nil? || expected.to_s.strip.empty?
+
+    server_name.to_s.strip == expected.to_s.strip
+  end
+
   # テスト用サーバーかどうかを判定
   def self.safe_test_server?(name)
     SAFE_TEST_SERVERS.include?(name.to_s.downcase.strip)
@@ -54,6 +62,7 @@ class ServerInitializer
     @find_mode   = options[:find]    || false
     @dry_run     = options[:dry_run] || false
     @force       = options[:force]   || false
+    @name        = options[:name]
     
     # さくらのクラウドAPIクライアント初期化（デフォルト値使用）
     @ssua = SakuraServerUserAgent.new(verbose: @verbose)
@@ -78,6 +87,7 @@ class ServerInitializer
     puts ""
     puts "オプション:"
     puts "        --find <URL|IP|NAME>         サーバー情報を検索（URL/IP/名前）"
+    puts "        --name <SERVER_NAME>         削除するサーバー名（--delete では必須）"
     puts "        --delete IP_ADDRESS          指定したIPアドレスのサーバーを削除（危険）"
     puts "        --force                      削除時の確認をスキップ（危険）"
     puts "        --dry-run                    削除を実行せず、何が起こるかを表示（開発者向け）"
@@ -185,6 +195,19 @@ class ServerInitializer
     
     # サーバー情報の表示
     display_server_details_for_deletion(server_info)
+
+    # 名前の一致確認（--force でも飛ばさない唯一の関門）
+    unless self.class.name_matches?(server_info['Name'], @name)
+      puts ""
+      puts "❌ エラー: 削除対象の名前が一致しません"
+      puts "  IP #{@input} のサーバー名: #{server_info['Name']}"
+      puts "  指定された名前:            #{@name.inspect}"
+      puts ""
+      puts "この IP が本当に意図した道場のものか、Issue の内容と見比べてください。"
+      puts "合っていれば --name #{server_info['Name']} を付けて実行します。"
+      puts "処理を中止します（サーバーへの変更は行われません）"
+      exit 1
+    end
     
     # ディスク情報の取得と表示
     disk_ids = get_server_disks(server_info['ID'])
@@ -785,6 +808,10 @@ if __FILE__ == $0
       input = ip
     end
     
+    opts.on("--name SERVER_NAME", "削除するサーバー名（--delete では必須。IP との一致を確認する）") do |name|
+      options[:name] = name
+    end
+
     opts.on("--force", "削除時の確認をスキップ（危険）") do
       options[:force] = true
     end

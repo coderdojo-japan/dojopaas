@@ -182,8 +182,16 @@ namespace :server do
   # ========================================
   # サーバー削除タスク（段階的実行）
   # ========================================
+  # 前回の削除結果を引き継がない。残っていると、削除せずに
+  # create_empty_commit が通り、Issue だけが閉じる
+  def clear_execute_deletion_status
+    file = status_file_for('execute_deletion')
+    File.delete(file) if File.exist?(file)
+  end
+
   desc "サーバー削除の準備（情報確認のみ）"
   task :prepare_deletion, [:ip] => [:check_api_credentials, :validate_env] do |t, args|
+    clear_execute_deletion_status
     ip = args[:ip] || ENV['IP_ADDRESS']
     
     unless ip
@@ -203,30 +211,37 @@ namespace :server do
       })
       puts result
       puts "\n✅ 削除準備が完了しました"
-      puts "次のステップ: rake server:execute_deletion[#{ip}]"
+      puts %(次のステップ: rake "server:execute_deletion[#{ip},<サーバー名>]")
+      puts "サーバー名は上の表示を Issue の道場名と見比べて入力してください"
     else
       abort "❌ サーバー情報の取得に失敗しました\n#{result}"
     end
   end
   
   desc "サーバーを削除（危険・要確認）"
-  task :execute_deletion, [:ip, :force] => :prepare_deletion do |t, args|
-    ip = args[:ip] || ENV['IP_ADDRESS']
-    # forceフラグを明示的にブール値として扱う
-    force = args[:force].to_s.downcase == 'true' || ENV['FORCE'].to_s.downcase == 'true'
-    
+  task :execute_deletion, [:ip, :name] => :prepare_deletion do |t, args|
+    ip   = args[:ip] || ENV['IP_ADDRESS']
+    name = args[:name]
+
+    # サーバー名を人が書くことで、IP の取り違えをここで止める
+    # （prepare_deletion の出力と Issue を見比べて書く。Bot は名前を埋めない）
+    if name.to_s.strip.empty?
+      abort "❌ エラー: 削除するサーバー名が必要です\n" \
+            "使い方: rake \"server:execute_deletion[#{ip},サーバー名]\"\n" \
+            "サーバー名は prepare_deletion の出力に表示されます"
+    end
+
     # 前のタスクの結果を確認
     prep_status = load_task_status('prepare_deletion')
     if prep_status.nil? || prep_status['status'].nil? || prep_status['status']['ip'] != ip
       abort "❌ エラー: 先に prepare_deletion を実行してください"
     end
-    
-    # 削除実行
-    cmd = "ruby scripts/initialize_server.rb --delete #{ip}"
-    cmd += " --force" if force
+
+    # 削除実行（確認の打鍵は省くが、名前の一致は必ず確認される）
+    cmd = ['ruby', 'scripts/initialize_server.rb', '--delete', ip, '--name', name, '--force']
     
     puts "⚠️  サーバー削除を実行します: #{ip}"
-    sh cmd do |ok, res|
+    sh(*cmd) do |ok, res|
       if ok
         save_task_status('execute_deletion', {
           success: true,
@@ -269,37 +284,21 @@ namespace :server do
   # ========================================
   # 完全な初期化フロー（依存関係チェーン）
   # ========================================
-  desc "サーバー初期化の完全なフロー（Issue番号必須）"
+  desc "サーバー初期化の手順を表示（削除は3ステップを個別に実行する）"
   task :initialize, [:ip, :issue_number] do |t, args|
-    ip = args[:ip] || ENV['IP_ADDRESS']
-    issue_number = args[:issue_number] || ENV['ISSUE_NUMBER']
-    
-    unless ip && issue_number
-      abort "❌ エラー: IPアドレスとIssue番号が必要です\n" \
-            "使用方法: rake server:initialize[192.168.1.1,123]"
-    end
-    
-    puts "🚀 サーバー初期化フローを開始します"
-    puts "  IPアドレス: #{ip}"
-    puts "  Issue: ##{issue_number}"
-    puts "=" * 50
-    
-    # 依存タスクを順次実行
-    Rake::Task['server:prepare_deletion'].invoke(ip)
-    
-    puts "\n⚠️  削除を実行しますか？ (yes/no)"
-    response = STDIN.gets.chomp
-    
-    if response.downcase == 'yes'
-      Rake::Task['server:execute_deletion'].invoke(ip, 'true')
-      Rake::Task['server:create_empty_commit'].invoke(issue_number)
-      
-      puts "\n" + "=" * 50
-      puts "✅ サーバー初期化フローが完了しました"
-      puts "最後のステップ: git push でCI/CDを実行してください"
-    else
-      puts "❌ 処理を中止しました"
-    end
+    ip           = args[:ip]           || ENV['IP_ADDRESS'] || '<IPアドレス>'
+    issue_number = args[:issue_number] || ENV['ISSUE_NUMBER'] || '<Issue番号>'
+
+    # 一括実行はやめた: 確認を飛ばして削除まで走るため、取り違えたときに止まらない
+    # 各ステップの出力を読みながら進める（サーバー名は prepare の出力を見て書く）
+    puts "サーバー初期化は、次の3ステップを順に実行します。"
+    puts ""
+    puts %(  bundle exec rake "server:prepare_deletion[#{ip}]")
+    puts %(  bundle exec rake "server:execute_deletion[#{ip},<サーバー名>]")
+    puts %(  bundle exec rake "server:create_empty_commit[#{issue_number}]")
+    puts ""
+    puts "最後に gpush すると、CI がサーバーを作り直します。"
+    puts "サーバー名は prepare_deletion の出力に表示されます。Issue の道場名と見比べて入力してください。"
   end
   
   # 検証ヘルパータスク（改善版）

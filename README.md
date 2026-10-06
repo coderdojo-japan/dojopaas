@@ -211,12 +211,11 @@ ruby scripts/initialize_server.rb --find https://github.com/coderdojo-japan/dojo
 ```
 
 2. **サーバー削除を実行**
-```bash
-# 削除するサーバーを確認してから削除する場合（推奨）
-ruby scripts/initialize_server.rb --delete [IPアドレス]
 
-# 削除するサーバーを確認せずに、削除する場合
-ruby scripts/initialize_server.rb --delete [IPアドレス] --force
+削除するサーバー名は、1 の出力に表示されます。Issue の道場名と見比べてから入力してください（名前が一致しないと削除は中断します）。
+```bash
+bundle exec rake "server:prepare_deletion[IPアドレス]"
+bundle exec rake "server:execute_deletion[IPアドレス,サーバー名]"
 ```
 
 3. **空コミットでCI実行**  
