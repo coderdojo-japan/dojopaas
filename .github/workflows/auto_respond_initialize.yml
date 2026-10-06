@@ -10,20 +10,20 @@ jobs:
     # Issue タイトルに「初期化依頼」が含まれている場合のみ実行
     if: contains(github.event.issue.title, '初期化依頼')
     runs-on: ubuntu-latest
-    
+
     permissions:
       issues: write
       contents: read
-    
+
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
-      
+
       - name: Ruby環境をセットアップ
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      
+
       - name: Issue本文からIPアドレスを抽出
         id: extract_ip
         # Issue 本文は誰でも書けるため、${{ }} でシェルに展開せず env 経由で渡す
@@ -33,17 +33,17 @@ jobs:
         run: |
           # IPアドレスパターンを抽出（数字とドットのみ）
           IP_ADDRESS=$(printf '%s' "$ISSUE_BODY" | grep -oE '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' | head -1)
-          
+
           if [ -z "$IP_ADDRESS" ]; then
             echo "❌ Issue本文にIPアドレスが見つかりませんでした"
             echo "ip_found=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           echo "📍 IPアドレスを発見: $IP_ADDRESS"
           echo "ip_address=$IP_ADDRESS" >> $GITHUB_OUTPUT
           echo "ip_found=true"          >> $GITHUB_OUTPUT
-      
+
       - name: IPアドレスを検証してサーバー情報を検索
         if: steps.extract_ip.outputs.ip_found == 'true'
         id: find_server
@@ -56,12 +56,12 @@ jobs:
           # 統一命名パターンに従ったfind_by_ipタスクを使用
           # IP は数字とドットのみなので、env 経由で受けて rake の引数に渡す
           OUTPUT=$(bundle exec rake "server:find_by_ip[$IP_ADDRESS]" 2>&1) || EXIT_CODE=$?
-          
+
           # GitHub Actions用に出力をエスケープ
           OUTPUT="${OUTPUT//'%'/'%25'}"
           OUTPUT="${OUTPUT//$'\n'/'%0A'}"
           OUTPUT="${OUTPUT//$'\r'/'%0D'}"
-          
+
           if [ -z "$EXIT_CODE" ] || [ "$EXIT_CODE" = "0" ]; then
             echo "server_found=true" >> $GITHUB_OUTPUT
             echo "server_info<<EOF"  >> $GITHUB_OUTPUT
@@ -73,7 +73,7 @@ jobs:
             echo "$OUTPUT"            >> $GITHUB_OUTPUT
             echo "EOF"                >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Issueにコメント - サーバーが見つかった場合
         if: |
           steps.extract_ip.outputs.ip_found      == 'true' &&
@@ -90,41 +90,41 @@ jobs:
                 body:         comment
               });
             };
-            
+
             const serverInfo = `${{ steps.find_server.outputs.server_info }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
-            
+
             const comment = `## 🔍 サーバー情報を確認しました
 
             \`\`\`
             ${serverInfo}
             \`\`\`
-            
+
             ---
-            
+
             ### 📋 次のステップ
-            
+
             @yasulab このサーバーを初期化する場合は、以下のコマンドを実行してください：
-            
+
             #### 順に実行します
             \`\`\`bash
             # 1. 削除準備（サーバー名と道場名を Issue と見比べる）
             bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
-            
+
             # 2. サーバー削除（サーバー名は 1 の出力を見て入力する）
             bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},<サーバー名>]"
-            
+
             # 3. 空コミット作成
             bundle exec rake "server:create_empty_commit[${{ github.event.issue.number }}]"
-            
+
             # 4. プッシュでCI/CD実行
             git push
             \`\`\`
-            
+
             ⚠️ **注意**: サーバー削除は取り消せません。削除前に必ず確認してください。
             `;
-            
+
             await createIssueComment(comment);
-      
+
       - name: Issueにコメント - サーバーが見つからなかった場合
         if: |
           steps.extract_ip.outputs.ip_found      == 'true' &&
@@ -141,32 +141,32 @@ jobs:
                 body:         comment
               });
             };
-            
+
             const errorMessage = `${{ steps.find_server.outputs.error_message }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
-            
+
             const comment = `## ❌ サーバー情報の取得に失敗しました
-            
+
             IPアドレス: \`${{ steps.extract_ip.outputs.ip_address }}\`
-            
+
             ### エラー詳細
             \`\`\`
             ${errorMessage}
             \`\`\`
-            
+
             @yasulab 手動での確認が必要です。
-            
+
             ### 確認コマンド
             \`\`\`bash
             # Rakeタスクを使用（統一命名パターン）
             bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]"
-            
+
             # または直接スクリプト実行
             ruby scripts/initialize_server.rb --find ${{ steps.extract_ip.outputs.ip_address }}
             \`\`\`
             `;
-            
+
             await createIssueComment(comment);
-      
+
       - name: Issueにコメント - IPアドレスが見つからなかった場合
         if: steps.extract_ip.outputs.ip_found == 'false'
         uses: actions/github-script@v6
@@ -181,18 +181,18 @@ jobs:
                 body:         comment
               });
             };
-            
+
             const comment = `## ⚠️ IPアドレスが見つかりませんでした
-            
+
             Issueの本文からIPアドレスを抽出できませんでした。
-            
+
             ### 正しいフォーマット例
             \`\`\`
             CoderDojo【道場名】の【申請者名】です。
             サーバー（IPアドレス：192.168.1.1）の初期化をお願いします。
             \`\`\`
-            
+
             @yasulab 手動での確認をお願いします。
             `;
-            
+
             await createIssueComment(comment);
