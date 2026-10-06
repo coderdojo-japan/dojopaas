@@ -46,6 +46,12 @@ class NotifyDeployFailureTest < Minitest::Test
     assert_includes body, 'この PR とは別の行', '他の行の失敗かもしれないと伝える'
   end
 
+  # 対応するのは保守者なので、確実に通知が届くようメンションする
+  # （初期化依頼の自動応答と同じ流儀）
+  def test_body_mentions_the_maintainer
+    assert_includes DeployFailureNotice.body(run_url: nil), DeployFailureNotice::MAINTAINER
+  end
+
   def test_body_works_without_a_run_url
     body = DeployFailureNotice.body(run_url: nil)
     assert_includes body, 'サーバーの作成に失敗'

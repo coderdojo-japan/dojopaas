@@ -8,6 +8,10 @@
 #
 # 使い方: bundle exec ruby scripts/notify_deploy_failure.rb
 module DeployFailureNotice
+  # 対応するのは保守者なので、確実に通知が届くようメンションする
+  # （初期化依頼の自動応答と同じ流儀）
+  MAINTAINER = ENV.fetch('DOJOPAAS_MAINTAINER', '@yasulab').freeze
+
   # マージコミットのメッセージから PR 番号を取り出す
   # このリポジトリはマージコミット運用なので、その形に固定する
   # （squash を使う日が来たら GitHub API で PR 番号を引く）
@@ -34,7 +38,7 @@ module DeployFailureNotice
     end
     lines << "ログ: #{run_url}" if run_url && !run_url.empty?
     lines << ''
-    lines << 'CoderDojo Japan が内容を確認して対応します。'
+    lines << "#{MAINTAINER} CoderDojo Japan が内容を確認して対応します。"
     lines << 'お急ぎの場合や、しばらく動きがない場合は、この PR にコメントしてください。'
     lines.join("\n")
   end
