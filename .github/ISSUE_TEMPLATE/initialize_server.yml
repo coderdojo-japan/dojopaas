@@ -7,13 +7,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        初期化すると、**サーバーの中のデータはすべて消えます**。必要なものは先に控えてください。
+        初期化すると、**サーバーの中のデータはすべて消えます**。必要なデータは、事前にバックアップをお取りください。
 
   - type: input
     id: dojo-name
     attributes:
       label: 道場名
-      description: 先頭の CoderDojo は省いて、道場名だけを書いてください
+      description: 先頭の CoderDojo は省いて、道場名だけをお書きください。
       placeholder: 那覇
     validations:
       required: true
@@ -30,7 +30,7 @@ body:
     id: ip-address
     attributes:
       label: IPアドレス
-      description: "[サーバー一覧](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)で確認できます"
+      description: "[サーバーの一覧表](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)からご確認いただけます。"
       placeholder: 133.242.xxx.xxx
     validations:
       required: true
@@ -39,6 +39,6 @@ body:
     id: comment
     attributes:
       label: コメント欄（任意）
-      description: 困っていること・経緯など、何でもどうぞ。自動処理では読まないので、自由に書いてください
+      description: 困っていること・経緯など、何かあればご自由にお書きください。
     validations:
       required: false
