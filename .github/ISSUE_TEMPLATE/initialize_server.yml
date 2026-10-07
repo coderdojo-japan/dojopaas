@@ -39,6 +39,6 @@ body:
     id: comment
     attributes:
       label: コメント欄（任意）
-      description: 困っていること・経緯など、何でもどうぞ。自動処理では読まないので、自由に書いてください
+      description: 困っていること・経緯など、何かあればご自由にお書きください。
     validations:
       required: false
