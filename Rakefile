@@ -66,26 +66,26 @@ namespace :server do
   task :check_api_credentials do
     required_vars = %w[SACLOUD_ACCESS_TOKEN SACLOUD_ACCESS_TOKEN_SECRET]
     missing_vars = required_vars.reject { |var| ENV[var] }
-    
+
     unless missing_vars.empty?
       abort "❌ エラー: 必要な環境変数が設定されていません: #{missing_vars.join(', ')}\n" \
             "設定方法:\n" \
             "  export SACLOUD_ACCESS_TOKEN=xxxx\n" \
             "  export SACLOUD_ACCESS_TOKEN_SECRET=xxxx"
     end
-    
+
     puts "✅ API認証情報を確認しました" if ENV['VERBOSE']
   end
-  
+
   # ========================================
   # ステータスファイル管理（インクリメンタル実行用）
   # ========================================
   directory 'tmp/rake_status'
-  
+
   def status_file_for(task_name)
     "tmp/rake_status/#{task_name.gsub(':', '_')}.json"
   end
-  
+
   def save_task_status(task_name, status)
     FileUtils.mkdir_p('tmp/rake_status')
     File.write(status_file_for(task_name), JSON.pretty_generate({
@@ -95,7 +95,7 @@ namespace :server do
       details: status[:details] || {}
     }))
   end
-  
+
   def load_task_status(task_name)
     file = status_file_for(task_name)
     return nil unless File.exist?(file)
@@ -103,82 +103,89 @@ namespace :server do
   rescue JSON::ParserError
     nil
   end
-  
-  
+
+
   # ========================================
   # サーバー情報検索タスク（統一命名パターン）
   # ========================================
   desc "IPアドレスでサーバーを検索"
   task :find_by_ip, [:ip] => [:check_api_credentials, :validate_env] do |t, args|
     ip = args[:ip] || ENV['IP_ADDRESS']
-    
+
     unless ip
       abort "❌ エラー: IPアドレスが必要です\n" \
             "使い方: rake server:find_by_ip[192.168.1.1]\n" \
             "または: IP_ADDRESS=192.168.1.1 rake server:find_by_ip"
     end
-    
+
     # IPアドレスの検証（SakuraServerUserAgentの共通メソッドを使用）
     require_relative 'scripts/sakura_server_user_agent'
-    
+
     unless SakuraServerUserAgent.valid_ip_address?(ip)
       abort "❌ エラー: 無効なIPアドレス形式: #{ip}"
     end
-    
+
     # IPアドレスを正規化
     validated_ip_str = SakuraServerUserAgent.normalize_ip_address(ip)
-    
+
     puts "✅ 有効なIPアドレス: #{validated_ip_str}"
     puts "🔍 サーバー情報を検索中..."
     puts "-" * SEPARATOR_WIDTH
-    
+
     # 検証済みIPでinitialize_server.rbスクリプトを実行（コマンドエコーを抑制）
-    sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false
+    #
+    # 失敗はブロックで受けて exit する。既定では rake が RuntimeError を投げ、
+    # 「rake aborted!」とスタックトレースが出る。スクリプト自身が理由と対処法を
+    # 出しているので、その後ろに CI のランナー上の絶対パスが並ぶと読む人が困る
+    # （bot のコメントにもそのまま載る）
+    sh("ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false) do |ok, _res|
+      exit 1 unless ok
+    end
   end
-  
+
   # ========================================
   # その他の検索タスク（統一命名パターン）
   # ========================================
   desc "Issue URLでサーバーを検索"
   task :find_by_issue, [:issue_url] => [:check_api_credentials, :validate_env] do |t, args|
     issue_url = args[:issue_url] || ENV['ISSUE_URL']
-    
+
     unless issue_url
       abort "❌ エラー: Issue URLが必要です\n" \
             "使い方: rake server:find_by_issue[https://github.com/.../issues/XXX]"
     end
-    
+
     # Issue URLフォーマットを検証
     unless issue_url =~ %r{^https://github\.com/coderdojo-japan/dojopaas/issues/\d+$}
       abort "❌ エラー: 無効なIssue URLフォーマット: #{issue_url}\n" \
             "期待される形式: https://github.com/coderdojo-japan/dojopaas/issues/XXX"
     end
-    
+
     puts "📋 Issue処理中: #{issue_url}"
     puts "🔍 サーバー情報を抽出中..."
     puts "-" * SEPARATOR_WIDTH
-    
+
     sh "ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false
   end
-  
+
   # ========================================
   # サーバー削除タスク（段階的実行）
   # ========================================
   desc "サーバー名でサーバーを検索"
   task :find_by_name, [:name] => [:check_api_credentials, :validate_env] do |t, args|
     name = args[:name] || ENV['SERVER_NAME']
-    
+
     unless name
       abort "❌ エラー: サーバー名が必要です\n" \
             "使い方: rake server:find_by_name[coderdojo-japan]"
     end
-    
+
     puts "🔍 サーバー名で検索: #{name}"
     puts "-" * SEPARATOR_WIDTH
-    
+
     sh "ruby scripts/initialize_server.rb --find #{name}", verbose: false
   end
-  
+
   # ========================================
   # サーバー削除タスク（段階的実行）
   # ========================================
@@ -193,13 +200,13 @@ namespace :server do
   task :prepare_deletion, [:ip] => [:check_api_credentials, :validate_env] do |t, args|
     clear_execute_deletion_status
     ip = args[:ip] || ENV['IP_ADDRESS']
-    
+
     unless ip
       abort "❌ エラー: IPアドレスが必要です"
     end
-    
+
     puts "🔍 削除対象サーバーの情報を確認中..."
-    
+
     # 削除準備状態を保存（インクリメンタル実行用）
     # find_by_ipと同じロジックを使用しても、別途実行する
     result = `ruby scripts/initialize_server.rb --find #{ip} 2>&1`
@@ -217,7 +224,7 @@ namespace :server do
       abort "❌ サーバー情報の取得に失敗しました\n#{result}"
     end
   end
-  
+
   desc "サーバーを削除（危険・要確認）"
   task :execute_deletion, [:ip, :name] => :prepare_deletion do |t, args|
     ip   = args[:ip] || ENV['IP_ADDRESS']
@@ -239,7 +246,7 @@ namespace :server do
 
     # 削除実行（確認の打鍵は省くが、名前の一致は必ず確認される）
     cmd = ['ruby', 'scripts/initialize_server.rb', '--delete', ip, '--name', name, '--force']
-    
+
     puts "⚠️  サーバー削除を実行します: #{ip}"
     sh(*cmd) do |ok, res|
       if ok
@@ -254,21 +261,21 @@ namespace :server do
       end
     end
   end
-  
+
   desc "削除後の空コミット作成"
   task :create_empty_commit, [:issue_number] do |t, args|
     issue_number = args[:issue_number] || ENV['ISSUE_NUMBER']
-    
+
     unless issue_number
       abort "❌ エラー: Issue番号が必要です"
     end
-    
+
     # 削除状態を確認
     del_status = load_task_status('execute_deletion')
     if del_status.nil? || !del_status['status'] || !del_status['status']['success']
       abort "❌ エラー: サーバー削除が完了していません"
     end
-    
+
     deleted_at = del_status['status']['deleted_at'] || Time.now.iso8601
     message = "Fix ##{issue_number}: Initialize server (deleted at #{deleted_at})"
     sh "git commit --allow-empty -m '#{message}'" do |ok, res|
@@ -280,7 +287,7 @@ namespace :server do
       end
     end
   end
-  
+
   # ========================================
   # 完全な初期化フロー（依存関係チェーン）
   # ========================================
@@ -300,21 +307,21 @@ namespace :server do
     puts "最後に gpush すると、CI がサーバーを作り直します。"
     puts "サーバー名は prepare_deletion の出力に表示されます。Issue の道場名と見比べて入力してください。"
   end
-  
+
   # 検証ヘルパータスク（改善版）
   task :validate_env do
     if ENV['CI'] == 'true'
       # CI環境では必要なシークレットをチェック
       required_vars = %w[SACLOUD_ACCESS_TOKEN SACLOUD_ACCESS_TOKEN_SECRET]
       missing_vars = required_vars.reject { |var| ENV[var] }
-      
+
       unless missing_vars.empty?
         abort "❌ エラー: CI環境で必要な環境変数が不足: #{missing_vars.join(', ')}\n" \
               "GitHub Secretsとして設定してください"
       end
     end
   end
-  
+
   # ========================================
   # サーバー一覧参照タスク
   # ========================================
@@ -352,14 +359,14 @@ namespace :server do
             # エラーは無視してステータスなしで続行
           end
         end
-        
+
         puts "📊 サーバー一覧（#{csv_data.length}台）:"
         puts ""
 
         csv_data.each do |row|
           server_name = row['Name']
           status = server_statuses[server_name]
-          
+
           # ステータスに応じた絵文字と表示を設定
           status_display = if status
             case status
@@ -375,19 +382,19 @@ namespace :server do
           else
             ""  # APIが利用できない場合は何も表示しない
           end
-          
+
           puts "  🖥️  #{server_name}#{status_display}"
           puts "      IPアドレス: #{row['IP Address']}"  # スペースを追加
           puts "      説明: #{row['Description']}" if row['Description']
           puts ""
         end
-        
+
         # テスト用サーバーのチェック
         require_relative 'scripts/initialize_server'
         test_servers = csv_data.select do |row|
           ServerInitializer.safe_test_server?(row['Name'])
         end
-        
+
         puts "🧪 テスト用サーバー（#{test_servers.length}台）:"
         if test_servers.any?
           test_servers.each do |server|
@@ -397,7 +404,7 @@ namespace :server do
           puts "  （テスト用サーバーがありません）"
         end
         puts ""
-        
+
         # ステータス表示についての注記
         if !ENV['SACLOUD_ACCESS_TOKEN'] || !ENV['SACLOUD_ACCESS_TOKEN_SECRET']
           puts "ℹ️  注: API認証情報が設定されていないため、サーバーステータス(up/down)は表示されていません"
@@ -406,11 +413,11 @@ namespace :server do
           puts "ℹ️  注: API接続エラーのため、サーバーステータス(up/down)を取得できませんでした"
         end
         puts ""
-        
+
       else
         abort "❌ エラー: サーバー一覧の取得に失敗しました (HTTP #{response.code})"
       end
-      
+
     rescue => e
       abort "❌ エラー: #{e.message}"
     end
@@ -422,42 +429,42 @@ namespace :server do
   desc "サーバーの詳細状態を確認"
   task :status, [:server_name] => [:check_api_credentials] do |t, args|
     server_name = args[:server_name]
-    
+
     unless server_name
       abort "❌ エラー: サーバー名が必要です\n" \
             "使い方: rake server:status[coderdojo-japan]"
     end
-    
+
     puts "🔍 サーバー状態を確認中: #{server_name}"
     sh "ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false
   end
-  
+
   # ========================================
   # 個別サーバー作成タスク（テスト用）
   # ========================================
   desc "指定したサーバーを個別に作成（テスト用）"
   task :create, [:server_name] => [:check_api_credentials] do |t, args|
     server_name = args[:server_name]
-    
+
     unless server_name
       abort "❌ エラー: サーバー名が必要です\n" \
             "使い方: rake server:create[coderdojo-japan]\n" \
             "注意: servers.csvに登録されているサーバー名を指定してください"
     end
-    
+
     puts "="*SEPARATOR_WIDTH
     puts "🚀 DojoPaaS 個別サーバー作成"
     puts "="*SEPARATOR_WIDTH
     puts ""
     puts "サーバー名: #{server_name}"
     puts ""
-    
+
     # deploy.rbのCoderDojoSakuraCLIクラスを使用（DRY原則）
     require_relative 'scripts/deploy'
-    
+
     cli = CoderDojoSakuraCLI.new([])
     success = cli.create_single_server(server_name)
-    
+
     if success
       puts ""
       puts "="*SEPARATOR_WIDTH
@@ -504,7 +511,7 @@ end
 #   multitask :check_all => ['server:validate_env'] do
 #     # servers.csvから全サーバーをチェック
 #     servers = CSV.read('servers.csv', headers: true)
-#     
+#
 #     # 並列でステータスチェックを実行
 #     threads = servers.map do |server|
 #       Thread.new do
@@ -516,9 +523,9 @@ end
 #         end
 #       end
 #     end
-#     
+#
 #     results = threads.map(&:value)
-#     
+#
 #     # 結果をサマリー表示
 #     puts "\n" + "=" * 50
 #     puts "サーバーステータスサマリー"
@@ -547,17 +554,17 @@ end
 # ================================================================
 # 将来のタスク（フェーズ2以降）
 # ================================================================
-# 
+#
 # フェーズ2: 高度な自動化
 # - rake server:batch_initialize    # 複数サーバーの一括初期化
 # - rake server:health_check        # ヘルスチェック実行
 # - rake deploy:canary             # カナリアデプロイ
-# 
+#
 # フェーズ3: 完全統合
 # - rake maintenance:scheduled      # スケジュールメンテナンス
 # - rake report:weekly             # 週次レポート生成
 # - rake backup:all                # 全サーバーバックアップ
-# 
+#
 # 詳細なロードマップは docs/plan_rakefile_migration.md を参照
 # ================================================================
 
