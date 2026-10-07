@@ -11,8 +11,7 @@ require 'open3'
 #
 # https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections
 #
-# なお actions/github-script の script: にも同じ性質があるが、そちらは
-# 別途対応する（現状はマージ済みデータ由来の値のみを埋め込んでいる）。
+# actions/github-script の script: も同じ性質を持つので、同様に検査する。
 class WorkflowSafetyTest < Minitest::Test
   WORKFLOW_DIR = File.expand_path('../.github/workflows', __dir__)
 
