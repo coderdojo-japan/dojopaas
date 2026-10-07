@@ -133,7 +133,14 @@ namespace :server do
     puts "-" * SEPARATOR_WIDTH
 
     # 検証済みIPでinitialize_server.rbスクリプトを実行（コマンドエコーを抑制）
-    sh "ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false
+    #
+    # 失敗はブロックで受けて exit する。既定では rake が RuntimeError を投げ、
+    # 「rake aborted!」とスタックトレースが出る。スクリプト自身が理由と対処法を
+    # 出しているので、その後ろに CI のランナー上の絶対パスが並ぶと読む人が困る
+    # （bot のコメントにもそのまま載る）
+    sh("ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false) do |ok, _res|
+      exit 1 unless ok
+    end
   end
 
   # ========================================
