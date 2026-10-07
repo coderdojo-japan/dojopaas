@@ -111,7 +111,7 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 ## Q. サーバーを初期化したい場合はどうすればよいですか?
 
-A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)から依頼してもらえれば! 道場名・申請者名・IPアドレスの入力欄があるので、それぞれ埋めて送信してください。
+A. [こちらのフォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)から依頼してもらえれば! 道場名・道場代表者の氏名・IPアドレスの入力欄があるので、それぞれ埋めて送信してください。
 
 初期化処理が開始したらステータスが `Closed` になるので、[2. SSHの接続方法](#2-sshの接続方法)を参考に当該サーバーに接続してみてください。
 

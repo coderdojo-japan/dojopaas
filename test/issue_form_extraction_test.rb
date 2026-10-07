@@ -12,7 +12,7 @@ class IssueFormExtractionTest < Minitest::Test
 
     那覇
 
-    ### 申請者名
+    ### 道場代表者の氏名
 
     安川要平
 

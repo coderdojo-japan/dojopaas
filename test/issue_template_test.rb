@@ -86,7 +86,7 @@ class IssueTemplateTest < Minitest::Test
   # 抽出側（scripts/initialize_server.rb）が見出しで探すラベル
   # 抽出側の定数をそのまま使う。手で写すと、片方だけ変えた時に気づけない
   REQUIRED_LABELS = [ServerInitializer::FORM_DOJO_LABEL,
-                     '申請者名',
+                     '道場代表者の氏名',
                      ServerInitializer::FORM_IP_LABEL].freeze
 
   def setup
