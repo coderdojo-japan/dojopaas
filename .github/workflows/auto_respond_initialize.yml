@@ -1,5 +1,4 @@
 name: サーバー初期化依頼への自動応答
-# Rakeの依存関係管理を活用した改善版
 
 on:
   issues:
@@ -82,6 +81,13 @@ jobs:
           steps.extract_ip.outputs.ip_found      == 'true' &&
           steps.find_server.outputs.server_found == 'true'
         uses: actions/github-script@v6
+        # 値は env: で渡す。script: に ${{ }} を書くと JS が読まれる前に文字列が
+        # 埋め込まれるので、サーバーの説明文にバッククォートが 1 つあるだけで
+        # 構文エラーになり、コメントが 1 件も投稿されない
+        env:
+          SERVER_INFO: ${{ steps.find_server.outputs.server_info }}
+          IP_ADDRESS:  ${{ steps.extract_ip.outputs.ip_address }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         with:
           script: |
             // ヘルパー関数: コメント作成をDRY化
@@ -94,7 +100,10 @@ jobs:
               });
             };
 
-            const serverInfo = `${{ steps.find_server.outputs.server_info }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            const unescape = (text) => text.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            const serverInfo  = unescape(process.env.SERVER_INFO);
+            const ipAddress   = process.env.IP_ADDRESS;
+            const issueNumber = process.env.ISSUE_NUMBER;
 
             const comment = `## 🔍 サーバー情報を確認しました
 
@@ -111,13 +120,13 @@ jobs:
             #### 順に実行します
             \`\`\`bash
             # 1. 削除準備（サーバー名と道場名を Issue と見比べる）
-            bundle exec rake "server:prepare_deletion[${{ steps.extract_ip.outputs.ip_address }}]"
+            bundle exec rake "server:prepare_deletion[${ipAddress}]"
 
             # 2. サーバー削除（サーバー名は 1 の出力を見て入力する）
-            bundle exec rake "server:execute_deletion[${{ steps.extract_ip.outputs.ip_address }},<サーバー名>]"
+            bundle exec rake "server:execute_deletion[${ipAddress},<サーバー名>]"
 
             # 3. 空コミット作成
-            bundle exec rake "server:create_empty_commit[${{ github.event.issue.number }}]"
+            bundle exec rake "server:create_empty_commit[${issueNumber}]"
 
             # 4. プッシュでCI/CD実行
             git push
@@ -133,6 +142,9 @@ jobs:
           steps.extract_ip.outputs.ip_found      == 'true' &&
           steps.find_server.outputs.server_found == 'false'
         uses: actions/github-script@v6
+        env:
+          ERROR_MESSAGE: ${{ steps.find_server.outputs.error_message }}
+          IP_ADDRESS:    ${{ steps.extract_ip.outputs.ip_address }}
         with:
           script: |
             // ヘルパー関数: コメント作成をDRY化
@@ -145,11 +157,13 @@ jobs:
               });
             };
 
-            const errorMessage = `${{ steps.find_server.outputs.error_message }}`.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            const unescape = (text) => text.replace(/%0A/g, '\n').replace(/%0D/g, '\r').replace(/%25/g, '%');
+            const errorMessage = unescape(process.env.ERROR_MESSAGE);
+            const ipAddress    = process.env.IP_ADDRESS;
 
             const comment = `## ❌ サーバー情報の取得に失敗しました
 
-            IPアドレス: \`${{ steps.extract_ip.outputs.ip_address }}\`
+            IPアドレス: \`${ipAddress}\`
 
             ### エラー詳細
             \`\`\`
@@ -160,11 +174,7 @@ jobs:
 
             ### 確認コマンド
             \`\`\`bash
-            # Rakeタスクを使用（統一命名パターン）
-            bundle exec rake "server:find_by_ip[${{ steps.extract_ip.outputs.ip_address }}]"
-
-            # または直接スクリプト実行
-            ruby scripts/initialize_server.rb --find ${{ steps.extract_ip.outputs.ip_address }}
+            bundle exec rake "server:find_by_ip[${ipAddress}]"
             \`\`\`
             `;
 
@@ -192,7 +202,7 @@ jobs:
             [初期化依頼フォーム](https://github.com/coderdojo-japan/dojopaas/issues/new?template=initialize_server.yml)の
             **IPアドレス** の欄に、半角の数字とドットで入力して送信していただけますか（\`133.242.xxx.xxx\` の形です）。
 
-            ご自身のサーバーの IP アドレスは、[サーバー一覧](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)で確認できます。
+            ご自身のサーバーの IP アドレスは、[サーバーの一覧表](https://github.com/coderdojo-japan/dojopaas/blob/gh-pages/instances.csv)からご確認いただけます。
 
             @yasulab 手動での確認をお願いします。
             `;
