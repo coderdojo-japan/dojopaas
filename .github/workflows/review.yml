@@ -4,6 +4,8 @@ on:
     types: [review_requested]
     branches:
       - "*"
+  # 疎通確認用。誰にも通知せず手動で動かせる（requestee は yasulab にフォールバック）
+  workflow_dispatch:
 jobs:
   event:
     runs-on: ubuntu-latest
