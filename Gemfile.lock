@@ -4,11 +4,15 @@ GEM
     base64 (0.3.0)
     csv (3.3.4)
     dotenv (3.1.8)
+    drb (2.2.3)
     httpclient (2.9.0)
       mutex_m
-    minitest (5.25.5)
+    minitest (6.0.6)
+      drb (~> 2.0)
+      prism (~> 1.5)
     mutex_m (0.3.0)
     net-ssh (7.3.0)
+    prism (1.9.0)
     rake (13.2.1)
 
 PLATFORMS
@@ -24,4 +28,4 @@ DEPENDENCIES
   rake
 
 BUNDLED WITH
-   2.6.9
+  4.0.20
