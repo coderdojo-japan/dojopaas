@@ -1,6 +1,7 @@
 require 'rake/testtask'
 require 'fileutils'
 require 'json'
+require 'open3'
 require 'time'
 require 'net/http'
 require 'uri'
@@ -208,12 +209,23 @@ namespace :server do
       abort "❌ エラー: IPアドレスが必要です"
     end
 
+    # 削除フローの 1 歩目で、IP は Issue や bot のコメントからコピーした値が入る。
+    # find_by_ip と同じ検証を通してから使う
+    require_relative 'scripts/sakura_server_user_agent'
+
+    unless SakuraServerUserAgent.valid_ip_address?(ip)
+      abort "❌ エラー: 無効なIPアドレス形式: #{ip}"
+    end
+
+    ip = SakuraServerUserAgent.normalize_ip_address(ip)
+
     puts "🔍 削除対象サーバーの情報を確認中..."
 
     # 削除準備状態を保存（インクリメンタル実行用）
     # find_by_ipと同じロジックを使用しても、別途実行する
-    result = `ruby scripts/initialize_server.rb --find #{ip} 2>&1`
-    if $?.success?
+    # シェルを経由しないよう配列で渡す（capture2e は標準エラーも一緒に受け取る）
+    result, status = Open3.capture2e('ruby', 'scripts/initialize_server.rb', '--find', ip)
+    if status.success?
       save_task_status('prepare_deletion', {
         success: true,
         ip: ip,

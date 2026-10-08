@@ -55,6 +55,20 @@ class RakeFailureOutputTest < Minitest::Test
     end
   end
 
+  # バッククォートもシェルを経由する。sh だけ見ていると、この形を見逃す
+  # （2026年10月9日: prepare_deletion が未検証の IP をバッククォートに展開していた）
+  BACKTICK_CALL = /^[^#]*`[^`]*\#\{/
+
+  def test_no_shell_interpolation_in_backticks
+    File.readlines(RAKEFILE).each_with_index do |line, index|
+      refute_match(BACKTICK_CALL, line,
+                   "Rakefile:#{index + 1} がバッククォートに値を展開しています。\n" \
+                   "シェルが解釈するので、引数に `;` が混ざると別のコマンドが走ります。\n" \
+                   "Open3 を配列で呼んでください:\n" \
+                   "  out, status = Open3.capture2e('ruby', 'scripts/x.rb', value)")
+    end
+  end
+
   # 検査する対象が 1 つも無ければ、この検査は何も保証していない
   def test_the_check_finds_sh_calls
     assert_operator sh_lines.size, :>, 0, 'sh 呼び出しが見つかりません（検査が空振りしています）'
