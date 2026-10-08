@@ -52,9 +52,11 @@ https://github.com/coderdojo-japan/dojopaas/blob/main/servers.csv
 公開鍵のサンプル: https://github.com/miya0001.keys
 
 > [!TIP]
-> **1日だけのワークショップ用に、ふだんの 8 倍のサーバーを用意できます。** `branch` に開催日を
-> `workshop-YYYYMMDD` の形で書くと、8コア 8GB のサーバーが作られます
-> (→ [1日ワークショップ用のサーバー](https://github.com/coderdojo-japan/dojopaas/blob/main/docs/one-day-workshop.md))。
+> **1日だけのワークショップ用に、ふだんの 8 倍 (8コア 8GB) のサーバーを用意できます。**
+> `branch` に開催日を `workshop-YYYYMMDD` の形で書き、`name` を `-workshop` で終わらせてください
+> (例: `coderdojo-naha-workshop,workshop-20261115,1日ワークショップ用,ssh-rsa AAAA...`)。
+> 書き方が合っているかは、プルリクエストを送ると bot がコメントします。
+> 開催が終わったら、その行を削除するプルリクエストをお送りください (→ [3. サーバーが不要になったとき](#3-サーバーが不要になったとき))。
 
 > [!IMPORTANT]
 > **秘密鍵と公開鍵を間違えない** ようお願いします！ `git push`する前によーくご確認ください。
@@ -152,8 +154,7 @@ CoderDojo Japan では各サーバーの管理までは対応しておりませ�
 * HDD: 20GB
 * リージョン: 石狩第二ゾーン
 
-1日だけのワークショップ用に、8コア 8GB のサーバーを用意することもできます。
-詳しくは [1日ワークショップ用のサーバー](https://github.com/coderdojo-japan/dojopaas/blob/main/docs/one-day-workshop.md) をご覧ください。
+1日だけのワークショップ用に、8コア 8GB のサーバーを用意することもできます (→ [1. サーバーがほしい方へ](#howto))。
 
 <br>
 
