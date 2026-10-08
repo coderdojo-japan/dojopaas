@@ -1,6 +1,7 @@
 require 'rake/testtask'
 require 'fileutils'
 require 'json'
+require 'open3'
 require 'time'
 require 'net/http'
 require 'uri'
@@ -138,7 +139,8 @@ namespace :server do
     # 「rake aborted!」とスタックトレースが出る。スクリプト自身が理由と対処法を
     # 出しているので、その後ろに CI のランナー上の絶対パスが並ぶと読む人が困る
     # （bot のコメントにもそのまま載る）
-    sh("ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false) do |ok, _res|
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", validated_ip_str]
+    sh(*cmd, verbose: false) do |ok, _res|
       exit 1 unless ok
     end
   end
@@ -165,7 +167,8 @@ namespace :server do
     puts "🔍 サーバー情報を抽出中..."
     puts "-" * SEPARATOR_WIDTH
 
-    sh("ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", issue_url]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -183,7 +186,8 @@ namespace :server do
     puts "🔍 サーバー名で検索: #{name}"
     puts "-" * SEPARATOR_WIDTH
 
-    sh("ruby scripts/initialize_server.rb --find #{name}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", name]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -205,12 +209,23 @@ namespace :server do
       abort "❌ エラー: IPアドレスが必要です"
     end
 
+    # 削除フローの 1 歩目で、IP は Issue や bot のコメントからコピーした値が入る。
+    # find_by_ip と同じ検証を通してから使う
+    require_relative 'scripts/sakura_server_user_agent'
+
+    unless SakuraServerUserAgent.valid_ip_address?(ip)
+      abort "❌ エラー: 無効なIPアドレス形式: #{ip}"
+    end
+
+    ip = SakuraServerUserAgent.normalize_ip_address(ip)
+
     puts "🔍 削除対象サーバーの情報を確認中..."
 
     # 削除準備状態を保存（インクリメンタル実行用）
     # find_by_ipと同じロジックを使用しても、別途実行する
-    result = `ruby scripts/initialize_server.rb --find #{ip} 2>&1`
-    if $?.success?
+    # シェルを経由しないよう配列で渡す（capture2e は標準エラーも一緒に受け取る）
+    result, status = Open3.capture2e('ruby', 'scripts/initialize_server.rb', '--find', ip)
+    if status.success?
       save_task_status('prepare_deletion', {
         success: true,
         ip: ip,
@@ -278,7 +293,9 @@ namespace :server do
 
     deleted_at = del_status['status']['deleted_at'] || Time.now.iso8601
     message = "Fix ##{issue_number}: Initialize server (deleted at #{deleted_at})"
-    sh "git commit --allow-empty -m '#{message}'" do |ok, res|
+    # Issue 番号は引数で渡ってくる。シェル文字列に埋めるとクォートを抜けられるので配列で渡す
+    cmd = ['git', 'commit', '--allow-empty', '-m', message]
+    sh(*cmd) do |ok, res|
       if ok
         puts "✅ 空コミットを作成しました"
         puts "次のステップ: git push でCI/CDを実行"
@@ -436,7 +453,8 @@ namespace :server do
     end
 
     puts "🔍 サーバー状態を確認中: #{server_name}"
-    sh("ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/utils/check_server_status.rb", server_name]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
