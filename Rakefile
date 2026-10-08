@@ -138,7 +138,8 @@ namespace :server do
     # 「rake aborted!」とスタックトレースが出る。スクリプト自身が理由と対処法を
     # 出しているので、その後ろに CI のランナー上の絶対パスが並ぶと読む人が困る
     # （bot のコメントにもそのまま載る）
-    sh("ruby scripts/initialize_server.rb --find #{validated_ip_str}", verbose: false) do |ok, _res|
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", validated_ip_str]
+    sh(*cmd, verbose: false) do |ok, _res|
       exit 1 unless ok
     end
   end
@@ -165,7 +166,8 @@ namespace :server do
     puts "🔍 サーバー情報を抽出中..."
     puts "-" * SEPARATOR_WIDTH
 
-    sh("ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", issue_url]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -183,7 +185,8 @@ namespace :server do
     puts "🔍 サーバー名で検索: #{name}"
     puts "-" * SEPARATOR_WIDTH
 
-    sh("ruby scripts/initialize_server.rb --find #{name}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/initialize_server.rb", "--find", name]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -278,7 +281,9 @@ namespace :server do
 
     deleted_at = del_status['status']['deleted_at'] || Time.now.iso8601
     message = "Fix ##{issue_number}: Initialize server (deleted at #{deleted_at})"
-    sh "git commit --allow-empty -m '#{message}'" do |ok, res|
+    # Issue 番号は引数で渡ってくる。シェル文字列に埋めるとクォートを抜けられるので配列で渡す
+    cmd = ['git', 'commit', '--allow-empty', '-m', message]
+    sh(*cmd) do |ok, res|
       if ok
         puts "✅ 空コミットを作成しました"
         puts "次のステップ: git push でCI/CDを実行"
@@ -436,7 +441,8 @@ namespace :server do
     end
 
     puts "🔍 サーバー状態を確認中: #{server_name}"
-    sh("ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false) { |ok, _res| exit 1 unless ok }
+    cmd = ["ruby", "scripts/utils/check_server_status.rb", server_name]
+    sh(*cmd, verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
