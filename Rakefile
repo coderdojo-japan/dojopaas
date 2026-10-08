@@ -165,7 +165,7 @@ namespace :server do
     puts "🔍 サーバー情報を抽出中..."
     puts "-" * SEPARATOR_WIDTH
 
-    sh "ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false
+    sh("ruby scripts/initialize_server.rb --find #{issue_url}", verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -183,7 +183,7 @@ namespace :server do
     puts "🔍 サーバー名で検索: #{name}"
     puts "-" * SEPARATOR_WIDTH
 
-    sh "ruby scripts/initialize_server.rb --find #{name}", verbose: false
+    sh("ruby scripts/initialize_server.rb --find #{name}", verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
@@ -436,7 +436,7 @@ namespace :server do
     end
 
     puts "🔍 サーバー状態を確認中: #{server_name}"
-    sh "ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false
+    sh("ruby scripts/utils/check_server_status.rb #{server_name}", verbose: false) { |ok, _res| exit 1 unless ok }
   end
 
   # ========================================
