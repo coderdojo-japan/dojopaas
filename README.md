@@ -84,6 +84,7 @@ $ ssh -i <path-to-privatekey> ubuntu@<ip-address>
 
 * ユーザー名はすべて `ubuntu` です。
 * プルリクエストの際にご連絡をいただいた公開鍵に対応する秘密鍵がないと接続できません。
+* **申請者以外の方（他のメンターやニンジャ）にも使っていただきたい場合**は、[SSH 鍵の追加の仕方](docs/ssh.md)をご覧ください。鍵を作る側と、サーバーに登録する側の両方の手順が載っています。
 * **ポート番号は22 (SSH), 80 (HTTP), 443 (HTTPS) のみが空いている状態になります。** 詳細は、サーバー生成時に実行される[スタートアップスクリプト](https://github.com/coderdojo-japan/dojopaas/blob/main/startup-scripts/112900928939)をご参照ください。
 
 <br>
