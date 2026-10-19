@@ -108,7 +108,7 @@ class CoderDojoSakuraCLI
     puts "🚀 サーバー '#{server_name}' を作成中..."
     puts "  説明: #{server_info['description']}"
     puts "  ブランチ: #{server_info['branch']}"
-    
+
     begin
       @ssua.create(
         name: server_info['name'],
@@ -116,12 +116,12 @@ class CoderDojoSakuraCLI
         pubkey: server_info['pubkey'],
         tag: server_info['branch']
       )
-      
+
       # 作成結果の確認
       sleep(5)  # APIの反映待ち
       result_servers = (@ssua.get_servers())['Servers']
       created_server = result_servers.find { |s| s['Name'] == server_name }
-      
+
       if created_server
         puts "✅ サーバー作成成功!"
         puts "  サーバー名: #{created_server['Name']}"
@@ -166,30 +166,25 @@ class CoderDojoSakuraCLI
   end
 
   def initial_archive_id
-    archiveid = nil
-    selected_name = nil
     archives = @ssua.get_archives()
     puts "List of Archives:"
-    archives['Archives'].each do |arch|
-      # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
-      # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
-      puts "- Name: #{arch['Name']}"
-      # 通常版Ubuntu 24.04を使用（disk/config APIでSSH鍵設定、@notesでスタートアップスクリプト実行）
-      # "Ubuntu Server"で始まるものだけを対象にして、CData Syncなどを除外
-      if /^Ubuntu Server/i =~ arch['Name'] && /24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name']) then
-        archiveid = arch['ID']
-        selected_name = arch['Name']
-        break  # 最初にマッチしたものを使用
-      end
+    archives['Archives'].each { |arch| puts "- Name: #{arch['Name']}" }
+
+    # MEMO: Ubuntuの対象バージョンの提供が終了した場合は、バージョンを上げる
+    # https://manual.sakura.ad.jp/cloud/server/os-packages/archive-iso/list.html
+    # 通常版Ubuntu 24.04を使用（disk/config APIでSSH鍵設定、@notesでスタートアップスクリプト実行）
+    # "Ubuntu Server"で始まるものだけを対象にして、CData Syncなどを除外
+    candidates = archives['Archives'].select do |arch|
+      /\AUbuntu Server 24\.04/i =~ arch['Name'] && !(/cloudimg/i =~ arch['Name'])
     end
 
-    if archiveid then
-      puts "Selected Archive: #{selected_name}"
-      puts "Archive ID: #{archiveid}"
-    else
-      abort "Can't get archive id"
-    end
-    archiveid
+    # 一覧の並びは新しい順とは限らない（24.04.1 が 24.04.2 より先に来る）ので、点リリースの最新を選ぶ
+    selected = candidates.max_by { |arch| Gem::Version.new(arch['Name'][/24\.04(\.\d+)?/]) }
+    abort "Can't get archive id" unless selected
+
+    puts "Selected Archive: #{selected['Name']}"
+    puts "Archive ID: #{selected['ID']}"
+    selected['ID']
   end
 end
 
