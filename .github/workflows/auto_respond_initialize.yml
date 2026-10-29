@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.4.0
 
       - name: Ruby環境をセットアップ
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@v1.335.0
         with:
           bundler-cache: true
 
@@ -80,7 +80,7 @@ jobs:
         if: |
           steps.extract_ip.outputs.ip_found      == 'true' &&
           steps.find_server.outputs.server_found == 'true'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.1
         # 値は env: で渡す。script: に ${{ }} を書くと JS が読まれる前に文字列が
         # 埋め込まれるので、サーバーの説明文にバッククォートが 1 つあるだけで
         # 構文エラーになり、コメントが 1 件も投稿されない
@@ -141,7 +141,7 @@ jobs:
         if: |
           steps.extract_ip.outputs.ip_found      == 'true' &&
           steps.find_server.outputs.server_found == 'false'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.1
         env:
           ERROR_MESSAGE: ${{ steps.find_server.outputs.error_message }}
           IP_ADDRESS:    ${{ steps.extract_ip.outputs.ip_address }}
@@ -182,7 +182,7 @@ jobs:
 
       - name: Issueにコメント - IPアドレスが見つからなかった場合
         if: steps.extract_ip.outputs.ip_found == 'false'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.1
         with:
           script: |
             // ヘルパー関数: コメント作成をDRY化
