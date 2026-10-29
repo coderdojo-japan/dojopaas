@@ -5,7 +5,7 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/auto_respond_initialize.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/github-script@v6.4.1'
+        - 'actions/github-script@v9.0.0'
         - 'ruby/setup-ruby@v1.335.0'
     '.github/workflows/claude-review.yml':
         - 'actions/checkout@v7.0.1'
@@ -26,9 +26,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/github-script@v6.4.1':
-        ref: 'v6.4.1'
-        commit: 'sha1-d7906e4ad0b1822421a7e6a35d5ca353c962f410'
+    'actions/github-script@v9.0.0':
+        ref: 'v9.0.0'
+        commit: 'sha1-3a2844b7e9c422d3c10d287c895573f7108da1b3'
         owner_id: 44036562
         repo_id: 205262760
     'anthropics/claude-code-action@v1':
