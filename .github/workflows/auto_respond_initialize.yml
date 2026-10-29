@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: リポジトリをチェックアウト
-        uses: actions/checkout@v4.4.0
+        uses: actions/checkout@v7.0.1
 
       - name: Ruby環境をセットアップ
         uses: ruby/setup-ruby@v1.335.0

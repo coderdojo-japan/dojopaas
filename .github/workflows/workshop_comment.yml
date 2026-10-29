@@ -29,7 +29,7 @@ jobs:
 
     steps:
       # ref を指定しない = base ブランチ。fork のコードは持ち込まない
-      - uses: actions/checkout@v4.4.0
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
