@@ -14,10 +14,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
         with:
           fetch-depth: 2
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1.335.0
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
@@ -40,10 +40,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.7.0
         with:
           fetch-depth: 2
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1.335.0
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
