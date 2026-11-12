@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 2
-      - uses: ruby/setup-ruby@v1.335.0
+      - uses: ruby/setup-ruby@v1.336.0
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 2
-      - uses: ruby/setup-ruby@v1.335.0
+      - uses: ruby/setup-ruby@v1.336.0
         with:
           bundler-cache: true
           #ruby-version: 2.7 # Not necessary if `.ruby-version` is given
